@@ -122,6 +122,13 @@ etransitivity; [ | apply H1 ].
 now symmetry.
 Qed.
 
+Theorem gr_sub_0_r : ∀ G (x : gr_set G), (x - 0 = x)%G.
+Proof.
+intros.
+etransitivity; [ | apply gr_add_0_r ].
+apply gr_add_compat; [ easy | apply gr_inv_zero ].
+Qed.
+
 Theorem gr_sub_move_r : ∀ G (x y z : gr_set G),
   (x - y = z)%G ↔ (x = z + y)%G.
 Proof.
@@ -1126,6 +1133,11 @@ split; [ | split ].
     transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
     apply g'; [ now apply b | apply B' | easy ].
   *idtac.
+exists 0.
+split; [ apply A | ].
+etransitivity; [ apply H_zero | ].
+symmetry; etransitivity; simpl; [ apply gr_sub_0_r | ].
+unfold d.
 ...
   *transitivity (H_app dm (H_app g y)).
   --eapply dm; [ | | now apply C ].
