@@ -1151,6 +1151,8 @@ split; [ | split ].
    symmetry in Hyx.
    specialize (H1 Hxk Hgy Hyx).
    symmetry in Hyx.
+   unfold Coker_eq; simpl.
+...
    etransitivity; [ apply H1 | ].
    unfold Coker_eq; simpl.
    unfold d.
