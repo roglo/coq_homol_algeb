@@ -65,6 +65,12 @@ Notation "a + b" := (gr_add a b) : group_scope.
 Notation "a - b" := (gr_add a (gr_inv b)) : group_scope.
 Notation "- a" := (gr_inv a) : group_scope.
 
+Add Parametric Relation {G} : (gr_set G) (@gr_eq G)
+ reflexivity proved by (@Equivalence_Reflexive _ (@gr_eq G) (@gr_equiv G))
+ symmetry proved by (@Equivalence_Symmetric _ (@gr_eq G) (@gr_equiv G))
+ transitivity proved by (@Equivalence_Transitive _ (@gr_eq G) (@gr_equiv G))
+ as gr_eq_rel.
+
 Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.
 
 Open Scope group_scope.
@@ -80,16 +86,6 @@ Arguments H_mem_compat _ _ f : rename.
 Arguments H_linear _ _ f : rename.
 Arguments H_compat _ _ f : rename.
 
-Theorem gr_eq_refl : ∀ G (x : gr_set G), x ≡ x.
-Proof.
-apply gr_equiv.
-Qed.
-
-Theorem gr_eq_symm : ∀ G (x y : gr_set G), x ≡ y → y ≡ x.
-Proof.
-apply gr_equiv.
-Qed.
-
 Theorem gr_eq_trans : ∀ G (x y z : gr_set G), x ≡ y → y ≡ z → x ≡ z.
 Proof.
 apply gr_equiv.
@@ -98,15 +94,14 @@ Qed.
 Theorem gr_add_0_r : ∀ G (x : gr_set G), (x + 0 = x)%G.
 Proof.
 intros.
-eapply gr_eq_trans; [ apply gr_add_comm | ].
-Check gr_add_0_l.
+etransitivity; [ apply gr_add_comm | ].
 apply gr_add_0_l.
 Qed.
 
 Theorem gr_add_inv_l : ∀ G (x : gr_set G), (- x + x = 0)%G.
 Proof.
 intros.
-eapply gr_eq_trans; [ apply gr_add_comm | ].
+etransitivity; [ apply gr_add_comm | ].
 apply gr_add_inv_r.
 Qed.
 
@@ -115,8 +110,8 @@ Proof.
 intros.
 specialize (@gr_add_inv_r G gr_zero) as H1.
 specialize (@gr_add_0_l G (gr_inv gr_zero)) as H3.
-eapply gr_eq_trans; [ | apply H1 ].
-now apply gr_eq_symm.
+etransitivity; [ | apply H1 ].
+now symmetry.
 Qed.
 
 Theorem gr_sub_move_r : ∀ G (x y z : gr_set G),
@@ -124,18 +119,18 @@ Theorem gr_sub_move_r : ∀ G (x y z : gr_set G),
 Proof.
 intros.
 split; intros Hxyz.
--apply gr_eq_trans with (y := ((x - y) + y)%G).
- +apply gr_eq_symm.
-  eapply gr_eq_trans; [ apply gr_add_assoc | ].
-  apply gr_eq_trans with (y := (x + 0)%G).
-  *apply gr_add_compat; [ apply gr_eq_refl | apply gr_add_inv_l ].
+-transitivity ((x - y) + y)%G.
+ +symmetry.
+  etransitivity; [ apply gr_add_assoc | ].
+  transitivity (x + 0)%G.
+  *apply gr_add_compat; [ reflexivity | apply gr_add_inv_l ].
   *apply gr_add_0_r.
- +apply gr_add_compat; [ easy | apply gr_eq_refl ].
--apply gr_eq_trans with (y := (z + y - y)%G).
- +apply gr_add_compat; [ easy | apply gr_eq_refl ].
- +eapply gr_eq_trans; [ apply gr_add_assoc | ].
-  apply gr_eq_trans with (y := (z + 0)%G).
-  *apply gr_add_compat; [ apply gr_eq_refl | apply gr_add_inv_r ].
+ +apply gr_add_compat; [ easy | reflexivity ].
+-transitivity (z + y - y)%G.
+ +apply gr_add_compat; [ easy | reflexivity ].
+ +etransitivity; [ apply gr_add_assoc | ].
+  transitivity (z + 0)%G.
+  *apply gr_add_compat; [ reflexivity | apply gr_add_inv_r ].
   *apply gr_add_0_r.
 Qed.
 
@@ -144,40 +139,40 @@ Theorem gr_sub_move_l : ∀ G (x y z : gr_set G),
 Proof.
 intros.
 split; intros Hxyz.
--apply gr_eq_symm.
- eapply gr_eq_trans; [ apply gr_add_comm | ].
- now apply gr_eq_symm, gr_sub_move_r.
+-symmetry.
+ etransitivity; [ apply gr_add_comm | ].
+ now symmetry; apply gr_sub_move_r.
 -apply gr_sub_move_r.
- eapply gr_eq_trans; [ apply Hxyz | ].
+ etransitivity; [ apply Hxyz | ].
  apply gr_add_comm.
 Qed.
 
 Theorem gr_inv_add_distr : ∀ G (x y : gr_set G), (- (x + y) = - x - y)%G.
 Proof.
 intros *.
-apply gr_eq_symm.
+symmetry.
 apply gr_sub_move_r.
-eapply gr_eq_trans.
--apply gr_eq_symm, gr_add_0_l.
+etransitivity.
+-symmetry; apply gr_add_0_l.
 -apply gr_sub_move_r.
- apply gr_eq_symm.
- eapply gr_eq_trans; [ apply gr_add_assoc | ].
- apply gr_eq_trans with (y := (- (x + y) + (x + y))%G).
- +apply gr_add_compat; [ apply gr_eq_refl | apply gr_add_comm ].
+ symmetry.
+ etransitivity; [ apply gr_add_assoc | ].
+ transitivity (- (x + y) + (x + y))%G.
+ +apply gr_add_compat; [ reflexivity | apply gr_add_comm ].
  +apply gr_add_inv_l.
 Qed.
 
 Theorem gr_inv_inv : ∀ G (x : gr_set G), (- - x = x)%G.
 Proof.
 intros.
-apply gr_eq_trans with (y := (- - x + (- x + x))%G).
--apply gr_eq_symm.
- apply gr_eq_trans with (y := (- - x + 0)%G).
- +apply gr_add_compat; [ apply gr_eq_refl | apply gr_add_inv_l ].
+transitivity (- - x + (- x + x))%G.
+-symmetry.
+ transitivity (- - x + 0)%G.
+ +apply gr_add_compat; [ reflexivity | apply gr_add_inv_l ].
  +apply gr_add_0_r.
--eapply gr_eq_trans; [ apply gr_eq_symm, gr_add_assoc | ].
- eapply gr_eq_trans; [ | apply gr_add_0_l ].
- apply gr_add_compat; [ apply gr_add_inv_l | apply gr_eq_refl ].
+-etransitivity; [ symmetry; apply gr_add_assoc | ].
+ etransitivity; [ | apply gr_add_0_l ].
+ apply gr_add_compat; [ apply gr_add_inv_l | reflexivity ].
 Qed.
 
 Theorem H_zero : ∀ A B (f : HomGr A B), (H_app f 0 = 0)%G.
@@ -185,20 +180,20 @@ Proof.
 intros.
 assert (H1 : (@gr_zero A + 0 = 0)%G) by apply A.
 assert (H2 : (H_app f 0 + H_app f 0 = H_app f 0)%G). {
-  eapply gr_eq_trans; [ apply gr_eq_symm, f; apply A | ].
+  etransitivity; [ symmetry; apply f; apply A | ].
   apply f; [ apply A; apply A | apply A | apply A ].
 }
 assert (H3 : (H_app f 0 + H_app f 0 - H_app f 0 = H_app f 0 - H_app f 0)%G). {
-  apply gr_add_compat; [ apply H2 | apply gr_eq_refl ].
+  apply gr_add_compat; [ apply H2 | reflexivity ].
 }
 assert (H4 : (H_app f 0 + H_app f 0 - H_app f 0 = 0)%G). {
-  eapply gr_eq_trans; [ apply H3 | apply B ].
+  etransitivity; [ apply H3 | apply B ].
 }
-eapply gr_eq_trans; [ | apply H4 ].
-apply gr_eq_symm.
-eapply gr_eq_trans; [ apply gr_add_assoc | ].
-eapply gr_eq_trans; [ | apply gr_add_0_r ].
-apply gr_add_compat; [ apply gr_eq_refl | apply B ].
+etransitivity; [ | apply H4 ].
+symmetry.
+etransitivity; [ apply gr_add_assoc | ].
+etransitivity; [ | apply gr_add_0_r ].
+apply gr_add_compat; [ reflexivity | apply B ].
 Qed.
 
 Theorem H_inv : ∀ A B (f : HomGr A B) x,
@@ -210,14 +205,14 @@ assert (H2 : (H_app f (x - x) = H_app f 0)%G). {
   apply H_compat; [ now apply A, A | apply A | apply H1 ].
 }
 assert (H3 : (H_app f x + H_app f (- x) = H_app f 0)%G). {
-  eapply gr_eq_trans; [ | apply H2 ].
-  apply gr_eq_symm, H_linear; [ easy | now apply A ].
+  etransitivity; [ | apply H2 ].
+  symmetry; apply H_linear; [ easy | now apply A ].
 }
 assert (H4 : (H_app f x + H_app f (- x) = 0)%G). {
-  eapply gr_eq_trans; [ apply H3 | apply H_zero ].
+  etransitivity; [ apply H3 | apply H_zero ].
 }
-apply gr_eq_trans with (y := (0 - H_app f x)%G).
--now apply gr_eq_symm, gr_sub_move_l, gr_eq_symm.
+transitivity (0 - H_app f x)%G.
+-now symmetry; apply gr_sub_move_l; symmetry.
 -apply gr_add_0_l.
 Qed.
 
@@ -258,7 +253,7 @@ Proof.
 split; intros H f g x.
 -destruct x.
  apply gr_eq_trans with (y := gr_zero); [ apply H_zero | ].
- apply gr_eq_symm, H_zero.
+ symmetry; apply H_zero.
 -now destruct (H_app f x), (H_app g x).
 Qed.
 
@@ -278,10 +273,10 @@ Proof.
 intros f y y' (x & Hxg & Hx) (x' & Hx'g & Hx').
 exists (gr_add x x').
 split; [ now apply G | ].
-eapply gr_eq_trans; [ now apply H_linear | ].
-apply gr_eq_trans with (y := gr_add y y').
+etransitivity; [ now apply H_linear | ].
+transitivity (gr_add y y').
 +now apply gr_add_compat.
-+apply gr_eq_refl.
++reflexivity.
 Qed.
 
 Theorem Im_inv_mem {G H} : ∀ (f : HomGr G H) (x : gr_set H),
@@ -291,7 +286,7 @@ Proof.
 intros f x (y & Hy & Hyx).
 exists (gr_inv y).
 split; [ now apply gr_inv_mem | ].
-apply gr_eq_trans with (y := gr_inv (H_app f y)).
+transitivity (gr_inv (H_app f y)).
 +now apply H_inv.
 +now apply gr_inv_compat.
 Qed.
@@ -309,7 +304,7 @@ Theorem Im_mem_compat {G H} : ∀ f (x y : gr_set H),
 intros * Hxy (z, Hz).
 exists z.
 split; [ easy | ].
-eapply gr_eq_trans; [ apply Hz | easy ].
+etransitivity; [ apply Hz | easy ].
 Qed.
 
 Definition Im {G H : AbGroup} (f : HomGr G H) :=
@@ -343,8 +338,8 @@ Theorem Ker_add_mem {G H} : ∀ (f : HomGr G H) (x y : gr_set G),
 Proof.
 intros f x x' (Hx, Hfx) (Hx', Hfx').
 split; [ now apply gr_add_mem | ].
-eapply gr_eq_trans; [ now apply H_linear | ].
-eapply gr_eq_trans; [ | apply gr_add_0_l ].
+etransitivity; [ now apply H_linear | ].
+etransitivity; [ | apply gr_add_0_l ].
 now apply gr_add_compat.
 Qed.
 
@@ -354,8 +349,8 @@ Proof.
 intros f x (Hx & Hfx).
 split.
 +now apply gr_inv_mem.
-+eapply gr_eq_trans; [ now apply H_inv | ].
- eapply gr_eq_trans; [ apply gr_inv_compat, Hfx | ].
++etransitivity; [ now apply H_inv | ].
+ etransitivity; [ apply gr_inv_compat, Hfx | ].
  apply gr_inv_zero.
 Qed.
 
@@ -365,8 +360,8 @@ Proof.
 intros * Hxy (ax, Hx).
 split.
 -eapply gr_mem_compat; [ apply Hxy | easy ].
--eapply gr_eq_trans; [ | apply Hx ].
- apply gr_eq_symm.
+-etransitivity; [ | apply Hx ].
+ symmetry.
  apply H_compat; [ easy | | easy ].
  eapply gr_mem_compat; [ apply Hxy | easy ].
 Qed.
@@ -403,11 +398,11 @@ intros.
 unfold Coker_eq.
 exists 0%G.
 split; [ apply gr_zero_mem | ].
-eapply gr_eq_trans; [ apply H_zero | ].
-apply gr_eq_symm.
+etransitivity; [ apply H_zero | ].
+symmetry.
 simpl in x; simpl.
-eapply gr_eq_trans; [ apply gr_add_assoc | ].
-eapply gr_eq_trans; [ apply gr_add_0_l | ].
+etransitivity; [ apply gr_add_assoc | ].
+etransitivity; [ apply gr_add_0_l | ].
 apply gr_add_inv_r.
 Qed.
 
@@ -418,12 +413,12 @@ intros.
 unfold Coker_eq.
 exists 0%G.
 split; [ apply gr_zero_mem | ].
-eapply gr_eq_trans; [ apply H_zero | ].
-apply gr_eq_symm.
+etransitivity; [ apply H_zero | ].
+symmetry.
 simpl in x, y, z; simpl.
-apply gr_sub_move_r, gr_eq_symm.
-eapply gr_eq_trans; [ apply gr_add_0_l | ].
-apply gr_eq_symm, gr_add_assoc.
+apply gr_sub_move_r; symmetry.
+etransitivity; [ apply gr_add_0_l | ].
+symmetry; apply gr_add_assoc.
 Qed.
 
 Theorem Coker_add_inv_r {G H} : ∀ (f : HomGr G H) x, Coker_eq f (x - x)%G 0%G.
@@ -431,11 +426,11 @@ Proof.
 intros.
 exists 0%G.
 split; [ apply gr_zero_mem | ].
-eapply gr_eq_trans; [ apply H_zero | ].
-apply gr_eq_symm.
+etransitivity; [ apply H_zero | ].
+symmetry.
 simpl.
 apply gr_eq_trans with (y := (0 - 0)%G).
--apply gr_add_compat; [ apply gr_add_inv_r | apply gr_eq_refl ].
+-apply gr_add_compat; [ apply gr_add_inv_r | reflexivity ].
 -apply gr_add_inv_r.
 Qed.
 
@@ -445,13 +440,13 @@ Proof.
 intros.
 exists 0%G.
 split; [ apply gr_zero_mem | ].
-eapply gr_eq_trans; [ apply H_zero | ].
-apply gr_eq_symm.
+etransitivity; [ apply H_zero | ].
+symmetry.
 simpl.
 apply gr_sub_move_r.
-eapply gr_eq_trans; [ apply gr_add_comm | ].
-apply gr_eq_symm.
-eapply gr_eq_trans; [ apply gr_add_0_l | apply gr_eq_refl ].
+etransitivity; [ apply gr_add_comm | ].
+symmetry.
+etransitivity; [ apply gr_add_0_l | reflexivity ].
 Qed.
 
 Theorem Coker_equiv {G H} : ∀ (f : HomGr G H), Equivalence (Coker_eq f).
@@ -461,19 +456,19 @@ unfold Coker_eq; split.
 -intros x.
  exists 0%G.
  split; [ apply gr_zero_mem | ].
- eapply gr_eq_trans; [ apply H_zero | ].
+ etransitivity; [ apply H_zero | ].
  simpl.
- apply gr_eq_symm, gr_add_inv_r.
+ symmetry; apply gr_add_inv_r.
 -intros x y Hxy.
  destruct Hxy as (z & Hz).
  exists (- z)%G.
  split; [ now apply gr_inv_mem | ].
- eapply gr_eq_trans; [ now apply H_inv | ].
- apply gr_eq_trans with (y := (- (x - y))%G).
+ etransitivity; [ now apply H_inv | ].
+ transitivity ((- (x - y))%G).
  +now simpl; apply gr_inv_compat.
- +simpl; eapply gr_eq_trans; [ apply gr_inv_add_distr | ].
-  eapply gr_eq_trans; [ apply gr_add_comm | ].
-  apply gr_add_compat; [ | apply gr_eq_refl ].
+ +simpl; etransitivity; [ apply gr_inv_add_distr | ].
+  etransitivity; [ apply gr_add_comm | ].
+  apply gr_add_compat; [ | reflexivity ].
   apply gr_inv_inv.
 -intros x y z Hxy Hyz.
  simpl in Hxy, Hyz.
@@ -481,14 +476,14 @@ unfold Coker_eq; split.
  destruct Hyz as (u, Hu).
  exists (t + u)%G.
  split; [ now apply gr_add_mem | ].
- eapply gr_eq_trans; [ now apply H_linear | ].
- apply gr_eq_trans with (y := (x - y + (y - z))%G).
+ etransitivity; [ now apply H_linear | ].
+ transitivity ((x - y + (y - z))%G).
  +now simpl; apply gr_add_compat.
- +simpl; eapply gr_eq_trans; [ apply gr_add_assoc | ].
-  apply gr_add_compat; [ apply gr_eq_refl | ].
-  eapply gr_eq_trans; [ apply gr_eq_symm, gr_add_assoc | ].
-  apply gr_eq_trans with (y := (0 - z)%G).
-  *simpl; apply gr_add_compat; [ apply gr_add_inv_l | apply gr_eq_refl ].
+ +simpl; etransitivity; [ apply gr_add_assoc | ].
+  apply gr_add_compat; [ reflexivity | ].
+  etransitivity; [ symmetry; apply gr_add_assoc | ].
+  transitivity ((0 - z)%G).
+  *simpl; apply gr_add_compat; [ apply gr_add_inv_l | reflexivity ].
   *simpl; apply gr_add_0_l.
 Qed.
 
@@ -498,14 +493,14 @@ Proof.
 intros * Heq Hx.
 destruct Heq as (z, Hz).
 apply gr_mem_compat with (x := (x - H_app f z)%G).
--apply gr_eq_trans with (y := (x - (x - y))%G); simpl.
- +apply gr_add_compat; [ apply gr_eq_refl | ].
+-transitivity ((x - (x - y))%G); simpl.
+ +apply gr_add_compat; [ reflexivity | ].
   now apply gr_inv_compat.
- +apply gr_sub_move_r, gr_eq_symm.
-  eapply gr_eq_trans; [ apply gr_add_comm | ].
-  eapply gr_eq_trans; [ apply gr_add_assoc | ].
-  apply gr_eq_trans with (y := (x + 0)%G); simpl.
-  *apply gr_add_compat; [ apply gr_eq_refl | apply gr_add_inv_l ].
+ +apply gr_sub_move_r; symmetry.
+  etransitivity; [ apply gr_add_comm | ].
+  etransitivity; [ apply gr_add_assoc | ].
+  transitivity ((x + 0)%G); simpl.
+  *apply gr_add_compat; [ reflexivity | apply gr_add_inv_l ].
   *apply gr_add_0_r.
 -simpl; apply gr_add_mem; [ easy | ].
  apply gr_inv_mem.
@@ -519,17 +514,17 @@ intros f x y x' y' (z & Hz & Hfz) (z' & Hz' & Hfz').
 exists (z + z')%G.
 split.
 -now apply gr_add_mem.
--eapply gr_eq_trans; [ now apply f | ].
- apply gr_eq_trans with (y := ((x - y) + (x' - y'))%G); simpl.
+-etransitivity; [ now apply f | ].
+ transitivity (((x - y) + (x' - y'))%G); simpl.
  +now apply gr_add_compat.
- +eapply gr_eq_trans; [ apply gr_add_assoc | apply gr_eq_symm ].
-  eapply gr_eq_trans; [ apply gr_add_assoc | apply gr_eq_symm ].
-  apply gr_add_compat; [ apply gr_eq_refl | ].
-  eapply gr_eq_trans; [ apply gr_add_comm | ].
-  eapply gr_eq_trans; [ apply gr_add_assoc | ].
-  apply gr_add_compat; [ apply gr_eq_refl | ].
-  eapply gr_eq_trans; [ apply gr_add_comm | ].
-  apply gr_eq_symm, gr_inv_add_distr.
+ +etransitivity; [ apply gr_add_assoc | symmetry ].
+  etransitivity; [ apply gr_add_assoc | symmetry ].
+  apply gr_add_compat; [ reflexivity | ].
+  etransitivity; [ apply gr_add_comm | ].
+  etransitivity; [ apply gr_add_assoc | ].
+  apply gr_add_compat; [ reflexivity | ].
+  etransitivity; [ apply gr_add_comm | ].
+  symmetry; apply gr_inv_add_distr.
 Qed.
 
 Theorem Coker_inv_compat {G H} :∀ (f : HomGr G H) x y,
@@ -539,8 +534,8 @@ intros * (z & Hz & Hfz).
 unfold Coker_eq; simpl.
 exists (- z)%G.
 split; [ now apply gr_inv_mem | ].
-eapply gr_eq_trans; [ now apply H_inv | ].
-apply gr_eq_trans with (y := (- (x - y))%G); simpl.
+etransitivity; [ now apply H_inv | ].
+transitivity ((- (x - y))%G); simpl.
 -now apply gr_inv_compat.
 -apply gr_inv_add_distr.
 Qed.
@@ -596,8 +591,8 @@ Theorem KK_mem_compat {A B A' B'} : ∀ (a : HomGr A A') (b : HomGr B B') f f',
   → ∀ x : gr_set (Ker a), x ∈ Ker a → H_app f x ∈ Ker b.
 intros * Hc * Hx.
 split; [ now apply f; simpl in Hx | ].
-eapply gr_eq_trans; [ apply Hc | ].
-apply gr_eq_trans with (y := H_app f' 0%G).
+etransitivity; [ apply Hc | ].
+transitivity (H_app f' 0%G).
 -apply f'; [ apply a, Hx | apply A' | apply Hx ].
 -apply H_zero.
 Qed.
@@ -643,10 +638,10 @@ Proof.
 intros * Hx Hy; simpl in Hx, Hy.
 exists 0%G.
 split; [ apply B | ].
-eapply gr_eq_trans; [ apply H_zero | apply B' ].
+etransitivity; [ apply H_zero | apply B' ].
 simpl; apply gr_sub_move_r.
 apply B'.
-eapply gr_eq_trans; [ apply gr_add_0_l | ].
+etransitivity; [ apply gr_add_0_l | ].
 now apply B', f'.
 Qed.
 
@@ -663,13 +658,13 @@ destruct Hxy as (z & Hz & Haz).
 simpl; unfold Coker_eq; simpl.
 exists (H_app f z).
 split; [ now apply f | ].
-eapply gr_eq_trans; [ apply Hc | ].
-apply gr_eq_trans with (y := H_app f' (x - y)%G).
+etransitivity; [ apply Hc | ].
+transitivity (H_app f' (x - y)%G).
 -apply H_compat; [ now apply a | | easy ].
  apply A'; [ easy | now apply A' ].
--eapply gr_eq_trans.
+-etransitivity.
  +apply f'; [ easy | now apply A' ].
- +apply gr_add_compat; [ apply gr_eq_refl | now apply H_inv ].
+ +apply gr_add_compat; [ reflexivity | now apply H_inv ].
 Qed.
 
 Definition HomGr_Coker_Coker {A B A' B'}
@@ -731,14 +726,14 @@ assert
   (* it is because Im(cza')={0}=Ker(f') *)
   assert (H2 : (H_app f' x - H_app f' y = 0)%G). {
     apply gr_sub_move_r.
-    eapply gr_eq_trans; [ apply Hxy | ].
-    apply gr_eq_symm, gr_add_0_l.
+    etransitivity; [ apply Hxy | ].
+    symmetry; apply gr_add_0_l.
   }
   assert (H3 : (H_app f' (x - y) = 0)%G). {
-    eapply gr_eq_trans; [ | apply H2 ].
-    eapply gr_eq_trans.
+    etransitivity; [ | apply H2 ].
+    etransitivity.
     -apply H_linear; [ easy | now apply A' ].
-    -apply gr_add_compat; [ apply gr_eq_refl | now apply H_inv ].
+    -apply gr_add_compat; [ reflexivity | now apply H_inv ].
   }
   assert (H4 : (x - y)%G ∈ Ker f'). {
     split; [ | apply H3 ].
@@ -749,11 +744,11 @@ assert
   destruct H4 as (z & _ & H4).
   destruct z.
   assert (H5 : (x - y = 0)%G). {
-    eapply gr_eq_trans; [ apply gr_eq_symm, H4 | ].
+    etransitivity; [ symmetry; apply H4 | ].
     apply H_zero.
   }
   apply gr_sub_move_r in H5.
-  eapply gr_eq_trans; [ apply H5 | ].
+  etransitivity; [ apply H5 | ].
   apply gr_add_0_l.
 }
 assert (Hcf'inj : ∀ x y, x ∈ Coker a → y ∈ Coker a → (H_app f' x = H_app f' y)%G → (x = y)%G). {
@@ -762,18 +757,18 @@ assert (Hcf'inj : ∀ x y, x ∈ Coker a → y ∈ Coker a → (H_app f' x = H_a
   exists 0; split; [ apply A | ].
   apply Hf'inj; [ apply a, A | | ].
   -apply A'; [ easy | now apply A' ].
-  -apply gr_eq_trans with (y := H_app f' 0).
+  -transitivity (H_app f' 0).
    +apply f'; [ apply a, A | apply A' | apply H_zero ].
-   +eapply gr_eq_trans; [ apply H_zero | ].
-    apply gr_eq_symm.
-    eapply gr_eq_trans.
+   +etransitivity; [ apply H_zero | ].
+    symmetry.
+    etransitivity.
     *apply H_linear; [ easy | now apply A' ].
-    *eapply gr_eq_trans.
-    --apply gr_add_compat; [ apply gr_eq_refl | ].
+    *etransitivity.
+    --apply gr_add_compat; [ reflexivity | ].
       now apply H_inv.
     --apply gr_sub_move_r.
-      eapply gr_eq_trans; [ apply Hxy | ].
-      apply gr_eq_symm, gr_add_0_l.
+      etransitivity; [ apply Hxy | ].
+      symmetry; apply gr_add_0_l.
 }
 assert (H7 : ∀ x, x ∈ C → g₁ x ∈ B). {
   intros z Hz; specialize (Hg₁ z) as H; now destruct H.
@@ -781,9 +776,9 @@ assert (H7 : ∀ x, x ∈ C → g₁ x ∈ B). {
 assert (H5 : ∀ x, x ∈ Ker c → (H_app g' (H_app b (g₁ x)) = 0)%G). {
   intros z (Hz, Hcz).
   specialize (Hg₁ z Hz) as H5.
-  eapply gr_eq_trans.
-  -apply gr_eq_symm, Hcgg'.
-  -apply gr_eq_trans with (y := H_app c z); [ | easy ].
+  etransitivity.
+  -symmetry; apply Hcgg'.
+  -transitivity (H_app c z); [ | easy ].
    apply H_compat; [ now apply g | easy | easy ].
 }
 assert
@@ -800,22 +795,22 @@ assert
     split.
     *destruct Hy' as (y & Hy & Hby).
      eapply B'; [ apply Hby | now apply b ].
-    *apply gr_eq_trans with (y := H_app g' (H_app b (g₁ x'))).
+    *transitivity (H_app g' (H_app b (g₁ x'))).
     --apply g'; [ | | easy ].
      ++destruct Hy' as (y & Hy & Hby).
        eapply B'; [ apply Hby | now apply b ].
      ++apply b, H7, Hx'.
-    --eapply gr_eq_trans; [ apply gr_eq_symm, Hcgg' | ].
+    --etransitivity; [ symmetry; apply Hcgg' | ].
       destruct Hx' as (Hx', Hcx').
       specialize (Hg₁ x' Hx') as H2.
       destruct H2 as (Hgx', Hggx').
-      apply gr_eq_trans with (y := H_app c x'); [ | easy ].
+      transitivity (H_app c x'); [ | easy ].
       apply c; [ now apply g, H7| easy | easy ].
   -exists 0%G; intros (x' & Hx' & Hyx').
    exfalso; apply Hy'.
    exists (g₁ x').
    split; [ apply H7; now simpl in Hx' | ].
-   now apply gr_eq_symm.
+   now symmetry.
 }
 specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
 move f'₁ before g₁.
@@ -824,7 +819,7 @@ set (d := λ x, f'₁ (H_app b (g₁ x))).
 assert (Hmemc : ∀ x, x ∈ Ker c → d x ∈ Coker a). {
   intros x Hx.
   apply Hf'₁.
-  exists x; split; [ easy | apply gr_eq_refl ].
+  exists x; split; [ easy | reflexivity ].
 }
 assert
   (Hlin : ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (d (x1 + x2) = d x1 + d x2)%G). {
@@ -839,13 +834,13 @@ assert
   assert (H1 : (H_app g y1 = x1)%G) by now apply Hg₁; simpl in Hx1.
   assert (H2 : (H_app g y2 = x2)%G) by now apply Hg₁; simpl in Hx2.
   assert (H3 : (H_app g (y1 + y2)%G = x3)%G). {
-    eapply gr_eq_trans.
+    etransitivity.
     -apply g.
      +now apply H7; simpl in Hx1.
      +now apply H7; simpl in Hx2.
-    -eapply gr_eq_trans.
+    -etransitivity.
      +apply gr_add_compat; [ apply H1 | apply H2 ].
-     +apply gr_eq_refl.
+     +reflexivity.
   }
   assert (Hy1 : y1 ∈ B) by apply H7, Hx1.
   assert (Hy2 : y2 ∈ B) by apply H7, Hx2.
@@ -853,31 +848,31 @@ assert
   assert (H4 : (y1 + y2 - y3)%G ∈ Ker g). {
     split.
     -now apply B; apply B.
-    -eapply gr_eq_trans; [ now apply g; apply B | ].
-     apply gr_eq_symm, gr_sub_move_r.
-     eapply gr_eq_trans; [ apply gr_add_0_l | ].
-     eapply gr_eq_trans; [ now apply gr_inv_compat, H_inv | ].
-     eapply gr_eq_trans; [ apply gr_inv_inv | ].
-     eapply gr_eq_trans.
+    -etransitivity; [ now apply g; apply B | ].
+     symmetry; apply gr_sub_move_r.
+     etransitivity; [ apply gr_add_0_l | ].
+     etransitivity; [ now apply gr_inv_compat, H_inv | ].
+     etransitivity; [ apply gr_inv_inv | ].
+     etransitivity.
      +apply Hg₁, C; [ apply Hx1 | apply Hx2 ].
-     +eapply gr_eq_symm, gr_eq_trans; [ now apply g | ].
-      eapply gr_eq_trans.
+     +symmetry; etransitivity; [ now apply g | ].
+      etransitivity.
       *apply gr_add_compat; [ apply H1 | apply H2 ].
-      *apply gr_eq_refl.
+      *reflexivity.
   }
   assert (Hfx1 : (H_app f' z1 = H_app b y1)%G). {
     apply Hf'₁; exists x1.
-    split; [ easy | apply gr_eq_refl ].
+    split; [ easy | reflexivity ].
   }
   assert (Hfx2 : (H_app f' z2 = H_app b y2)%G). {
     apply Hf'₁; exists x2.
-    split; [ easy | apply gr_eq_refl ].
+    split; [ easy | reflexivity ].
   }
   assert (Hfx3 : (H_app f' z3 = H_app b y3)%G). {
     unfold z3, y3.
     apply Hf'₁.
     exists x3.
-    split; [ | apply gr_eq_refl ].
+    split; [ | reflexivity ].
     unfold x3.
     now apply (Ker c).
   }
@@ -888,37 +883,37 @@ assert
       assert (H : z1 ∈ A' ∧ z2 ∈ A'). {
         split.
         -apply Hf'₁.
-         exists x1; split; [ easy | apply gr_eq_refl ].
+         exists x1; split; [ easy | reflexivity ].
         -apply Hf'₁.
-         exists x2; split; [ easy | apply gr_eq_refl ].
+         exists x2; split; [ easy | reflexivity ].
       }
       split; [ easy | ].
       split; [ easy | ].
       unfold z3.
       apply Hf'₁.
-      exists x3; split; [ | apply gr_eq_refl ].
+      exists x3; split; [ | reflexivity ].
       unfold x3.
       now apply (Ker c).
     }
-    eapply gr_eq_trans; simpl.
+    etransitivity; simpl.
     -now apply H_linear; apply A'.
     -apply gr_add_compat.
-     +eapply gr_eq_trans; [ now apply H_linear | ].
+     +etransitivity; [ now apply H_linear | ].
       now apply gr_add_compat.
-     +eapply gr_eq_trans; [ now apply H_inv | ].
+     +etransitivity; [ now apply H_inv | ].
       now apply gr_inv_compat.
   }
   apply sf in H4.
   destruct H4 as (z & Hz & Hzf).
   assert (Hfz : (H_app f' (z1 + z2 - z3) = H_app f' (H_app a z))%G). {
-    eapply gr_eq_trans; [ apply Hfzzz | ].
-    eapply gr_eq_trans.
-    -apply gr_add_compat; [ now apply gr_eq_symm, b | ].
-     +now apply gr_eq_symm, H_inv.
-    -eapply gr_eq_trans.
-     +now apply gr_eq_symm, H_linear; apply B.
-     +eapply gr_eq_trans.
-      *apply H_compat; [ | | eapply gr_eq_symm, Hzf ].
+    etransitivity; [ apply Hfzzz | ].
+    etransitivity.
+    -apply gr_add_compat; [ now symmetry; apply b | ].
+     +now symmetry; apply H_inv.
+    -etransitivity.
+     +now symmetry; apply H_linear; apply B.
+     +etransitivity.
+      *apply H_compat; [ | | symmetry; apply Hzf ].
       --now apply B; apply B.
       --now apply f.
       *apply Hcff'.
@@ -927,26 +922,26 @@ assert
   -simpl; unfold Coker_eq; simpl.
    exists (- z).
    split; [ now apply A | ].
-   eapply gr_eq_trans; [ now apply H_inv | ].
-   eapply gr_eq_trans; [ apply gr_inv_compat, gr_eq_symm, Hfz | ].
-   eapply gr_eq_symm.
-   eapply gr_eq_trans; [ apply gr_add_comm | ].
-   eapply gr_eq_trans.
-   +apply gr_add_compat; [ apply gr_inv_add_distr | apply gr_eq_refl ].
-   +apply gr_eq_symm.
-    eapply gr_eq_trans.
+   etransitivity; [ now apply H_inv | ].
+   etransitivity; [ apply gr_inv_compat; symmetry; apply Hfz | ].
+   symmetry.
+   etransitivity; [ apply gr_add_comm | ].
+   etransitivity.
+   +apply gr_add_compat; [ apply gr_inv_add_distr | reflexivity ].
+   +symmetry.
+    etransitivity.
     *simpl; apply gr_inv_add_distr.
     *apply gr_add_compat; [ apply gr_inv_add_distr | ].
      apply gr_inv_inv.
   -apply A'.
    +apply A'.
     *apply Hf'₁; exists x1.
-     split; [ easy | apply gr_eq_refl ].
+     split; [ easy | reflexivity ].
     *apply Hf'₁; exists x2.
-     split; [ easy | apply gr_eq_refl ].
+     split; [ easy | reflexivity ].
    +apply A'.
     apply Hf'₁; exists x3.
-    split; [ | apply gr_eq_refl ].
+    split; [ | reflexivity ].
     unfold x3.
     now apply (Ker c).
   -now apply a.
@@ -958,13 +953,13 @@ assert
   assert (Hgy1 : (H_app g (g₁ x1) = x1)%G) by apply Hg₁, Hx1.
   assert (Hgy2 : (H_app g (g₁ x2) = x2)%G) by apply Hg₁, Hx2.
   assert (Hgb1 : (H_app g' (H_app b (g₁ x1)) = 0)%G). {
-    eapply gr_eq_trans; [ apply gr_eq_symm, Hcgg' | ].
-    eapply gr_eq_trans; [ | apply Hx1 ].
+    etransitivity; [ symmetry; apply Hcgg' | ].
+    etransitivity; [ | apply Hx1 ].
     apply c; [ apply g, Hg₁, Hx1 | apply Hx1 | apply Hgy1 ].
   }
   assert (Hgb2 : (H_app g' (H_app b (g₁ x2)) = 0)%G). {
-    eapply gr_eq_trans; [ apply gr_eq_symm, Hcgg' | ].
-    eapply gr_eq_trans; [ | apply Hx2 ].
+    etransitivity; [ symmetry; apply Hcgg' | ].
+    etransitivity; [ | apply Hx2 ].
     apply c; [ apply g, Hg₁, Hx2 | apply Hx2 | apply Hgy2 ].
   }
   assert (H1 : H_app b (g₁ x1) ∈ Im f'). {
@@ -977,79 +972,79 @@ assert
   destruct H2 as (z'2 & Hz'2 & Hfz'2).
   move z'2 before z'1; move Hz'2 before Hz'1.
   assert (H3 : (H_app f' (z'1 - z'2) = H_app b (g₁ x1 - g₁ x2))%G). {
-    eapply gr_eq_trans.
+    etransitivity.
     -apply f'; [ easy | now apply A' ].
-    -apply gr_eq_symm.
-     eapply gr_eq_trans.
+    -symmetry.
+     etransitivity.
      +apply b; [ apply H7, Hx1 | apply B, H7, Hx2 ].
-     +apply gr_eq_symm, gr_add_compat; [ easy | ].
-      eapply gr_eq_trans; [ now apply H_inv | ].
-      apply gr_eq_symm.
-      eapply gr_eq_trans; [ apply H_inv, H7, Hx2 | ].
-      now apply gr_inv_compat, gr_eq_symm.
+     +symmetry; apply gr_add_compat; [ easy | ].
+      etransitivity; [ now apply H_inv | ].
+      symmetry.
+      etransitivity; [ apply H_inv, H7, Hx2 | ].
+      now apply gr_inv_compat; symmetry.
   }
   assert (H4 : g₁ x1 - g₁ x2 ∈ Im f). {
     apply sf.
     split.
     -apply B; [ apply H7, Hx1 | apply B, H7, Hx2 ].
-    -eapply gr_eq_trans.
+    -etransitivity.
      +apply g; [ apply H7, Hx1 | apply B, H7, Hx2 ].
-     +apply gr_eq_trans with (y := x1 - x2); simpl.
+     +transitivity (x1 - x2); simpl.
       *apply gr_add_compat; [ easy | ].
-       eapply gr_eq_trans; [ apply H_inv, H7, Hx2 | ].
+       etransitivity; [ apply H_inv, H7, Hx2 | ].
        now apply gr_inv_compat.
-      *apply gr_sub_move_r, gr_eq_symm.
-       eapply gr_eq_trans; [ apply gr_add_0_l | ].
-       now apply gr_eq_symm.
+      *apply gr_sub_move_r; symmetry.
+       etransitivity; [ apply gr_add_0_l | ].
+       now symmetry.
   }
   destruct H4 as (z & Hz & Hfz).
   assert (H4 : (z'1 - z'2 = H_app a z)%G). {
     apply Hf'inj; [ | now apply a | ].
     -apply A'; [ easy | now apply A' ].
-    -eapply gr_eq_symm, gr_eq_trans.
-     +apply gr_eq_symm, Hcff'.
-     +eapply gr_eq_trans.
+    -symmetry; etransitivity.
+     +symmetry; apply Hcff'.
+     +etransitivity.
       *apply H_compat with (y := g₁ x1 - g₁ x2); [ now apply f | | easy ].
        apply B; [ apply H7, Hx1 | apply B, H7, Hx2 ].
-      *now apply gr_eq_symm.
+      *now symmetry.
   }
   assert (H6 : z'1 - z'2 ∈ Im a). {
-    exists z; split; [ easy | now apply gr_eq_symm ].
+    exists z; split; [ easy | now symmetry ].
   }
   assert (Hdx2 : (d x2 = z'2)%G). {
     simpl; unfold Coker_eq; simpl.
     exists 0.
     split; [ apply A | ].
-    eapply gr_eq_trans; [ apply H_zero | ].
-    apply gr_eq_symm, gr_sub_move_r, gr_eq_symm.
-    eapply gr_eq_trans; [ apply gr_add_0_l | ].
+    etransitivity; [ apply H_zero | ].
+    symmetry; apply gr_sub_move_r; symmetry.
+    etransitivity; [ apply gr_add_0_l | ].
     apply Hf'inj; [ easy | | ].
     -unfold d; apply Hf'₁; exists x2.
-     split; [ easy | apply gr_eq_refl ].
-    -eapply gr_eq_trans; [ apply Hfz'2 | ].
-     apply gr_eq_symm, Hf'₁; exists x2; split; [ easy | apply gr_eq_refl ].
+     split; [ easy | reflexivity ].
+    -etransitivity; [ apply Hfz'2 | ].
+     symmetry; apply Hf'₁; exists x2; split; [ easy | reflexivity ].
   }
   assert (Hdx1 : (d x1 = z'1)%G). {
     simpl; unfold Coker_eq; simpl.
     exists 0.
     split; [ apply A | ].
-    eapply gr_eq_trans; [ apply H_zero | ].
-    apply gr_eq_symm, gr_sub_move_r, gr_eq_symm.
-    eapply gr_eq_trans; [ apply gr_add_0_l | ].
+    etransitivity; [ apply H_zero | ].
+    symmetry; apply gr_sub_move_r; symmetry.
+    etransitivity; [ apply gr_add_0_l | ].
     apply Hf'inj; [ easy | | ].
     -unfold d; apply Hf'₁; exists x1.
-     split; [ easy | apply gr_eq_refl ].
-    -eapply gr_eq_trans; [ apply Hfz'1 | ].
-     apply gr_eq_symm, Hf'₁; exists x1; split; [ easy | apply gr_eq_refl ].
+     split; [ easy | reflexivity ].
+    -etransitivity; [ apply Hfz'1 | ].
+     symmetry; apply Hf'₁; exists x1; split; [ easy | reflexivity ].
   }
   assert (Hzz' : @gr_eq (@Coker A A' a) z'1 z'2). {
     destruct H6 as (zz & Hzz & Hazz).
     simpl; unfold Coker_eq; simpl.
     now exists zz; split.
   }
-  eapply gr_eq_trans; [ apply Hdx1 | ].
-  eapply gr_eq_trans; [ apply Hzz' | ].
-  now apply gr_eq_symm.
+  etransitivity; [ apply Hdx1 | ].
+  etransitivity; [ apply Hzz' | ].
+  now symmetry.
 }
 remember
   {| H_app := d; H_mem_compat := Hmemc; H_linear := Hlin; H_compat := Hcomp |}
@@ -1062,12 +1057,11 @@ split; [ | split ].
  +intros (x & (Hx & Hax) & Hxy).
   split; [ split | ].
   *eapply B; [ apply Hxy | now apply f ].
-  *apply gr_eq_trans with (y := H_app b (H_app f x)).
-  --apply b; [ | now apply f | now apply gr_eq_symm ].
+  *transitivity (H_app b (H_app f x)).
+  --apply b; [ | now apply f | now symmetry ].
     eapply gr_mem_compat; [ apply Hxy | now apply f ].
-...
   --etransitivity; [ apply Hcff' | ].
-    transitivity (H_app f' (gr_zero A')); [ | apply f' ].
+    transitivity (H_app f' (@gr_zero A')); [ | apply H_zero ].
     apply f'; [ now apply a | apply A' | easy ].
   *apply sf.
    exists x; easy.
@@ -1080,44 +1074,29 @@ split; [ | split ].
   assert (H3 : H_app a x ∈ Ker f'). {
     split; [ now apply a | ].
     specialize (Hcff' x) as H3.
-    destruct B' as (b's, b'i, b'eq, b'z, b'o, b'p).
-    destruct b'p as (b'zi, b'c, b'id, b'a, b'co, b'eqv, b'imo, b'amo).
-    simpl in *.
     etransitivity; [ symmetry; apply H3 | ].
     transitivity (H_app b y); [ | easy ].
     apply b; [ | easy | easy ].
-    destruct B as (bs, bi, beq, bz, bo, bp).
-    destruct bp as (bzi, bc, bid, ba, bco, beqv, bimo, bamo).
-    simpl in *.
-    eapply bimo; [ symmetry; apply Hxy | easy ].
+    now apply f.
   }
   specialize (H2 H3).
   destruct H2 as (z & _ & Hzz).
   destruct z.
-  destruct A' as (a's, a'i, a'eq, a'z, a'o, a'p).
-  destruct a'p as (a'zi, a'c, a'id, a'a, a'co, a'eqv, a'imo, a'amo).
-  simpl in *.
-  etransitivity; [ symmetry; apply Hzz | ].
-  apply za'.
+  etransitivity; [ symmetry; apply Hzz | apply H_zero ].
 -intros y.
  split.
  +intros (x & (Hx & Hax) & Hxy).
   split; [ split | ].
   *eapply C; [ apply Hxy | now apply g ].
   *specialize (Hcgg' x) as H1.
-   destruct C' as (c's, c'i, c'eq, c'z, c'o, c'p).
-   destruct c'p as (c'zi, c'c, c'id, c'a, c'co, c'eqv, c'imo, c'amo).
-   simpl in *.
    transitivity (H_app c (H_app g x)).
   --eapply c; [ | now apply g | now apply C ].
     eapply C; [ apply Hxy | now apply g ].
   --etransitivity; [ apply H1 | ].
-    transitivity (H_app g' (gr_zero B')); [ | apply g' ].
+    transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
     apply g'; [ now apply b | apply B' | easy ].
-  *destruct A' as (a's, a'i, a'eq, a'z, a'o, a'p).
-   destruct a'p as (a'zi, a'c, a'id, a'a, a'co, a'eqv, a'imo, a'amo).
-   simpl in *.
-   transitivity (H_app d (H_app g x)).
+...
+  *transitivity (H_app dm (H_app g x)).
   --eapply d; [ | | now apply C ].
     split.
    ++eapply C; [ apply Hxy | now apply g ].
