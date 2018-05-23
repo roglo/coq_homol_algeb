@@ -1132,6 +1132,7 @@ split; [ | split ].
   --etransitivity; [ apply H1 | ].
     transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
     apply g'; [ now apply b | apply B' | easy ].
+(**)
   *specialize (Hcomp x (H_app g y)) as H1.
    assert (Hgy : H_app g y ∈ Ker c). {
      split; [ now apply g | ].
@@ -1149,16 +1150,16 @@ split; [ | split ].
    }
    symmetry in Hyx.
    specialize (H1 Hxk Hgy Hyx).
-   destruct H1 as (z & Hz & Haz).
+   symmetry in Hyx.
+   etransitivity; [ apply H1 | ].
    unfold Coker_eq; simpl.
+   unfold d.
 ...
    split; [ apply A | ].
    etransitivity; [ apply H_zero | ].
    symmetry; etransitivity; simpl; [ apply gr_sub_0_r | ].
    transitivity (d (H_app g y)).
-*)
 ...
-
   --apply Hcomp.
 ...
   *transitivity (H_app dm (H_app g y)).
