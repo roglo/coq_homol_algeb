@@ -449,43 +449,64 @@ symmetry.
 etransitivity; [ apply gr_add_0_l | reflexivity ].
 Qed.
 
+Theorem Coker_eq_refl {G H} (f : HomGr G H) : Reflexive (Coker_eq f).
+Proof.
+intros x.
+exists 0%G.
+split; [ apply gr_zero_mem | ].
+etransitivity; [ apply H_zero | ].
+simpl.
+symmetry; apply gr_add_inv_r.
+Qed.
+
+Theorem Coker_eq_symm {G H} (f : HomGr G H) : Symmetric (Coker_eq f).
+Proof.
+intros x y Hxy.
+destruct Hxy as (z & Hz).
+exists (- z)%G.
+split; [ now apply gr_inv_mem | ].
+etransitivity; [ now apply H_inv | ].
+transitivity ((- (x - y))%G).
++now simpl; apply gr_inv_compat.
++simpl; etransitivity; [ apply gr_inv_add_distr | ].
+ etransitivity; [ apply gr_add_comm | ].
+ apply gr_add_compat; [ | reflexivity ].
+ apply gr_inv_inv.
+Qed.
+
+Theorem Coker_eq_trans {G H} (f : HomGr G H) : Transitive (Coker_eq f).
+Proof.
+intros x y z Hxy Hyz.
+simpl in Hxy, Hyz.
+destruct Hxy as (t, Ht).
+destruct Hyz as (u, Hu).
+exists (t + u)%G.
+split; [ now apply gr_add_mem | ].
+etransitivity; [ now apply H_linear | ].
+transitivity ((x - y + (y - z))%G).
++now simpl; apply gr_add_compat.
++simpl; etransitivity; [ apply gr_add_assoc | ].
+ apply gr_add_compat; [ reflexivity | ].
+ etransitivity; [ symmetry; apply gr_add_assoc | ].
+ transitivity ((0 - z)%G).
+ *simpl; apply gr_add_compat; [ apply gr_add_inv_l | reflexivity ].
+ *simpl; apply gr_add_0_l.
+Qed.
+
 Theorem Coker_equiv {G H} : ∀ (f : HomGr G H), Equivalence (Coker_eq f).
 Proof.
 intros.
 unfold Coker_eq; split.
--intros x.
- exists 0%G.
- split; [ apply gr_zero_mem | ].
- etransitivity; [ apply H_zero | ].
- simpl.
- symmetry; apply gr_add_inv_r.
--intros x y Hxy.
- destruct Hxy as (z & Hz).
- exists (- z)%G.
- split; [ now apply gr_inv_mem | ].
- etransitivity; [ now apply H_inv | ].
- transitivity ((- (x - y))%G).
- +now simpl; apply gr_inv_compat.
- +simpl; etransitivity; [ apply gr_inv_add_distr | ].
-  etransitivity; [ apply gr_add_comm | ].
-  apply gr_add_compat; [ | reflexivity ].
-  apply gr_inv_inv.
--intros x y z Hxy Hyz.
- simpl in Hxy, Hyz.
- destruct Hxy as (t, Ht).
- destruct Hyz as (u, Hu).
- exists (t + u)%G.
- split; [ now apply gr_add_mem | ].
- etransitivity; [ now apply H_linear | ].
- transitivity ((x - y + (y - z))%G).
- +now simpl; apply gr_add_compat.
- +simpl; etransitivity; [ apply gr_add_assoc | ].
-  apply gr_add_compat; [ reflexivity | ].
-  etransitivity; [ symmetry; apply gr_add_assoc | ].
-  transitivity ((0 - z)%G).
-  *simpl; apply gr_add_compat; [ apply gr_add_inv_l | reflexivity ].
-  *simpl; apply gr_add_0_l.
+-apply Coker_eq_refl.
+-apply Coker_eq_symm.
+-apply Coker_eq_trans.
 Qed.
+
+Add Parametric Relation {G H} {f : HomGr G H} : (gr_set (Im f)) (Coker_eq f)
+ reflexivity proved by (Coker_eq_refl f)
+ symmetry proved by (Coker_eq_symm f)
+ transitivity proved by (Coker_eq_trans f)
+ as gr_cokereq_rel.
 
 Theorem Coker_mem_compat {G H} : ∀ (f : HomGr G H) x y,
   Coker_eq f x y → x ∈ H → y ∈ H.
@@ -1095,29 +1116,21 @@ split; [ | split ].
   --etransitivity; [ apply H1 | ].
     transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
     apply g'; [ now apply b | apply B' | easy ].
-...
   *transitivity (H_app dm (H_app g x)).
-  --eapply d; [ | | now apply C ].
+  --eapply dm; [ | | now apply C ].
     split.
    ++eapply C; [ apply Hxy | now apply g ].
-   ++destruct C' as (c's, c'i, c'eq, c'z, c'o, c'p).
-     destruct c'p as (c'zi, c'c, c'id, c'a, c'co, c'eqv, c'imo, c'amo).
-     simpl in *.
-     transitivity (H_app c (H_app g x)).
+   ++transitivity (H_app c (H_app g x)).
     **eapply c; [ | now apply g | now apply C ].
       eapply C; [ apply Hxy | now apply g ].
     **etransitivity; [ apply Hcgg' | ].
-      transitivity (H_app g' (gr_zero B')); [ | apply g' ].
+      transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
       apply g'; [ now apply b | apply B' | easy ].
    ++split; [ now apply g | ].
-     destruct C' as (c's, c'i, c'eq, c'z, c'o, c'p).
-     destruct c'p as (c'zi, c'c, c'id, c'a, c'co, c'eqv, c'imo, c'amo).
-     simpl in *.
      etransitivity; [ apply Hcgg' | ].
-     transitivity (H_app g' (gr_zero B')); [ | apply g' ].
+     transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
      apply g'; [ now apply b | apply B' | easy ].
-  --destruct d as (appd, dp).
-    destruct dp as (dz, din, dlin, dcomp); simpl in *.
+  --idtac.
 ...
    apply sg'; rewrite <- Hxy.
    exists x; easy.
