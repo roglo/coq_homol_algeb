@@ -1141,6 +1141,7 @@ split; [ | split ].
      apply g'; [ now apply b | apply B' | easy ].
   --unfold dm; simpl.
     unfold Coker_eq; simpl.
+    unfold d.
 ...
    apply sg'; rewrite <- Hxy.
    exists x; easy.
