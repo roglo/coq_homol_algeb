@@ -651,7 +651,7 @@ now apply f.
 Qed.
 
 Definition HomGr_Ker_Ker {A B A' B'}
-    (f : HomGr A B) (f' : HomGr A' B') (a : HomGr A A') (b : HomGr B B')
+    {f : HomGr A B} {f' : HomGr A' B'} (a : HomGr A A') (b : HomGr B B')
     (Hc : diagram_commutes f a b f') :=
   {| H_app (x : gr_set (Ker a)) := H_app f x : gr_set (Ker b);
      H_mem_compat := KK_mem_compat a b f f' Hc;
@@ -704,7 +704,7 @@ transitivity (H_app f' (x - y)%G).
 Qed.
 
 Definition HomGr_Coker_Coker {A B A' B'}
-    (f : HomGr A B) (f' : HomGr A' B') (a : HomGr A A') (b : HomGr B B')
+    {f : HomGr A B} {f' : HomGr A' B'} (a : HomGr A A') (b : HomGr B B')
     (Hc : diagram_commutes f a b f') :=
   {| H_app (x : gr_set (Coker a)) := H_app f' x : gr_set (Coker b);
      H_mem_compat := CC_mem_compat f' a b;
@@ -747,10 +747,10 @@ Lemma snake :
 Proof.
 intros *.
 intros Hcff' Hcgg' s s'.
-exists (HomGr_Ker_Ker f f' a b Hcff').
-exists (HomGr_Ker_Ker g g' b c Hcgg').
-exists (HomGr_Coker_Coker f f' a b Hcff').
-exists (HomGr_Coker_Coker g g' b c Hcgg').
+exists (HomGr_Ker_Ker a b Hcff').
+exists (HomGr_Ker_Ker b c Hcgg').
+exists (HomGr_Coker_Coker a b Hcff').
+exists (HomGr_Coker_Coker b c Hcgg').
 destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
 specialize (exists_ker_C_to_B B C C' g c cz sg) as H1.
@@ -851,22 +851,23 @@ assert
 specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
 move f'₁ before g₁.
 clear H1 H2.
-set (d := λ x, f'₁ (H_app b (g₁ x))).
-assert (Hmemc : ∀ x, x ∈ Ker c → d x ∈ Coker a). {
+set (df := λ x, f'₁ (H_app b (g₁ x))).
+assert (Hmemc : ∀ x, x ∈ Ker c → df x ∈ Coker a). {
   intros x Hx.
   apply Hf'₁.
   exists x; split; [ easy | reflexivity ].
 }
 assert
-  (Hlin : ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (d (x1 + x2) = d x1 + d x2)%G). {
+  (Hlin :
+     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (df (x1 + x2) = df x1 + df x2)%G). {
   intros x1 x2 Hx1 Hx2.
   set (x3 := (x1 + x2)%G).
   set (y1 := g₁ x1).
   set (y2 := g₁ x2).
   set (y3 := g₁ x3).
-  set (z1 := d x1).
-  set (z2 := d x2).
-  set (z3 := d x3).
+  set (z1 := df x1).
+  set (z2 := df x2).
+  set (z3 := df x3).
   assert (H1 : (H_app g y1 = x1)%G) by now apply Hg₁; simpl in Hx1.
   assert (H2 : (H_app g y2 = x2)%G) by now apply Hg₁; simpl in Hx2.
   assert (H3 : (H_app g (y1 + y2)%G = x3)%G). {
@@ -984,7 +985,7 @@ assert
 }
 assert
   (Hcomp :
-     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (x1 = x2)%G → (d x1 = d x2)%G). {
+     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (x1 = x2)%G → (df x1 = df x2)%G). {
   intros * Hx1 Hx2 Hxx.
   assert (Hgy1 : (H_app g (g₁ x1) = x1)%G) by apply Hg₁, Hx1.
   assert (Hgy2 : (H_app g (g₁ x2) = x2)%G) by apply Hg₁, Hx2.
@@ -1047,7 +1048,7 @@ assert
   assert (H6 : z'1 - z'2 ∈ Im a). {
     exists z; split; [ easy | now symmetry ].
   }
-  assert (Hdx2 : (d x2 = z'2)%G). {
+  assert (Hdx2 : (df x2 = z'2)%G). {
     simpl; unfold Coker_eq; simpl.
     exists 0.
     split; [ apply A | ].
@@ -1055,12 +1056,12 @@ assert
     symmetry; apply gr_sub_move_r; symmetry.
     etransitivity; [ apply gr_add_0_l | ].
     apply Hf'inj; [ easy | | ].
-    -unfold d; apply Hf'₁; exists x2.
+    -apply Hf'₁; exists x2.
      split; [ easy | reflexivity ].
     -etransitivity; [ apply Hfz'2 | ].
      symmetry; apply Hf'₁; exists x2; split; [ easy | reflexivity ].
   }
-  assert (Hdx1 : (d x1 = z'1)%G). {
+  assert (Hdx1 : (df x1 = z'1)%G). {
     simpl; unfold Coker_eq; simpl.
     exists 0.
     split; [ apply A | ].
@@ -1068,7 +1069,7 @@ assert
     symmetry; apply gr_sub_move_r; symmetry.
     etransitivity; [ apply gr_add_0_l | ].
     apply Hf'inj; [ easy | | ].
-    -unfold d; apply Hf'₁; exists x1.
+    -apply Hf'₁; exists x1.
      split; [ easy | reflexivity ].
     -etransitivity; [ apply Hfz'1 | ].
      symmetry; apply Hf'₁; exists x1; split; [ easy | reflexivity ].
@@ -1083,11 +1084,10 @@ assert
   now symmetry.
 }
 set
-  (dm :=
-   {| H_app := d; H_mem_compat := Hmemc; H_linear := Hlin;
+  (d :=
+   {| H_app := df; H_mem_compat := Hmemc; H_linear := Hlin;
       H_compat := Hcomp |}).
-exists dm.
-simpl.
+exists d.
 split; [ | split ].
 -intros y.
  split.
@@ -1151,7 +1151,8 @@ split; [ | split ].
    symmetry in Hyx.
    specialize (H1 Hxk Hgy Hyx).
    symmetry in Hyx.
-   unfold Coker_eq; simpl.
+   simpl; unfold Coker_eq; simpl.
+   simpl in Hyx.
 ...
    etransitivity; [ apply H1 | ].
    unfold Coker_eq; simpl.
