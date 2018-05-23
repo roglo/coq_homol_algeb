@@ -1125,6 +1125,8 @@ split; [ | split ].
   --etransitivity; [ apply H1 | ].
     transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
     apply g'; [ now apply b | apply B' | easy ].
+  *idtac.
+...
   *transitivity (H_app dm (H_app g y)).
   --eapply dm; [ | | now apply C ].
     split.
