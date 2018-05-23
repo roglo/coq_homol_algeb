@@ -851,23 +851,23 @@ assert
 specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
 move f'₁ before g₁.
 clear H1 H2.
-set (df := λ x, f'₁ (H_app b (g₁ x))).
-assert (Hmemc : ∀ x, x ∈ Ker c → df x ∈ Coker a). {
+set (d := λ x, f'₁ (H_app b (g₁ x))).
+assert (Hmemc : ∀ x, x ∈ Ker c → d x ∈ Coker a). {
   intros x Hx.
   apply Hf'₁.
   exists x; split; [ easy | reflexivity ].
 }
 assert
   (Hlin :
-     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (df (x1 + x2) = df x1 + df x2)%G). {
+     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (d (x1 + x2) = d x1 + d x2)%G). {
   intros x1 x2 Hx1 Hx2.
   set (x3 := (x1 + x2)%G).
   set (y1 := g₁ x1).
   set (y2 := g₁ x2).
   set (y3 := g₁ x3).
-  set (z1 := df x1).
-  set (z2 := df x2).
-  set (z3 := df x3).
+  set (z1 := d x1).
+  set (z2 := d x2).
+  set (z3 := d x3).
   assert (H1 : (H_app g y1 = x1)%G) by now apply Hg₁; simpl in Hx1.
   assert (H2 : (H_app g y2 = x2)%G) by now apply Hg₁; simpl in Hx2.
   assert (H3 : (H_app g (y1 + y2)%G = x3)%G). {
@@ -985,7 +985,7 @@ assert
 }
 assert
   (Hcomp :
-     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (x1 = x2)%G → (df x1 = df x2)%G). {
+     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (x1 = x2)%G → (d x1 = d x2)%G). {
   intros * Hx1 Hx2 Hxx.
   assert (Hgy1 : (H_app g (g₁ x1) = x1)%G) by apply Hg₁, Hx1.
   assert (Hgy2 : (H_app g (g₁ x2) = x2)%G) by apply Hg₁, Hx2.
@@ -1048,7 +1048,7 @@ assert
   assert (H6 : z'1 - z'2 ∈ Im a). {
     exists z; split; [ easy | now symmetry ].
   }
-  assert (Hdx2 : (df x2 = z'2)%G). {
+  assert (Hdx2 : (d x2 = z'2)%G). {
     simpl; unfold Coker_eq; simpl.
     exists 0.
     split; [ apply A | ].
@@ -1061,7 +1061,7 @@ assert
     -etransitivity; [ apply Hfz'2 | ].
      symmetry; apply Hf'₁; exists x2; split; [ easy | reflexivity ].
   }
-  assert (Hdx1 : (df x1 = z'1)%G). {
+  assert (Hdx1 : (d x1 = z'1)%G). {
     simpl; unfold Coker_eq; simpl.
     exists 0.
     split; [ apply A | ].
@@ -1084,10 +1084,10 @@ assert
   now symmetry.
 }
 set
-  (d :=
-   {| H_app := df; H_mem_compat := Hmemc; H_linear := Hlin;
+  (dm :=
+   {| H_app := d; H_mem_compat := Hmemc; H_linear := Hlin;
       H_compat := Hcomp |}).
-exists d.
+exists dm.
 split; [ | split ].
 -intros y.
  split.
