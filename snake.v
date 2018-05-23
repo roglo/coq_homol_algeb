@@ -10,10 +10,18 @@ Reserved Notation "x '≡' y" (at level 70).
 
 (* Abelian Groups.
 
-   Note: group sets are setoids, i.e. there is a specific equality (gr_eq)
-   which must be compatible with membership (gr_mem_compat), with addition
-   (gr_add_compat), and with inverse (gr_inv_compat). This allows to define
-   groups quotients by changing this equality, e.g. in cokernels *)
+   Notes:
+
+   -sets in groups are represented by predicates; so a value of type
+    gr_set is not necessarily in the group set. To be in the group set, it
+    must satisfy the predicate gr_mem, which is later syntaxified by the
+    usual symbol ∈.
+
+   -moreover group sets are setoids: there is a specific equality (gr_eq)
+    which must be compatible with membership (gr_mem_compat), with addition
+    (gr_add_compat), and with inverse (gr_inv_compat). This allows to define
+    quotient groups by changing this equality, for example in cokernels
+*)
 
 Record AbGroup :=
   { (* data *)
