@@ -1257,8 +1257,7 @@ split; [ | split ].
   move z before x; move Hz before Hx.
   rewrite gr_sub_0_r in Haz.
   enough (∃ y, (y ∈ B ∧ (H_app b y = 0)%G) ∧ (H_app g y = x)%G) by easy.
-(**)
-  apply (H_app_compat _ _ f') in Haz.
+  apply (H_app_compat _ _ f') in Haz; [ | now apply a | ].
   *rewrite <- Hcff' in Haz.
    exists (g₁ x - H_app f z).
    split; [ split | ].
@@ -1269,29 +1268,17 @@ split; [ | split ].
    ++apply gr_sub_move_r; rewrite gr_add_0_l; symmetry.
      etransitivity; [ apply Haz | ].
      etransitivity; [ now apply Hf'₁; exists x | easy ].
-  --idtac.
+  --etransitivity.
+   ++apply H_additive; [ apply Hg₁, Hx | now apply B, f ].
+   ++etransitivity.
+    **apply gr_add_compat; [ easy | now apply H_inv, f ].
+    **apply gr_sub_move_l.
+    ---etransitivity; [ apply Hg₁, Hx | ].
+       symmetry.
+       etransitivity; [ | apply gr_add_0_l ].
+       apply gr_add_compat; [ | easy ].
+       enough (H1 : H_app f z ∈ Ker g) by now simpl in H1.
+       now apply sf; exists z.
+  *eapply gr_mem_compat; [ apply Haz | now apply a ].
 ...
-  exists (H_app f z - g₁ x).
-  split; [ split | ].
-  *...
-  *etransitivity; [ apply H_additive | ].
-  --now apply f.
-  --apply B, (g₁_in_B Hg₁), Hx.
-  --idtac.
-...
-  exists (H_app f z).
-  split; [ split | ].
-  *now apply f.
-  *rewrite Hcff'.
-   transitivity (H_app f' (d x)).
-  --apply f'; [ now apply a | now apply Hf'₁; exists x | easy ].
-  --enough (H : d x ∈ Ker f') by apply H.
-    apply sf'.
-    exists G0; split; [ easy | ].
-    rewrite H_zero; symmetry.
-...
-  exists (g₁ x).
-  split; [ split | ].
-  *apply (g₁_in_B Hg₁), Hx.
-  *idtac.
-...
+-idtac.
