@@ -831,6 +831,20 @@ destruct (MemDec (Im b) y') as [Hy'| Hy'].
  now symmetry.
 Qed.
 
+Theorem d_mem_compat
+     {A A' B B' C C'} {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'}
+     {f' : HomGr A' B'} {f'₁ g₁} :
+  let d := λ x, f'₁ (H_app b (g₁ x)) in
+  (∀ x : gr_set B',
+    (∃ x0 : gr_set (Ker c), x0 ∈ Ker c ∧ (x = H_app b (g₁ x0))%G)
+    → f'₁ x ∈ Coker a ∧ (H_app f' (f'₁ x) = x)%G)
+  → ∀ x, x ∈ Ker c → d x ∈ Coker a.
+Proof.
+intros * Hf'₁ * Hx.
+apply Hf'₁.
+now exists x.
+Qed.
+
 Lemma snake :
   ∀ (A B C A' B' C' : AbGroup)
      (f : HomGr A B) (g : HomGr B C)
@@ -861,11 +875,6 @@ specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
 move f'₁ before g₁.
 clear H1 H2.
 set (d := λ x, f'₁ (H_app b (g₁ x))).
-assert (Hmemc : ∀ x, x ∈ Ker c → d x ∈ Coker a). {
-  intros x Hx.
-  apply Hf'₁.
-  exists x; split; [ easy | reflexivity ].
-}
 assert
   (Hlin :
      ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (d (x1 + x2) = d x1 + d x2)%G). {
@@ -1094,7 +1103,9 @@ assert
 }
 set
   (dm :=
-   {| H_app := d; H_mem_compat := Hmemc; H_linear := Hlin;
+   {| H_app := d;
+      H_mem_compat := d_mem_compat Hf'₁;
+      H_linear := Hlin;
       H_compat := Hcomp |}).
 exists dm.
 split; [ | split ].
@@ -1170,22 +1181,23 @@ split; [ | split ].
    apply sf in Hyk.
    destruct Hyk as (z & Hz & Haz).
    assert (Hdx : (d x = H_app a z)%G). {
-     apply (f'c_is_inj sf'); [ now apply Hmemc | now apply a | ].
-     etransitivity; [ apply Hf'₁; now exists x | ].
-     symmetry.
-     etransitivity; [ symmetry; apply Hcff' | ].
-     etransitivity.
-     -apply H_compat; [ | | apply Haz ].
-      +apply H_mem_compat, Hz.
-      +apply B; [ apply (g₁_in_B Hg₁), Hxk | now apply B ].
-     -etransitivity.
-      +apply b; [ apply (g₁_in_B Hg₁), Hxk | now apply B ].
+     apply (f'c_is_inj sf'); [ | now apply a | ].
+     -now apply (d_mem_compat Hf'₁).
+     -etransitivity; [ apply Hf'₁; now exists x | ].
+      symmetry.
+      etransitivity; [ symmetry; apply Hcff' | ].
+      etransitivity.
+      +apply H_compat; [ | | apply Haz ].
+       *apply H_mem_compat, Hz.
+       *apply B; [ apply (g₁_in_B Hg₁), Hxk | now apply B ].
       +etransitivity.
-       *apply gr_add_compat; [ easy | now simpl; apply H_inv ].
+       *apply b; [ apply (g₁_in_B Hg₁), Hxk | now apply B ].
        *etransitivity.
-       --apply gr_add_compat; [ easy | apply gr_inv_compat, Hay ].
-       --etransitivity; [ apply gr_sub_0_r | ].
-         apply b; [ apply (g₁_in_B Hg₁), Hxk | apply (g₁_in_B Hg₁), Hxk | easy ].
+       --apply gr_add_compat; [ easy | now simpl; apply H_inv ].
+       --etransitivity.
+        ++apply gr_add_compat; [ easy | apply gr_inv_compat, Hay ].
+        ++etransitivity; [ apply gr_sub_0_r | ].
+          apply b; [ apply (g₁_in_B Hg₁), Hxk | apply (g₁_in_B Hg₁), Hxk | easy ].
    }
    simpl; rewrite Hdx.
    exists z; split; [ easy | ].
