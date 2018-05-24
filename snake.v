@@ -1301,5 +1301,29 @@ exists dm.
 split; [ now eapply exact_sequence_1 | ].
 split; [ now eapply exact_sequence_2; try easy | ].
 split.
--idtac.
+(**)
+split.
+-intros z' Hz'.
+ destruct Hz' as (x & Hx & z & Hz & Haz).
+ move z before x.
+ simpl in Haz.
+ simpl; split.
+ +apply gr_mem_compat with (x := d x - H_app a z).
+  *transitivity (d x - (d x - z')); simpl.
+  --apply gr_add_compat; [ easy | now apply gr_inv_compat ].
+  --apply gr_sub_move_l.
+    symmetry.
+    etransitivity; [ apply gr_add_assoc | ].
+    etransitivity; [ | apply gr_add_0_r ].
+    apply gr_add_compat; [ easy | ].
+    apply gr_add_inv_l.
+  *apply A'; [ now apply Hf'₁; exists x | now apply A', a ].
+ +unfold Coker_eq; simpl.
+  enough (H : ∃ y, y ∈ B ∧ (H_app b y = H_app f' z')%G). {
+    destruct H as (y & Hy & Hby).
+    exists y.
+    split; [ easy | now rewrite gr_sub_0_r ].
+  }
+...
+split; [ | easy ].
 ...
