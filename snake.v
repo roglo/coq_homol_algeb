@@ -599,13 +599,15 @@ Inductive sequence {A : AbGroup} :=
   | Seq1 : sequence
   | Seq2 : ∀ {B} (f : HomGr A B), @sequence B → sequence.
 
+Notation "A ⊂ B" := (∀ a, a ∈ A → a ∈ B) (at level 60).
+
 Fixpoint exact_sequence {A : AbGroup} (S : sequence) :=
   match S with
   | Seq1 => True
   | Seq2 f S' =>
       match S' with
       | Seq1 => True
-      | Seq2 g S'' => (∀ a, a ∈ Im f ↔ a ∈ Ker g) ∧ exact_sequence S'
+      | Seq2 g S'' => (Im f ⊂ Ker g ∧ Ker g ⊂ Im f) ∧ exact_sequence S'
       end
   end.
 
@@ -711,8 +713,8 @@ Definition HomGr_Coker_Coker {A B A' B'}
      H_app_compat := CC_app_compat f f' a b Hc;
      H_additive := CC_additive f' a b |}.
 
-Theorem exists_ker_C_to_B : ∀ B C C' g (c : HomGr C C') (cz : HomGr C Gr0),
-  (∀ a : gr_set (Im g), a ∈ Im g ↔ a ∈ Ker cz)
+Theorem exists_Ker_C_to_B : ∀ B C C' g (c : HomGr C C') (cz : HomGr C Gr0),
+ Im g ⊂ Ker cz ∧ Ker cz ⊂ Im g
   → ∀ x : gr_set (Ker c), ∃ y, x ∈ C → y ∈ B ∧ H_app g y ≡ x.
 Proof.
 intros * sg x.
@@ -730,8 +732,8 @@ simpl.
 now destruct (appcz x).
 Qed.
 
-Theorem f'_is_inj : ∀ {A' B'} {f' : HomGr A' B'} {za' : HomGr Gr0 A'},
-   (∀ a : gr_set (Im za'), a ∈ Im za' ↔ a ∈ Ker f') →
+Theorem f'_is_inj {A' B'} {f' : HomGr A' B'} {za' : HomGr Gr0 A'} :
+   Im za' ⊂ Ker f' ∧ Ker f' ⊂ Im za' →
    ∀ x y, x ∈ A' → y ∈ A' → (H_app f' x = H_app f' y)%G → (x = y)%G.
 Proof.
 intros * sf' * Hx Hy Hxy.
@@ -763,10 +765,10 @@ etransitivity; [ apply H5 | ].
 apply gr_add_0_l.
 Qed.
 
-Theorem f'c_is_inj :
-  ∀ {A A' B'} {f' : HomGr A' B'} {a : HomGr A A'} {za' : HomGr Gr0 A'},
-  (∀ a : gr_set (Im za'), a ∈ Im za' ↔ a ∈ Ker f') →
-  ∀ x y, x ∈ Coker a → y ∈ Coker a → (H_app f' x = H_app f' y)%G → (x = y)%G.
+Theorem f'c_is_inj
+    {A A' B'} {f' : HomGr A' B'} {a : HomGr A A'} {za' : HomGr Gr0 A'} :
+  Im za' ⊂ Ker f' ∧ Ker f' ⊂ Im za'
+  → ∀ x y, x ∈ Coker a → y ∈ Coker a → (H_app f' x = H_app f' y)%G → (x = y)%G.
 Proof.
 intros * sf' * Hx Hy Hxy.
 simpl; unfold Coker_eq; simpl.
@@ -797,7 +799,7 @@ Qed.
 
 Theorem exists_B'_to_Coker_a : ∀ {A A' B B' C C' g f'}
   {g' : HomGr B' C'} (a : HomGr A A') {b : HomGr B B'} {c : HomGr C C'} {g₁},
-  (∀ a : gr_set (Im f'), a ∈ Im f' ↔ a ∈ Ker g')
+  (Im f' ⊂ Ker g' ∧ Ker g' ⊂ Im f')
   → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
   → diagram_commutes g b c g'
   → ∀ y', ∃ z',
@@ -851,9 +853,9 @@ Theorem d_app_compat
     {za' : HomGr Gr0 A'} {g₁ f'₁} :
   diagram_commutes f a b f'
   → diagram_commutes g b c g'
-  → (∀ a : gr_set (Im f), a ∈ Im f ↔ a ∈ Ker g)
-  → (∀ a : gr_set (Im za'), a ∈ Im za' ↔ a ∈ Ker f')
-  → (∀ a : gr_set (Im f'), a ∈ Im f' ↔ a ∈ Ker g')
+  → Im f ⊂ Ker g ∧ Ker g ⊂ Im f
+  → Im za' ⊂ Ker f' ∧ Ker f' ⊂ Im za'
+  → Im f' ⊂ Ker g' ∧ Ker g' ⊂ Im f'
   → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
   → (∀ x : gr_set B',
         (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
@@ -966,8 +968,8 @@ Theorem d_additive
     {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'} {za' : HomGr Gr0 A'}
     {g₁ f'₁} :
   diagram_commutes f a b f'
-  → (∀ a : gr_set (Im f), a ∈ Im f ↔ a ∈ Ker g)
-  → (∀ a : gr_set (Im za'), a ∈ Im za' ↔ a ∈ Ker f')
+  → Im f ⊂ Ker g ∧ Ker g ⊂ Im f
+  → Im za' ⊂ Ker f' ∧ Ker f' ⊂ Im za'
   → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
   → (∀ x : gr_set B',
         (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
@@ -1122,7 +1124,7 @@ exists (HomGr_Coker_Coker a b Hcff').
 exists (HomGr_Coker_Coker b c Hcgg').
 destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
-specialize (exists_ker_C_to_B B C C' g c cz sg) as H1.
+specialize (exists_Ker_C_to_B B C C' g c cz sg) as H1.
 specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
 specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
 specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
@@ -1137,9 +1139,8 @@ set
       H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}).
 exists dm.
 split; [ | split ].
--intros y.
- split.
- +intros (x & (Hx & Hax) & Hxy).
+-split.
+ +intros y (x & (Hx & Hax) & Hxy).
   split; [ split | ].
   *eapply B; [ apply Hxy | now apply f ].
   *transitivity (H_app b (H_app f x)).
@@ -1150,13 +1151,12 @@ split; [ | split ].
     apply f'; [ now apply a | apply A' | easy ].
   *apply sf.
    exists x; easy.
- +intros ((Hy & Hby) & Hgy).
+ +intros y ((Hy & Hby) & Hgy).
   assert (H : y ∈ Im f) by now apply sf; split.
   destruct H as (x & Hx & Hxy).
   exists x; split; [ | easy ].
   split; [ easy | ].
-  specialize (sf' (H_app a x)) as H1.
-  destruct H1 as (H1, H2).
+  specialize (proj2 sf' (H_app a x)) as H1.
   assert (H3 : H_app a x ∈ Ker f'). {
     split; [ now apply a | ].
     specialize (Hcff' x) as H3.
@@ -1165,13 +1165,12 @@ split; [ | split ].
     apply b; [ | easy | easy ].
     now apply f.
   }
-  specialize (H2 H3).
-  destruct H2 as (z & _ & Hzz).
+  specialize (H1 H3).
+  destruct H1 as (z & _ & Hzz).
   destruct z.
   etransitivity; [ symmetry; apply Hzz | apply H_zero ].
--intros x.
- split.
- +intros (y & (Hy & Hay) & Hyx).
+-split.
+ +intros x (y & (Hy & Hay) & Hyx).
   split; [ split | ].
   *eapply C; [ apply Hyx | now apply g ].
   *specialize (Hcgg' y) as H1.
@@ -1231,5 +1230,5 @@ split; [ | split ].
    simpl; rewrite Hdx.
    exists z; split; [ easy | ].
    now simpl; rewrite gr_sub_0_r.
- +idtac.
+ +intros x Hx.
 ...
