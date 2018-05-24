@@ -1324,6 +1324,7 @@ split.
     exists y.
     split; [ easy | now rewrite gr_sub_0_r ].
   }
+  simpl in z'.
 ...
 split; [ | easy ].
 ...
