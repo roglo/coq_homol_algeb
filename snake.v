@@ -833,7 +833,7 @@ Qed.
 
 Theorem d_mem_compat
      {A A' B B' C C'} {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'}
-     {f' : HomGr A' B'} {f'₁ g₁} :
+     {f' : HomGr A' B'} {g₁ f'₁} :
   let d := λ x, f'₁ (H_app b (g₁ x)) in
   (∀ x : gr_set B',
     (∃ x0 : gr_set (Ker c), x0 ∈ Ker c ∧ (x = H_app b (g₁ x0))%G)
@@ -845,10 +845,126 @@ apply Hf'₁.
 now exists x.
 Qed.
 
+Theorem d_app_compat
+    {A A' B B' C C'} {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'}
+    {f : HomGr A B} {g : HomGr B C} {f' : HomGr A' B'} {g' : HomGr B' C'}
+    {za' : HomGr Gr0 A'} {g₁ f'₁} :
+  diagram_commutes f a b f'
+  → diagram_commutes g b c g'
+  → (∀ a : gr_set (Im f), a ∈ Im f ↔ a ∈ Ker g)
+  → (∀ a : gr_set (Im za'), a ∈ Im za' ↔ a ∈ Ker f')
+  → (∀ a : gr_set (Im f'), a ∈ Im f' ↔ a ∈ Ker g')
+  → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
+  → (∀ x : gr_set B',
+        (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
+        → f'₁ x ∈ Coker a ∧ (H_app f' (f'₁ x) = x)%G)
+  → let d := λ x, f'₁ (H_app b (g₁ x)) in
+     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (x1 = x2)%G → (d x1 = d x2)%G.
+Proof.
+intros * Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁ * Hx1 Hx2 Hxx.
+assert (Hgy1 : (H_app g (g₁ x1) = x1)%G) by apply Hg₁, Hx1.
+assert (Hgy2 : (H_app g (g₁ x2) = x2)%G) by apply Hg₁, Hx2.
+assert (Hgb1 : (H_app g' (H_app b (g₁ x1)) = 0)%G). {
+  etransitivity; [ symmetry; apply Hcgg' | ].
+  etransitivity; [ | apply Hx1 ].
+  apply c; [ apply g, Hg₁, Hx1 | apply Hx1 | apply Hgy1 ].
+}
+assert (Hgb2 : (H_app g' (H_app b (g₁ x2)) = 0)%G). {
+  etransitivity; [ symmetry; apply Hcgg' | ].
+  etransitivity; [ | apply Hx2 ].
+  apply c; [ apply g, Hg₁, Hx2 | apply Hx2 | apply Hgy2 ].
+}
+assert (H1 : H_app b (g₁ x1) ∈ Im f'). {
+  apply sg'; split; [ apply b, (g₁_in_B Hg₁), Hx1 | easy ].
+}
+assert (H2 : H_app b (g₁ x2) ∈ Im f'). {
+  apply sg'; split; [ apply b, (g₁_in_B Hg₁), Hx2 | easy ].
+}
+destruct H1 as (z'1 & Hz'1 & Hfz'1).
+destruct H2 as (z'2 & Hz'2 & Hfz'2).
+move z'2 before z'1; move Hz'2 before Hz'1.
+assert (H3 : (H_app f' (z'1 - z'2) = H_app b (g₁ x1 - g₁ x2))%G). {
+  etransitivity.
+  -apply H_additive; [ easy | now apply A' ].
+  -symmetry.
+   etransitivity.
+   +apply H_additive; [ apply (g₁_in_B Hg₁), Hx1 | apply B, (g₁_in_B Hg₁), Hx2 ].
+   +symmetry; apply gr_add_compat; [ easy | ].
+    etransitivity; [ now apply H_inv | ].
+    symmetry.
+    etransitivity; [ apply H_inv, (g₁_in_B Hg₁), Hx2 | ].
+    now apply gr_inv_compat; symmetry.
+}
+assert (H4 : g₁ x1 - g₁ x2 ∈ Im f). {
+  apply sf.
+  split.
+  -apply B; [ apply (g₁_in_B Hg₁), Hx1 | apply B, (g₁_in_B Hg₁), Hx2 ].
+  -etransitivity.
+   +apply H_additive.
+    *apply (g₁_in_B Hg₁), Hx1.
+    *apply B, (g₁_in_B Hg₁), Hx2.
+   +transitivity (x1 - x2); simpl.
+    *apply gr_add_compat; [ easy | ].
+     etransitivity; [ apply H_inv, (g₁_in_B Hg₁), Hx2 | ].
+     now apply gr_inv_compat.
+    *apply gr_sub_move_r; symmetry.
+     etransitivity; [ apply gr_add_0_l | ].
+     now symmetry.
+}
+destruct H4 as (z & Hz & Hfz).
+assert (H4 : (z'1 - z'2 = H_app a z)%G). {
+  apply (f'_is_inj sf'); [ | now apply a | ].
+  -apply A'; [ easy | now apply A' ].
+  -symmetry; etransitivity.
+   +symmetry; apply Hcff'.
+   +etransitivity.
+    *apply H_app_compat with (y := g₁ x1 - g₁ x2); [ now apply f | | easy ].
+     apply B; [ apply (g₁_in_B Hg₁), Hx1 | apply B, (g₁_in_B Hg₁), Hx2 ].
+    *now symmetry.
+}
+assert (H6 : z'1 - z'2 ∈ Im a). {
+  exists z; split; [ easy | now symmetry ].
+}
+assert (Hdx2 : (d x2 = z'2)%G). {
+  simpl; unfold Coker_eq; simpl.
+  exists 0.
+  split; [ apply A | ].
+  etransitivity; [ apply H_zero | ].
+  symmetry; apply gr_sub_move_r; symmetry.
+  etransitivity; [ apply gr_add_0_l | ].
+  apply (f'_is_inj sf'); [ easy | | ].
+  -apply Hf'₁; exists x2.
+   split; [ easy | reflexivity ].
+  -etransitivity; [ apply Hfz'2 | ].
+   symmetry; apply Hf'₁; exists x2; split; [ easy | reflexivity ].
+}
+assert (Hdx1 : (d x1 = z'1)%G). {
+  simpl; unfold Coker_eq; simpl.
+  exists 0.
+  split; [ apply A | ].
+  etransitivity; [ apply H_zero | ].
+  symmetry; apply gr_sub_move_r; symmetry.
+  etransitivity; [ apply gr_add_0_l | ].
+  apply (f'_is_inj sf'); [ easy | | ].
+  -apply Hf'₁; exists x1.
+   split; [ easy | reflexivity ].
+  -etransitivity; [ apply Hfz'1 | ].
+   symmetry; apply Hf'₁; exists x1; split; [ easy | reflexivity ].
+}
+assert (Hzz' : @gr_eq (@Coker A A' a) z'1 z'2). {
+  destruct H6 as (zz & Hzz & Hazz).
+  simpl; unfold Coker_eq; simpl.
+  now exists zz; split.
+}
+etransitivity; [ apply Hdx1 | ].
+etransitivity; [ apply Hzz' | ].
+now symmetry.
+Qed.
+
 Theorem d_additive
     {A A' B B' C C'} {f : HomGr A B} {g : HomGr B C} {f' : HomGr A' B'}
     {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'} {za' : HomGr Gr0 A'}
-    {f'₁ g₁} :
+    {g₁ f'₁} :
   diagram_commutes f a b f'
   → (∀ a : gr_set (Im f), a ∈ Im f ↔ a ∈ Ker g)
   → (∀ a : gr_set (Im za'), a ∈ Im za' ↔ a ∈ Ker f')
@@ -1013,113 +1129,11 @@ specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
 move f'₁ before g₁.
 clear H1 H2.
 set (d := λ x, f'₁ (H_app b (g₁ x))).
-assert
-  (d_app_compat :
-     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (x1 = x2)%G → (d x1 = d x2)%G). {
-  intros * Hx1 Hx2 Hxx.
-  assert (Hgy1 : (H_app g (g₁ x1) = x1)%G) by apply Hg₁, Hx1.
-  assert (Hgy2 : (H_app g (g₁ x2) = x2)%G) by apply Hg₁, Hx2.
-  assert (Hgb1 : (H_app g' (H_app b (g₁ x1)) = 0)%G). {
-    etransitivity; [ symmetry; apply Hcgg' | ].
-    etransitivity; [ | apply Hx1 ].
-    apply c; [ apply g, Hg₁, Hx1 | apply Hx1 | apply Hgy1 ].
-  }
-  assert (Hgb2 : (H_app g' (H_app b (g₁ x2)) = 0)%G). {
-    etransitivity; [ symmetry; apply Hcgg' | ].
-    etransitivity; [ | apply Hx2 ].
-    apply c; [ apply g, Hg₁, Hx2 | apply Hx2 | apply Hgy2 ].
-  }
-  assert (H1 : H_app b (g₁ x1) ∈ Im f'). {
-    apply sg'; split; [ apply b, (g₁_in_B Hg₁), Hx1 | easy ].
-  }
-  assert (H2 : H_app b (g₁ x2) ∈ Im f'). {
-    apply sg'; split; [ apply b, (g₁_in_B Hg₁), Hx2 | easy ].
-  }
-  destruct H1 as (z'1 & Hz'1 & Hfz'1).
-  destruct H2 as (z'2 & Hz'2 & Hfz'2).
-  move z'2 before z'1; move Hz'2 before Hz'1.
-  assert (H3 : (H_app f' (z'1 - z'2) = H_app b (g₁ x1 - g₁ x2))%G). {
-    etransitivity.
-    -apply H_additive; [ easy | now apply A' ].
-    -symmetry.
-     etransitivity.
-     +apply H_additive; [ apply (g₁_in_B Hg₁), Hx1 | apply B, (g₁_in_B Hg₁), Hx2 ].
-     +symmetry; apply gr_add_compat; [ easy | ].
-      etransitivity; [ now apply H_inv | ].
-      symmetry.
-      etransitivity; [ apply H_inv, (g₁_in_B Hg₁), Hx2 | ].
-      now apply gr_inv_compat; symmetry.
-  }
-  assert (H4 : g₁ x1 - g₁ x2 ∈ Im f). {
-    apply sf.
-    split.
-    -apply B; [ apply (g₁_in_B Hg₁), Hx1 | apply B, (g₁_in_B Hg₁), Hx2 ].
-    -etransitivity.
-     +apply H_additive.
-      *apply (g₁_in_B Hg₁), Hx1.
-      *apply B, (g₁_in_B Hg₁), Hx2.
-     +transitivity (x1 - x2); simpl.
-      *apply gr_add_compat; [ easy | ].
-       etransitivity; [ apply H_inv, (g₁_in_B Hg₁), Hx2 | ].
-       now apply gr_inv_compat.
-      *apply gr_sub_move_r; symmetry.
-       etransitivity; [ apply gr_add_0_l | ].
-       now symmetry.
-  }
-  destruct H4 as (z & Hz & Hfz).
-  assert (H4 : (z'1 - z'2 = H_app a z)%G). {
-    apply (f'_is_inj sf'); [ | now apply a | ].
-    -apply A'; [ easy | now apply A' ].
-    -symmetry; etransitivity.
-     +symmetry; apply Hcff'.
-     +etransitivity.
-      *apply H_app_compat with (y := g₁ x1 - g₁ x2); [ now apply f | | easy ].
-       apply B; [ apply (g₁_in_B Hg₁), Hx1 | apply B, (g₁_in_B Hg₁), Hx2 ].
-      *now symmetry.
-  }
-  assert (H6 : z'1 - z'2 ∈ Im a). {
-    exists z; split; [ easy | now symmetry ].
-  }
-  assert (Hdx2 : (d x2 = z'2)%G). {
-    simpl; unfold Coker_eq; simpl.
-    exists 0.
-    split; [ apply A | ].
-    etransitivity; [ apply H_zero | ].
-    symmetry; apply gr_sub_move_r; symmetry.
-    etransitivity; [ apply gr_add_0_l | ].
-    apply (f'_is_inj sf'); [ easy | | ].
-    -apply Hf'₁; exists x2.
-     split; [ easy | reflexivity ].
-    -etransitivity; [ apply Hfz'2 | ].
-     symmetry; apply Hf'₁; exists x2; split; [ easy | reflexivity ].
-  }
-  assert (Hdx1 : (d x1 = z'1)%G). {
-    simpl; unfold Coker_eq; simpl.
-    exists 0.
-    split; [ apply A | ].
-    etransitivity; [ apply H_zero | ].
-    symmetry; apply gr_sub_move_r; symmetry.
-    etransitivity; [ apply gr_add_0_l | ].
-    apply (f'_is_inj sf'); [ easy | | ].
-    -apply Hf'₁; exists x1.
-     split; [ easy | reflexivity ].
-    -etransitivity; [ apply Hfz'1 | ].
-     symmetry; apply Hf'₁; exists x1; split; [ easy | reflexivity ].
-  }
-  assert (Hzz' : @gr_eq (@Coker A A' a) z'1 z'2). {
-    destruct H6 as (zz & Hzz & Hazz).
-    simpl; unfold Coker_eq; simpl.
-    now exists zz; split.
-  }
-  etransitivity; [ apply Hdx1 | ].
-  etransitivity; [ apply Hzz' | ].
-  now symmetry.
-}
 set
   (dm :=
    {| H_app := d;
       H_mem_compat := d_mem_compat Hf'₁;
-      H_app_compat := d_app_compat;
+      H_app_compat := d_app_compat Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁;
       H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}).
 exists dm.
 split; [ | split ].
