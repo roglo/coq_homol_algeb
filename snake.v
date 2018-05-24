@@ -1191,10 +1191,7 @@ set
 exists dm.
 split; [ | split ].
 -now eapply exact_sequence_1.
--clear.
- subst dm.
-...
- split.
+-split.
  +intros x (y & (Hy & Hay) & Hyx).
   split; [ split | ].
   *eapply C; [ apply Hyx | now apply g ].
@@ -1255,5 +1252,9 @@ split; [ | split ].
    simpl; rewrite Hdx.
    exists z; split; [ easy | ].
    now simpl; rewrite gr_sub_0_r.
- +intros x Hx.
+ +intros x (Hx & z & Hz & Haz).
+  subst dm; simpl in x, Haz.
+  move z before x; move Hz before Hx.
+  rewrite gr_sub_0_r in Haz.
+  enough (∃ y, (y ∈ B ∧ (H_app b y = 0)%G) ∧ (H_app g y = x)%G) by easy.
 ...
