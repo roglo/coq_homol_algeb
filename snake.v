@@ -1257,12 +1257,19 @@ split; [ | split ].
   move z before x; move Hz before Hx.
   rewrite gr_sub_0_r in Haz.
   enough (∃ y, (y ∈ B ∧ (H_app b y = 0)%G) ∧ (H_app g y = x)%G) by easy.
-...
+(**)
   apply (H_app_compat _ _ f') in Haz.
-  rewrite <- Hcff' in Haz.
-  unfold d in Haz.
-  *exists (H_app f z - g₁ x).
-(* ouais bon faut voir... *)
+  *rewrite <- Hcff' in Haz.
+   exists (g₁ x - H_app f z).
+   split; [ split | ].
+  --apply B; [ apply Hg₁, Hx | now apply B, f ].
+  --rewrite H_additive.
+   ++etransitivity.
+    **apply gr_add_compat; [ easy | now apply H_inv, f ].
+    **apply gr_sub_move_r; rewrite gr_add_0_l; symmetry.
+      etransitivity; [ apply Haz | ].
+      etransitivity; [ now apply Hf'₁; exists x | easy ].
+   ++idtac.
 ...
   exists (H_app f z - g₁ x).
   split; [ split | ].
