@@ -600,6 +600,7 @@ Inductive sequence {A : AbGroup} :=
   | Seq2 : ∀ {B} (f : HomGr A B), @sequence B → sequence.
 
 Notation "A ⊂ B" := (∀ a, a ∈ A → a ∈ B) (at level 60).
+Notation "A == B" := (A ⊂ B ∧ B ⊂ A) (at level 60).
 
 Fixpoint exact_sequence {A : AbGroup} (S : sequence) :=
   match S with
@@ -607,7 +608,7 @@ Fixpoint exact_sequence {A : AbGroup} (S : sequence) :=
   | Seq2 f S' =>
       match S' with
       | Seq1 => True
-      | Seq2 g S'' => (Im f ⊂ Ker g ∧ Ker g ⊂ Im f) ∧ exact_sequence S'
+      | Seq2 g S'' => Im f == Ker g ∧ exact_sequence S'
       end
   end.
 
@@ -713,8 +714,8 @@ Definition HomGr_Coker_Coker {A B A' B'}
      H_app_compat := CC_app_compat f f' a b Hc;
      H_additive := CC_additive f' a b |}.
 
-Theorem exists_Ker_C_to_B : ∀ B C C' g (c : HomGr C C') (cz : HomGr C Gr0),
-  Im g ⊂ Ker cz ∧ Ker cz ⊂ Im g
+Theorem exists_Ker_C_to_B {B C C' g} (c : HomGr C C') {cz : HomGr C Gr0} :
+  Im g == Ker cz
   → ∀ x : gr_set (Ker c), ∃ y, x ∈ C → y ∈ B ∧ H_app g y ≡ x.
 Proof.
 intros * sg x.
@@ -733,8 +734,8 @@ now destruct (appcz x).
 Qed.
 
 Theorem f'_is_inj {A' B'} {f' : HomGr A' B'} {za' : HomGr Gr0 A'} :
-   Im za' ⊂ Ker f' ∧ Ker f' ⊂ Im za' →
-   ∀ x y, x ∈ A' → y ∈ A' → (H_app f' x = H_app f' y)%G → (x = y)%G.
+   Im za' == Ker f'
+   → ∀ x y, x ∈ A' → y ∈ A' → (H_app f' x = H_app f' y)%G → (x = y)%G.
 Proof.
 intros * sf' * Hx Hy Hxy.
 assert (H2 : (H_app f' x - H_app f' y = 0)%G). {
@@ -767,7 +768,7 @@ Qed.
 
 Theorem f'c_is_inj
     {A A' B'} {f' : HomGr A' B'} {a : HomGr A A'} {za' : HomGr Gr0 A'} :
-  Im za' ⊂ Ker f' ∧ Ker f' ⊂ Im za'
+  Im za' == Ker f'
   → ∀ x y, x ∈ Coker a → y ∈ Coker a → (H_app f' x = H_app f' y)%G → (x = y)%G.
 Proof.
 intros * sf' * Hx Hy Hxy.
@@ -799,7 +800,7 @@ Qed.
 
 Theorem exists_B'_to_Coker_a : ∀ {A A' B B' C C' g f'}
   {g' : HomGr B' C'} (a : HomGr A A') {b : HomGr B B'} {c : HomGr C C'} {g₁},
-  Im f' ⊂ Ker g' ∧ Ker g' ⊂ Im f'
+  Im f' == Ker g'
   → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
   → diagram_commutes g b c g'
   → ∀ y', ∃ z',
@@ -853,9 +854,9 @@ Theorem d_app_compat
     {za' : HomGr Gr0 A'} {g₁ f'₁} :
   diagram_commutes f a b f'
   → diagram_commutes g b c g'
-  → Im f ⊂ Ker g ∧ Ker g ⊂ Im f
-  → Im za' ⊂ Ker f' ∧ Ker f' ⊂ Im za'
-  → Im f' ⊂ Ker g' ∧ Ker g' ⊂ Im f'
+  → Im f == Ker g
+  → Im za' == Ker f'
+  → Im f' == Ker g'
   → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
   → (∀ x : gr_set B',
         (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
@@ -968,8 +969,8 @@ Theorem d_additive
     {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'} {za' : HomGr Gr0 A'}
     {g₁ f'₁} :
   diagram_commutes f a b f'
-  → Im f ⊂ Ker g ∧ Ker g ⊂ Im f
-  → Im za' ⊂ Ker f' ∧ Ker f' ⊂ Im za'
+  → Im f == Ker g
+  → Im za' == Ker f'
   → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
   → (∀ x : gr_set B',
         (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
@@ -1124,7 +1125,7 @@ exists (HomGr_Coker_Coker a b Hcff').
 exists (HomGr_Coker_Coker b c Hcgg').
 destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
-specialize (exists_Ker_C_to_B B C C' g c cz sg) as H1.
+specialize (exists_Ker_C_to_B c sg) as H1.
 specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
 specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
 specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
