@@ -1257,6 +1257,7 @@ split; [ | split ].
   move z before x; move Hz before Hx.
   rewrite gr_sub_0_r in Haz.
   enough (∃ y, (y ∈ B ∧ (H_app b y = 0)%G) ∧ (H_app g y = x)%G) by easy.
+...
   apply (H_app_compat _ _ f') in Haz.
   rewrite <- Hcff' in Haz.
   unfold d in Haz.
