@@ -1151,19 +1151,13 @@ split; [ | split ].
    symmetry in Hyx.
    specialize (H1 Hxk Hgy Hyx).
    symmetry in Hyx.
-   simpl; unfold Coker_eq; simpl.
    simpl in Hyx.
-...
    etransitivity; [ apply H1 | ].
-   unfold Coker_eq; simpl.
-   unfold d.
-...
+   simpl; unfold Coker_eq; simpl.
+   exists 0.
    split; [ apply A | ].
    etransitivity; [ apply H_zero | ].
    symmetry; etransitivity; simpl; [ apply gr_sub_0_r | ].
-   transitivity (d (H_app g y)).
-...
-  --apply Hcomp.
 ...
   *transitivity (H_app dm (H_app g y)).
   --eapply dm; [ | | now apply C ].
