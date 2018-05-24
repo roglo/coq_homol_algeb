@@ -1147,84 +1147,41 @@ split; [ | split ].
      etransitivity; [ | apply Hgy ].
      apply c; [ easy | now apply g | now symmetry ].
    }
-   transitivity (d (H_app g y)).
-  --apply Hcomp; [ | easy | now symmetry ].
-    split.
-   ++eapply gr_mem_compat; [ apply Hyx | now apply g ].
-   ++etransitivity; [ | apply Hgy ].
-     apply c; [ apply Hxk | now apply g | now symmetry ].
-  --idtac.
-    assert
-      (Hyy :
-         ∀ y1 y2,
-         (H_app g y1 = H_app g y2)%G
-         → ∃ z, (H_app f z = y1 - y2)%G). {
-      intros * Hyy.
-(* cf le truc à Zhou *)
-...
-    assert
-      (Hyy :
-         ∀ y1 y2,
-         (H_app g y1 = H_app g y2)%G
-         → (f'₁ (H_app b y1) = f'₁ (H_app b y2))%G). {
-...
-}
-specialize (Hyy y (g₁ x)).
-assert (H : (H_app g y = H_app g (g₁ x))%G). {
-  symmetry.
-  etransitivity; [ apply Hg₁, Hxk | now symmetry ].
-}
-specialize (Hyy H); clear H.
-unfold d.
-...
-etransitivity
-
-destruct Hyy as (z & Hz).
-unfold d.
-...
-  *specialize (Hcomp x (H_app g y)) as H1.
-   assert (Hgy : H_app g y ∈ Ker c). {
-     split; [ now apply g | ].
-     etransitivity; [ apply Hcgg' | ].
-     etransitivity; [ | apply H_zero ].
-     apply g'; [ now apply b | apply B' | easy ].
+   assert (Hyk : g₁ x - y ∈ Ker g). {
+     split.
+     -apply B; [ apply H7, Hxk | now apply B ].
+     -etransitivity.
+      +apply H_linear; [ apply H7, Hxk | now apply B ].
+      +etransitivity.
+       *apply gr_add_compat; [ apply Hg₁, Hxk | ].
+        now simpl; apply H_inv.
+       *apply gr_sub_move_r; rewrite <- Hyx.
+        symmetry; apply gr_add_0_l.
    }
-   assert (Hxk : x ∈ Ker c). {
-     assert (Hx : x ∈ C). {
-       eapply gr_mem_compat; [ apply Hyx | now apply g ].
-     }
-     split; [ easy | ].
-     etransitivity; [ | apply Hgy ].
-     apply c; [ easy | now apply g | now symmetry ].
+   apply sf in Hyk.
+   destruct Hyk as (z & Hz & Haz).
+   assert (Hdx : (d x = H_app a z)%G). {
+     apply Hcf'inj; simpl; [ now apply Hmemc | now apply a | ].
+     etransitivity; [ apply Hf'₁; now exists x | ].
+     symmetry.
+     etransitivity; [ symmetry; apply Hcff' | ].
+     etransitivity.
+     -apply H_compat; [ | | apply Haz ].
+      +apply H_mem_compat, Hz.
+      +apply B; [ apply H7, Hxk | now apply B ].
+     -etransitivity.
+      +apply b; [ apply H7, Hxk | now apply B ].
+      +etransitivity.
+       *apply gr_add_compat; [ easy | now simpl; apply H_inv ].
+       *etransitivity.
+       --apply gr_add_compat; [ easy | apply gr_inv_compat, Hay ].
+       --etransitivity; [ apply gr_sub_0_r | ].
+         apply b; [ apply H7, Hxk | apply H7, Hxk | easy ].
    }
-   symmetry in Hyx.
-   specialize (H1 Hxk Hgy Hyx).
-   symmetry in Hyx.
-   simpl in Hyx.
-   etransitivity; [ apply H1 | ].
-   simpl; unfold Coker_eq; simpl.
-   exists 0.
-   split; [ apply A | ].
-   etransitivity; [ apply H_zero | ].
-   symmetry; etransitivity; simpl; [ apply gr_sub_0_r | ].
-...
-  *transitivity (H_app dm (H_app g y)).
-  --eapply dm; [ | | now apply C ].
-    split.
-   ++eapply C; [ apply Hyx | now apply g ].
-   ++transitivity (H_app c (H_app g y)).
-    **eapply c; [ | now apply g | now apply C ].
-      eapply C; [ apply Hyx | now apply g ].
-    **etransitivity; [ apply Hcgg' | ].
-      transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
-      apply g'; [ now apply b | apply B' | easy ].
-   ++split; [ now apply g | ].
-     etransitivity; [ apply Hcgg' | ].
-     transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
-     apply g'; [ now apply b | apply B' | easy ].
-  --unfold dm; simpl.
-    unfold Coker_eq; simpl.
-    unfold d.
+   simpl; rewrite Hdx.
+   exists z; split; [ easy | ].
+   now simpl; rewrite gr_sub_0_r.
+ +idtac.
 ...
    apply sg'; rewrite <- Hxy.
    exists x; easy.
