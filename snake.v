@@ -1154,6 +1154,25 @@ split; [ | split ].
    ++etransitivity; [ | apply Hgy ].
      apply c; [ apply Hxk | now apply g | now symmetry ].
   --idtac.
+    assert
+      (Hyy :
+         ∀ y1 y2,
+         (H_app g y1 = H_app g y2)%G
+         → (f'₁ (H_app b y1) = f'₁ (H_app b y2))%G). {
+  admit.
+}
+specialize (Hyy y (g₁ x)).
+assert (H : (H_app g y = H_app g (g₁ x))%G). {
+  symmetry.
+  etransitivity; [ apply Hg₁, Hxk | now symmetry ].
+}
+specialize (Hyy H); clear H.
+unfold d.
+...
+etransitivity
+
+destruct Hyy as (z & Hz).
+unfold d.
 ...
   *specialize (Hcomp x (H_app g y)) as H1.
    assert (Hgy : H_app g y ∈ Ker c). {
