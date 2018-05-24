@@ -1132,7 +1132,29 @@ split; [ | split ].
   --etransitivity; [ apply H1 | ].
     transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
     apply g'; [ now apply b | apply B' | easy ].
-(**)
+  *simpl in Hyx.
+   assert (Hgy : H_app g y ∈ Ker c). {
+     split; [ now apply g | ].
+     etransitivity; [ apply Hcgg' | ].
+     etransitivity; [ | apply H_zero ].
+     apply g'; [ now apply b | apply B' | easy ].
+   }
+   assert (Hxk : x ∈ Ker c). {
+     assert (Hx : x ∈ C). {
+       eapply gr_mem_compat; [ apply Hyx | now apply g ].
+     }
+     split; [ easy | ].
+     etransitivity; [ | apply Hgy ].
+     apply c; [ easy | now apply g | now symmetry ].
+   }
+   transitivity (d (H_app g y)).
+  --apply Hcomp; [ | easy | now symmetry ].
+    split.
+   ++eapply gr_mem_compat; [ apply Hyx | now apply g ].
+   ++etransitivity; [ | apply Hgy ].
+     apply c; [ apply Hxk | now apply g | now symmetry ].
+  --idtac.
+...
   *specialize (Hcomp x (H_app g y)) as H1.
    assert (Hgy : H_app g y ∈ Ker c). {
      split; [ now apply g | ].
