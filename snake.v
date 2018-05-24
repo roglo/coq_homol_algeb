@@ -673,8 +673,10 @@ Theorem CC_app_compat {A B A' B'} :
   ∀ (f : HomGr A B) (f' : HomGr A' B') (a : HomGr A A') (b : HomGr B B'),
   diagram_commutes f a b f'
   → ∀ x y : gr_set (Coker a),
-  x ∈ Coker a → y ∈ Coker a → (x = y)%G
-  → @gr_eq (Coker b) (H_app f' x) (H_app f' y)%G.
+     x ∈ Coker a
+     → y ∈ Coker a
+     → (x = y)%G
+     → @gr_eq (Coker b) (H_app f' x) (H_app f' y)%G.
 Proof.
 intros * Hc * Hx Hy Hxy.
 simpl in Hx, Hy, x, y, Hxy; simpl.
@@ -693,7 +695,9 @@ Qed.
 
 Theorem CC_additive {A B A' B'} :
   ∀ (f' : HomGr A' B') (a : HomGr A A') (b : HomGr B B'),
-  ∀ x y : gr_set (Coker a), x ∈ Coker a → y ∈ Coker a
+  ∀ x y : gr_set (Coker a),
+  x ∈ Coker a
+  → y ∈ Coker a
   → @gr_eq (Coker b) (H_app f' (x + y))%G (H_app f' x + H_app f' y)%G.
 Proof.
 intros * Hx Hy; simpl in Hx, Hy.
@@ -790,9 +794,11 @@ eapply (f'_is_inj sf'); [ apply a, A | | ].
     symmetry; apply gr_add_0_l.
 Qed.
 
+Definition g₁_prop {B C C'} g (c : HomGr C C') g₁ :=
+  ∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G.
+
 Theorem g₁_in_B : ∀ {B C C' g} {c : HomGr C C'} {g₁},
-  (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
-  → ∀ x, x ∈ C → g₁ x ∈ B.
+  g₁_prop g c g₁ → ∀ x, x ∈ C → g₁ x ∈ B.
 Proof.
 intros * Hg₁ * Hx.
 now specialize (Hg₁ x Hx) as H.
@@ -801,7 +807,7 @@ Qed.
 Theorem exists_B'_to_Coker_a : ∀ {A A' B B' C C' g f'}
   {g' : HomGr B' C'} (a : HomGr A A') {b : HomGr B B'} {c : HomGr C C'} {g₁},
   Im f' == Ker g'
-  → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
+  → g₁_prop g c g₁
   → diagram_commutes g b c g'
   → ∀ y', ∃ z',
     (∃ x, x ∈ Ker c ∧ (y' = H_app b (g₁ x))%G)
@@ -857,7 +863,7 @@ Theorem d_app_compat
   → Im f == Ker g
   → Im za' == Ker f'
   → Im f' == Ker g'
-  → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
+  → g₁_prop g c g₁
   → (∀ x : gr_set B',
         (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
         → f'₁ x ∈ Coker a ∧ (H_app f' (f'₁ x) = x)%G)
@@ -971,7 +977,7 @@ Theorem d_additive
   diagram_commutes f a b f'
   → Im f == Ker g
   → Im za' == Ker f'
-  → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
+  → g₁_prop g c g₁
   → (∀ x : gr_set B',
         (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
         → f'₁ x ∈ Coker a ∧ (H_app f' (f'₁ x) = x)%G)
