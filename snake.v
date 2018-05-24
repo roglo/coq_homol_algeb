@@ -1298,8 +1298,8 @@ set
       H_app_compat := d_app_compat Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁;
       H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}).
 exists dm.
-split; [ | split ].
--now eapply exact_sequence_1.
--now eapply exact_sequence_2; try easy.
+split; [ now eapply exact_sequence_1 | ].
+split; [ now eapply exact_sequence_2; try easy | ].
+split.
 -idtac.
 ...
