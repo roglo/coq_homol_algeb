@@ -1109,6 +1109,47 @@ apply (f'_is_inj sf') in Hfz.
 -now apply a.
 Qed.
 
+Theorem exact_sequence_1 {A B C A' B' C'} :
+  ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
+     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
+     (Hcff' : diagram_commutes f a b f') (Hcgg' : diagram_commutes g b c g'),
+  Im f == Ker g
+  → Im za' == Ker f'
+  → Im (HomGr_Ker_Ker a b Hcff') == Ker (HomGr_Ker_Ker b c Hcgg').
+Proof.
+intros * sf sf'.
+split.
++intros y (x & (Hx & Hax) & Hxy).
+ split; [ split | ].
+ *eapply B; [ apply Hxy | now apply f ].
+ *transitivity (H_app b (H_app f x)).
+ --apply b; [ | now apply f | now symmetry ].
+   eapply gr_mem_compat; [ apply Hxy | now apply f ].
+ --etransitivity; [ apply Hcff' | ].
+   transitivity (H_app f' (@gr_zero A')); [ | apply H_zero ].
+   apply f'; [ now apply a | apply A' | easy ].
+ *apply sf.
+  exists x; easy.
++intros y ((Hy & Hby) & Hgy).
+ assert (H : y ∈ Im f) by now apply sf; split.
+ destruct H as (x & Hx & Hxy).
+ exists x; split; [ | easy ].
+ split; [ easy | ].
+ specialize (proj2 sf' (H_app a x)) as H1.
+ assert (H3 : H_app a x ∈ Ker f'). {
+   split; [ now apply a | ].
+   specialize (Hcff' x) as H3.
+   etransitivity; [ symmetry; apply H3 | ].
+   transitivity (H_app b y); [ | easy ].
+   apply b; [ | easy | easy ].
+   now apply f.
+ }
+ specialize (H1 H3).
+ destruct H1 as (z & _ & Hzz).
+ destruct z.
+ etransitivity; [ symmetry; apply Hzz | apply H_zero ].
+Qed.
+
 Lemma snake :
   ∀ (A B C A' B' C' : AbGroup)
      (f : HomGr A B) (g : HomGr B C)
@@ -1149,37 +1190,11 @@ set
       H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}).
 exists dm.
 split; [ | split ].
--split.
- +intros y (x & (Hx & Hax) & Hxy).
-  split; [ split | ].
-  *eapply B; [ apply Hxy | now apply f ].
-  *transitivity (H_app b (H_app f x)).
-  --apply b; [ | now apply f | now symmetry ].
-    eapply gr_mem_compat; [ apply Hxy | now apply f ].
-  --etransitivity; [ apply Hcff' | ].
-    transitivity (H_app f' (@gr_zero A')); [ | apply H_zero ].
-    apply f'; [ now apply a | apply A' | easy ].
-  *apply sf.
-   exists x; easy.
- +intros y ((Hy & Hby) & Hgy).
-  assert (H : y ∈ Im f) by now apply sf; split.
-  destruct H as (x & Hx & Hxy).
-  exists x; split; [ | easy ].
-  split; [ easy | ].
-  specialize (proj2 sf' (H_app a x)) as H1.
-  assert (H3 : H_app a x ∈ Ker f'). {
-    split; [ now apply a | ].
-    specialize (Hcff' x) as H3.
-    etransitivity; [ symmetry; apply H3 | ].
-    transitivity (H_app b y); [ | easy ].
-    apply b; [ | easy | easy ].
-    now apply f.
-  }
-  specialize (H1 H3).
-  destruct H1 as (z & _ & Hzz).
-  destruct z.
-  etransitivity; [ symmetry; apply Hzz | apply H_zero ].
--split.
+-now eapply exact_sequence_1.
+-clear.
+ subst dm.
+...
+ split.
  +intros x (y & (Hy & Hay) & Hyx).
   split; [ split | ].
   *eapply C; [ apply Hyx | now apply g ].
