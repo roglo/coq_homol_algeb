@@ -1158,8 +1158,16 @@ split; [ | split ].
       (Hyy :
          ∀ y1 y2,
          (H_app g y1 = H_app g y2)%G
+         → ∃ z, (H_app f z = y1 - y2)%G). {
+      intros * Hyy.
+(* cf le truc à Zhou *)
+...
+    assert
+      (Hyy :
+         ∀ y1 y2,
+         (H_app g y1 = H_app g y2)%G
          → (f'₁ (H_app b y1) = f'₁ (H_app b y2))%G). {
-  admit.
+...
 }
 specialize (Hyy y (g₁ x)).
 assert (H : (H_app g y = H_app g (g₁ x))%G). {
