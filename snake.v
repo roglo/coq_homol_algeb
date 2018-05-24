@@ -797,6 +797,13 @@ Qed.
 Definition g₁_prop {B C C'} g (c : HomGr C C') g₁ :=
   ∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G.
 
+Definition f'₁_prop
+    {A A' B C B' C'} (a : HomGr A A') (b : HomGr B B') {c : HomGr C C'}
+    (f' : HomGr A' B') g₁ f'₁ :=
+  ∀ x : gr_set B',
+  (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
+  → f'₁ x ∈ Coker a ∧ (H_app f' (f'₁ x) = x)%G.
+
 Theorem g₁_in_B : ∀ {B C C' g} {c : HomGr C C'} {g₁},
   g₁_prop g c g₁ → ∀ x, x ∈ C → g₁ x ∈ B.
 Proof.
@@ -844,9 +851,7 @@ Theorem d_mem_compat
      {A A' B B' C C'} {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'}
      {f' : HomGr A' B'} {g₁ f'₁} :
   let d := λ x, f'₁ (H_app b (g₁ x)) in
-  (∀ x : gr_set B',
-    (∃ x0 : gr_set (Ker c), x0 ∈ Ker c ∧ (x = H_app b (g₁ x0))%G)
-    → f'₁ x ∈ Coker a ∧ (H_app f' (f'₁ x) = x)%G)
+  f'₁_prop a b f' g₁ f'₁
   → ∀ x, x ∈ Ker c → d x ∈ Coker a.
 Proof.
 intros * Hf'₁ * Hx.
@@ -864,9 +869,7 @@ Theorem d_app_compat
   → Im za' == Ker f'
   → Im f' == Ker g'
   → g₁_prop g c g₁
-  → (∀ x : gr_set B',
-        (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
-        → f'₁ x ∈ Coker a ∧ (H_app f' (f'₁ x) = x)%G)
+  → f'₁_prop a b f' g₁ f'₁
   → let d := λ x, f'₁ (H_app b (g₁ x)) in
      ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (x1 = x2)%G → (d x1 = d x2)%G.
 Proof.
@@ -978,9 +981,7 @@ Theorem d_additive
   → Im f == Ker g
   → Im za' == Ker f'
   → g₁_prop g c g₁
-  → (∀ x : gr_set B',
-        (∃ x1 : gr_set (Ker c), x1 ∈ Ker c ∧ (x = H_app b (g₁ x1))%G)
-        → f'₁ x ∈ Coker a ∧ (H_app f' (f'₁ x) = x)%G)
+  → f'₁_prop a b f' g₁ f'₁
   → let d := λ x, f'₁ (H_app b (g₁ x)) in
      ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (d (x1 + x2) = d x1 + d x2)%G.
 Proof.
@@ -1136,6 +1137,7 @@ specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
 specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
 specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
 fold (g₁_prop g c g₁) in Hg₁.
+fold (f'₁_prop a b f' g₁ f'₁) in Hf'₁.
 move f'₁ before g₁.
 clear H1 H2.
 set (d := λ x, f'₁ (H_app b (g₁ x))).
