@@ -795,6 +795,42 @@ intros * Hg₁ * Hx.
 now specialize (Hg₁ x Hx) as H.
 Qed.
 
+Theorem exists_B'_to_Coker_a : ∀ {A A' B B' C C' g f'}
+  {g' : HomGr B' C'} (a : HomGr A A') {b : HomGr B B'} {c : HomGr C C'} {g₁},
+  (∀ a : gr_set (Im f'), a ∈ Im f' ↔ a ∈ Ker g')
+  → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
+  → diagram_commutes g b c g'
+  → ∀ y', ∃ z',
+    (∃ x, x ∈ Ker c ∧ (y' = H_app b (g₁ x))%G)
+    → z' ∈ Coker a ∧ (H_app f' z' = y')%G.
+Proof.
+intros * sg' Hg₁ Hcgg' *.
+destruct (MemDec (Im b) y') as [Hy'| Hy'].
+-destruct (MemDec (Im f') y') as [(z' & Hz' & Hfz')| Hfy'].
+ +exists z'; now intros (x' & Hx' & Hyx').
+ +exists 0%G; intros (x' & Hx' & Hyx').
+  exfalso; apply Hfy', sg'; simpl.
+  split.
+  *destruct Hy' as (y & Hy & Hby).
+   eapply B'; [ apply Hby | now apply b ].
+  *transitivity (H_app g' (H_app b (g₁ x'))).
+  --apply g'; [ | | easy ].
+    ++destruct Hy' as (y & Hy & Hby).
+      eapply B'; [ apply Hby | now apply b ].
+    ++apply b, (g₁_in_B Hg₁), Hx'.
+  --etransitivity; [ symmetry; apply Hcgg' | ].
+    destruct Hx' as (Hx', Hcx').
+    specialize (Hg₁ x' Hx') as H2.
+    destruct H2 as (Hgx', Hggx').
+    transitivity (H_app c x'); [ | easy ].
+    apply c; [ now apply g, (g₁_in_B Hg₁) | easy | easy ].
+-exists 0%G; intros (x' & Hx' & Hyx').
+ exfalso; apply Hy'.
+ exists (g₁ x').
+ split; [ apply (g₁_in_B Hg₁); now simpl in Hx' | ].
+ now symmetry.
+Qed.
+
 Lemma snake :
   ∀ (A B C A' B' C' : AbGroup)
      (f : HomGr A B) (g : HomGr B C)
@@ -820,37 +856,7 @@ destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
 specialize (exists_ker_C_to_B B C C' g c cz sg) as H1.
 specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
-assert
-  (H2 :
-   ∀ y', ∃ z',
-   (∃ x, x ∈ Ker c ∧ (y' = H_app b (g₁ x))%G)
-   → z' ∈ Coker a ∧ (H_app f' z' = y')%G). {
-  intros y'.
-  destruct (MemDec (Im b) y') as [Hy'| Hy'].
-  -destruct (MemDec (Im f') y') as [(z' & Hz' & Hfz')| Hfy'].
-   +exists z'; now intros (x' & Hx' & Hyx').
-   +exists 0%G; intros (x' & Hx' & Hyx').
-    exfalso; apply Hfy', sg'; simpl.
-    split.
-    *destruct Hy' as (y & Hy & Hby).
-     eapply B'; [ apply Hby | now apply b ].
-    *transitivity (H_app g' (H_app b (g₁ x'))).
-    --apply g'; [ | | easy ].
-     ++destruct Hy' as (y & Hy & Hby).
-       eapply B'; [ apply Hby | now apply b ].
-     ++apply b, (g₁_in_B Hg₁), Hx'.
-    --etransitivity; [ symmetry; apply Hcgg' | ].
-      destruct Hx' as (Hx', Hcx').
-      specialize (Hg₁ x' Hx') as H2.
-      destruct H2 as (Hgx', Hggx').
-      transitivity (H_app c x'); [ | easy ].
-      apply c; [ now apply g, (g₁_in_B Hg₁) | easy | easy ].
-  -exists 0%G; intros (x' & Hx' & Hyx').
-   exfalso; apply Hy'.
-   exists (g₁ x').
-   split; [ apply (g₁_in_B Hg₁); now simpl in Hx' | ].
-   now symmetry.
-}
+specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
 specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
 move f'₁ before g₁.
 clear H1 H2.
