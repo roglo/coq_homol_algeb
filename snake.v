@@ -820,14 +820,6 @@ destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
 specialize (exists_ker_C_to_B B C C' g c cz sg) as H1.
 specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
-assert (H5 : ∀ x, x ∈ Ker c → (H_app g' (H_app b (g₁ x)) = 0)%G). {
-  intros z (Hz, Hcz).
-  specialize (Hg₁ z Hz) as H5.
-  etransitivity.
-  -symmetry; apply Hcgg'.
-  -transitivity (H_app c z); [ | easy ].
-   apply H_compat; [ now apply g | easy | easy ].
-}
 assert
   (H2 :
    ∀ y', ∃ z',
