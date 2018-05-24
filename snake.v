@@ -1135,6 +1135,7 @@ specialize (exists_Ker_C_to_B c sg) as H1.
 specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
 specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
 specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
+fold (g₁_prop g c g₁) in Hg₁.
 move f'₁ before g₁.
 clear H1 H2.
 set (d := λ x, f'₁ (H_app b (g₁ x))).
