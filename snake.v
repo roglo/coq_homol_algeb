@@ -714,7 +714,7 @@ Definition HomGr_Coker_Coker {A B A' B'}
      H_additive := CC_additive f' a b |}.
 
 Theorem exists_Ker_C_to_B : ∀ B C C' g (c : HomGr C C') (cz : HomGr C Gr0),
- Im g ⊂ Ker cz ∧ Ker cz ⊂ Im g
+  Im g ⊂ Ker cz ∧ Ker cz ⊂ Im g
   → ∀ x : gr_set (Ker c), ∃ y, x ∈ C → y ∈ B ∧ H_app g y ≡ x.
 Proof.
 intros * sg x.
@@ -799,7 +799,7 @@ Qed.
 
 Theorem exists_B'_to_Coker_a : ∀ {A A' B B' C C' g f'}
   {g' : HomGr B' C'} (a : HomGr A A') {b : HomGr B B'} {c : HomGr C C'} {g₁},
-  (Im f' ⊂ Ker g' ∧ Ker g' ⊂ Im f')
+  Im f' ⊂ Ker g' ∧ Ker g' ⊂ Im f'
   → (∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G)
   → diagram_commutes g b c g'
   → ∀ y', ∃ z',
