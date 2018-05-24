@@ -730,6 +730,39 @@ simpl.
 now destruct (appcz x).
 Qed.
 
+Theorem f'_is_inj : ∀ {A' B'} {f' : HomGr A' B'} {za' : HomGr Gr0 A'},
+    (∀ a : gr_set (Im za'), a ∈ Im za' ↔ a ∈ Ker f') →
+    ∀ x y, x ∈ A' → y ∈ A' → (H_app f' x = H_app f' y)%G → (x = y)%G.
+Proof.
+intros * sf' * Hx Hy Hxy.
+assert (H2 : (H_app f' x - H_app f' y = 0)%G). {
+  apply gr_sub_move_r.
+  etransitivity; [ apply Hxy | ].
+  symmetry; apply gr_add_0_l.
+}
+assert (H3 : (H_app f' (x - y) = 0)%G). {
+  etransitivity; [ | apply H2 ].
+  etransitivity.
+  -apply H_linear; [ easy | now apply A' ].
+  -apply gr_add_compat; [ reflexivity | now apply H_inv ].
+}
+assert (H4 : (x - y)%G ∈ Ker f'). {
+  split; [ | apply H3 ].
+  apply A'; [ easy | now apply A' ].
+}
+apply sf' in H4.
+simpl in H4.
+destruct H4 as (z & _ & H4).
+destruct z.
+assert (H5 : (x - y = 0)%G). {
+  etransitivity; [ symmetry; apply H4 | ].
+  apply H_zero.
+}
+apply gr_sub_move_r in H5.
+etransitivity; [ apply H5 | ].
+apply gr_add_0_l.
+Qed.
+
 Lemma snake :
   ∀ (A B C A' B' C' : AbGroup)
      (f : HomGr A B) (g : HomGr B C)
@@ -755,43 +788,11 @@ destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
 specialize (exists_ker_C_to_B B C C' g c cz sg) as H1.
 specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
-assert
-  (Hf'inj :
-  ∀ x y, x ∈ A' → y ∈ A' → (H_app f' x = H_app f' y)%G → (x = y)%G). {
-  intros * Hx Hy Hxy.
-  (* it is because Im(cza')={0}=Ker(f') *)
-  assert (H2 : (H_app f' x - H_app f' y = 0)%G). {
-    apply gr_sub_move_r.
-    etransitivity; [ apply Hxy | ].
-    symmetry; apply gr_add_0_l.
-  }
-  assert (H3 : (H_app f' (x - y) = 0)%G). {
-    etransitivity; [ | apply H2 ].
-    etransitivity.
-    -apply H_linear; [ easy | now apply A' ].
-    -apply gr_add_compat; [ reflexivity | now apply H_inv ].
-  }
-  assert (H4 : (x - y)%G ∈ Ker f'). {
-    split; [ | apply H3 ].
-    apply A'; [ easy | now apply A' ].
-  }
-  apply sf' in H4.
-  simpl in H4.
-  destruct H4 as (z & _ & H4).
-  destruct z.
-  assert (H5 : (x - y = 0)%G). {
-    etransitivity; [ symmetry; apply H4 | ].
-    apply H_zero.
-  }
-  apply gr_sub_move_r in H5.
-  etransitivity; [ apply H5 | ].
-  apply gr_add_0_l.
-}
 assert (Hcf'inj : ∀ x y, x ∈ Coker a → y ∈ Coker a → (H_app f' x = H_app f' y)%G → (x = y)%G). {
   intros * Hx Hy Hxy.
   simpl; unfold Coker_eq; simpl.
   exists 0; split; [ apply A | ].
-  apply Hf'inj; [ apply a, A | | ].
+  eapply (f'_is_inj _); [ apply a, A | | ].
   -apply A'; [ easy | now apply A' ].
   -transitivity (H_app f' 0).
    +apply f'; [ apply a, A | apply A' | apply H_zero ].
@@ -955,7 +956,7 @@ assert
       --now apply f.
       *apply Hcff'.
   }
-  apply Hf'inj in Hfz.
+  apply (f'_is_inj sf') in Hfz.
   -simpl; unfold Coker_eq; simpl.
    exists (- z).
    split; [ now apply A | ].
@@ -1036,7 +1037,7 @@ assert
   }
   destruct H4 as (z & Hz & Hfz).
   assert (H4 : (z'1 - z'2 = H_app a z)%G). {
-    apply Hf'inj; [ | now apply a | ].
+    apply (f'_is_inj sf'); [ | now apply a | ].
     -apply A'; [ easy | now apply A' ].
     -symmetry; etransitivity.
      +symmetry; apply Hcff'.
@@ -1055,7 +1056,7 @@ assert
     etransitivity; [ apply H_zero | ].
     symmetry; apply gr_sub_move_r; symmetry.
     etransitivity; [ apply gr_add_0_l | ].
-    apply Hf'inj; [ easy | | ].
+    apply (f'_is_inj sf'); [ easy | | ].
     -apply Hf'₁; exists x2.
      split; [ easy | reflexivity ].
     -etransitivity; [ apply Hfz'2 | ].
@@ -1068,7 +1069,7 @@ assert
     etransitivity; [ apply H_zero | ].
     symmetry; apply gr_sub_move_r; symmetry.
     etransitivity; [ apply gr_add_0_l | ].
-    apply Hf'inj; [ easy | | ].
+    apply (f'_is_inj sf'); [ easy | | ].
     -apply Hf'₁; exists x1.
      split; [ easy | reflexivity ].
     -etransitivity; [ apply Hfz'1 | ].
