@@ -1263,13 +1263,13 @@ split; [ | split ].
    exists (g₁ x - H_app f z).
    split; [ split | ].
   --apply B; [ apply Hg₁, Hx | now apply B, f ].
-  --rewrite H_additive.
-   ++etransitivity.
-    **apply gr_add_compat; [ easy | now apply H_inv, f ].
-    **apply gr_sub_move_r; rewrite gr_add_0_l; symmetry.
-      etransitivity; [ apply Haz | ].
-      etransitivity; [ now apply Hf'₁; exists x | easy ].
-   ++idtac.
+  --rewrite H_additive; [ | apply Hg₁, Hx | now apply B, f ].
+    etransitivity.
+   ++apply gr_add_compat; [ easy | now apply H_inv, f ].
+   ++apply gr_sub_move_r; rewrite gr_add_0_l; symmetry.
+     etransitivity; [ apply Haz | ].
+     etransitivity; [ now apply Hf'₁; exists x | easy ].
+  --idtac.
 ...
   exists (H_app f z - g₁ x).
   split; [ split | ].
