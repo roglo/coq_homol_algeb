@@ -1365,20 +1365,11 @@ split.
    -enough (H : H_app f' z' ∈ Ker g') by apply H.
     now apply sg'; simpl; exists z'.
  }
+(**)
+...
  exists (H_app g y).
  split; [ now apply g | ].
  split; [ apply Hgy | ].
-...
- exists 0; split; [ apply A | ].
- rewrite H_zero; symmetry.
- simpl; apply gr_sub_move_l.
- rewrite gr_add_0_r.
- apply (f'_is_inj sf'); [ | apply Hz' | ].
- *now apply Hf'₁; exists (H_app g y).
- *etransitivity.
- --now apply Hf'₁; exists (H_app g y).
- --idtac.
-    (* ah merde, b n'est pas injective *)
 ...
 split; [ | easy ].
 ...
