@@ -1346,7 +1346,16 @@ split.
     ---rewrite <- H_additive; [ now symmetry | | now apply A' ].
        now apply Hf'₁; exists x.
   *apply A'; [ now apply Hf'₁; exists x | now apply A' ].
--idtac.
+-intros z' (Hz' & y & Hy & Hby).
+ simpl in z', Hz', Hby.
+ rewrite gr_sub_0_r in Hby.
+ simpl; unfold Coker_eq; simpl.
+ enough (H :
+  ∃ x, x ∈ C ∧ (H_app c x = 0)%G ∧
+  ∃ z, z ∈ A ∧ (H_app a z = d x - z')%G). {
+   destruct H as (x & Hx).
+   now exists x.
+ }
 ...
 split; [ | easy ].
 ...
