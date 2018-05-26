@@ -1356,7 +1356,6 @@ split.
    destruct H as (x & Hx).
    now exists x.
  }
-(*
  assert (Hgy : H_app g y ∈ Ker c). {
    split; [ now apply g | ].
    rewrite Hcgg'.
@@ -1366,6 +1365,7 @@ split.
    -enough (H : H_app f' z' ∈ Ker g') by apply H.
     now apply sg'; simpl; exists z'.
  }
+(*
  assert (Hgf' : (H_app g' (H_app f' z') = 0)%G). {
    destruct Hgy as (Hgy, Hcgy).
    rewrite Hcgg' in Hcgy.
@@ -1396,6 +1396,20 @@ split.
  }
  destruct Hbg as (Hbg, Hgb).
  rewrite <- Hcgg' in Hgb.
+ exists (H_app g y).
+ split; [ now apply g | split ].
+ +rewrite <- Hgb.
+  apply c; [ now apply g | | ].
+  *apply g, B; [ apply Hg₁, C | easy ].
+  *rewrite H_additive; [ | apply Hg₁, C | easy ].
+   apply gr_sub_move_r.
+   rewrite gr_add_inv_r; symmetry.
+   apply Hg₁, C.
+ +exists z; split; [ easy | ].
+  symmetry; simpl; apply gr_sub_move_r.
+  symmetry; apply (f'_is_inj sf'); [ | now apply dm | ].
+  *apply A'; [ now apply a | easy ].
+  *rewrite Hfa.
 ...
  assert (H : H_app a z + z' ∈ Ker dm). {
    specialize (exact_sequence_1 f g f' g' a b c za') as H1.
