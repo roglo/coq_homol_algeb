@@ -1379,6 +1379,15 @@ split.
    etransitivity; [ apply Hg₁, C | easy ].
  }
  destruct Hz as (z & Hz & Hfz).
+ assert (Hfa : (H_app f' (H_app a z + z') = H_app b (g₁ 0 + y))%G). {
+   rewrite H_additive; [ | now apply a | easy ].
+   rewrite H_additive; [ | apply Hg₁, C | easy ].
+   etransitivity.
+   -apply gr_add_compat; [ symmetry; apply Hcff' | ].
+    symmetry; apply Hby.
+   -apply gr_add_compat; [ | easy ].
+    apply b; [ now apply f | apply Hg₁, C | easy ].
+ }
 ...
  assert (H : H_app a z + z' ∈ Ker dm). {
    specialize (exact_sequence_1 f g f' g' a b c za') as H1.
