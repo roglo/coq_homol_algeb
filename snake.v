@@ -1356,6 +1356,7 @@ split.
    destruct H as (x & Hx).
    now exists x.
  }
+(*
  assert (Hgy : H_app g y ∈ Ker c). {
    split; [ now apply g | ].
    rewrite Hcgg'.
@@ -1371,6 +1372,13 @@ split.
    etransitivity; [ | apply Hcgy ].
    apply H_app_compat; [ now apply f' | now apply b | symmetry; apply Hby ].
  }
+*)
+ assert (Hz : g₁ 0 ∈ Im f). {
+   apply sf; simpl.
+   split; [ apply Hg₁, C | ].
+   etransitivity; [ apply Hg₁, C | easy ].
+ }
+ destruct Hz as (z & Hz & Hfz).
 (**)
 ...
  exists (H_app g y).
