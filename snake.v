@@ -1409,8 +1409,11 @@ split.
   *rewrite Hfa; symmetry.
    etransitivity.
   --apply Hf'₁.
-    exists (H_app g y).
-    split; [ easy | ].
+    exists (H_app g (y - g₁ 0)).
+    split; [ | easy ].
+    split.
+   ++apply g, B; [ easy | apply B, Hg₁, C ].
+   ++idtac.
 ...
   ============================
   (H_app b (g₁ (H_app g (y - g₁ 0))) = H_app b (g₁ (H_app g y)))%G
