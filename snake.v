@@ -1365,6 +1365,12 @@ split.
    -enough (H : H_app f' z' ∈ Ker g') by apply H.
     now apply sg'; simpl; exists z'.
  }
+ assert (Hgf' : (H_app g' (H_app f' z') = 0)%G). {
+   destruct Hgy as (Hgy, Hcgy).
+   rewrite Hcgg' in Hcgy.
+   etransitivity; [ | apply Hcgy ].
+   apply H_app_compat; [ now apply f' | now apply b | symmetry; apply Hby ].
+ }
 (**)
 ...
  exists (H_app g y).
