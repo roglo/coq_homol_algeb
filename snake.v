@@ -1396,6 +1396,25 @@ split.
  }
  destruct Hbg as (Hbg, Hgb).
  rewrite <- Hcgg' in Hgb.
+ exists (H_app g (y - g₁ 0)).
+ split; [ admit | split ].
+ +admit.
+ +exists z; split; [ easy | ].
+  symmetry; simpl; apply gr_sub_move_r.
+  symmetry; apply (f'_is_inj sf'); [ | | ].
+  *apply A'; [ now apply a | easy ].
+  *apply dm; split.
+  --apply g, B; [ easy | apply B, Hg₁, C ].
+  --admit.
+  *rewrite Hfa; symmetry.
+   etransitivity.
+  --apply Hf'₁.
+    exists (H_app g y).
+    split; [ easy | ].
+...
+  ============================
+  (H_app b (g₁ (H_app g (y - g₁ 0))) = H_app b (g₁ (H_app g y)))%G
+....
  exists (H_app g y).
  split; [ now apply g | split ].
  +rewrite <- Hgb.
