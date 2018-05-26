@@ -1379,6 +1379,12 @@ split.
    etransitivity; [ apply Hg₁, C | easy ].
  }
  destruct Hz as (z & Hz & Hfz).
+...
+ assert (H : H_app a z + z' ∈ Ker dm). {
+   specialize (exact_sequence_1 f g f' g' a b c za') as H1.
+   specialize (H1 Hcff' Hcgg' sf sf').
+   specialize (exact_sequence_2 f g f' g' a b c za' g₁ f'₁ sf sf') as H2.
+   specialize (H2 Hcff' Hcgg' Hg₁ Hf'₁ dm (eq_refl _)).
 (**)
 ...
  exists (H_app g y).
