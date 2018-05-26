@@ -1379,44 +1379,45 @@ split.
    etransitivity; [ apply Hg₁, C | easy ].
  }
  destruct Hz as (z & Hz & Hfz).
- assert (Hfa : (H_app f' (H_app a z + z') = H_app b (g₁ 0 + y))%G). {
-   rewrite H_additive; [ | now apply a | easy ].
-   rewrite H_additive; [ | apply Hg₁, C | easy ].
-   etransitivity.
-   -apply gr_add_compat; [ symmetry; apply Hcff' | ].
-    symmetry; apply Hby.
-   -apply gr_add_compat; [ | easy ].
-    apply b; [ now apply f | apply Hg₁, C | easy ].
+ assert (Hfa : (H_app f' (z' - H_app a z) = H_app b (y - g₁ 0))%G). {
+   rewrite H_additive; [ | easy | now apply A', a ].
+   rewrite H_additive; [ | easy | apply B, Hg₁, C ].
+   apply gr_add_compat; [ now symmetry | ].
+   rewrite H_inv; [ | now apply a ].
+   rewrite H_inv; [ | apply Hg₁, C ].
+   apply gr_inv_compat.
+   rewrite <- Hcff'.
+   apply b; [ now apply f | apply Hg₁, C | easy ].
  }
- assert (Hbg : H_app b (g₁ 0 + y) ∈ Ker g'). {
+ assert (Hbg : H_app b (y - g₁ 0) ∈ Ker g'). {
    apply sg'.
-   exists (H_app a z + z').
+   exists (z' - H_app a z).
    split; [ | easy ].
-   apply A'; [ now apply a | easy ].
+   apply A'; [ easy | now apply A', a ].
  }
  destruct Hbg as (Hbg, Hgb).
  rewrite <- Hcgg' in Hgb.
  exists (H_app g (y - g₁ 0)).
  split; [ admit | split ].
  +admit.
- +exists z; split; [ easy | ].
+ +exists (- z); split; [ now apply A | ].
   symmetry; simpl; apply gr_sub_move_r.
-  symmetry; apply (f'_is_inj sf'); [ | | ].
-  *apply A'; [ now apply a | easy ].
-  *apply dm; split.
-  --apply g, B; [ easy | apply B, Hg₁, C ].
-  --admit.
-  *rewrite Hfa; symmetry.
-   etransitivity.
-  --apply Hf'₁.
-    exists (H_app g (y - g₁ 0)).
-    split; [ | easy ].
-    split.
-   ++apply g, B; [ easy | apply B, Hg₁, C ].
+  symmetry.
+  etransitivity; [ apply gr_add_comm | ].
+  etransitivity.
+  *apply gr_add_compat; [ easy | now apply H_inv ].
+  *apply (f'_is_inj sf'); [ | | ].
+  --apply A'; [ easy | now apply A', a ].
+  --apply dm; split; [ | easy ].
+    apply g, B; [ easy | apply B, Hg₁, C ].
+  --rewrite Hfa; symmetry.
+    etransitivity.
+   ++apply Hf'₁.
+     exists (H_app g (y - g₁ 0)).
+     split; [ | easy ].
+     split; [ | easy ].
+     apply g, B; [ easy | apply B, Hg₁, C ].
    ++idtac.
-...
-  ============================
-  (H_app b (g₁ (H_app g (y - g₁ 0))) = H_app b (g₁ (H_app g y)))%G
 ....
  exists (H_app g y).
  split; [ now apply g | split ].
