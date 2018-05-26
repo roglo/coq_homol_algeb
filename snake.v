@@ -1388,6 +1388,14 @@ split.
    -apply gr_add_compat; [ | easy ].
     apply b; [ now apply f | apply Hg₁, C | easy ].
  }
+ assert (Hbg : H_app b (g₁ 0 + y) ∈ Ker g'). {
+   apply sg'.
+   exists (H_app a z + z').
+   split; [ | easy ].
+   apply A'; [ now apply a | easy ].
+ }
+ destruct Hbg as (Hbg, Hgb).
+ rewrite <- Hcgg' in Hgb.
 ...
  assert (H : H_app a z + z' ∈ Ker dm). {
    specialize (exact_sequence_1 f g f' g' a b c za') as H1.
