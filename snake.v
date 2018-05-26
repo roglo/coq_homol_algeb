@@ -1409,7 +1409,10 @@ split.
   symmetry; simpl; apply gr_sub_move_r.
   symmetry; apply (f'_is_inj sf'); [ | now apply dm | ].
   *apply A'; [ now apply a | easy ].
-  *rewrite Hfa.
+  *rewrite Hfa; symmetry.
+   etransitivity.
+  --now apply Hf'₁; exists (H_app g y).
+  --idtac.
 ...
  assert (H : H_app a z + z' ∈ Ker dm). {
    specialize (exact_sequence_1 f g f' g' a b c za') as H1.
