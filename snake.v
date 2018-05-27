@@ -1513,5 +1513,12 @@ split.
   now apply sg' in H; simpl in H.
  +apply g'; [ | now apply b | now symmetry ].
   apply B'; [ now apply f' | now apply B' ].
--idtac.
+-simpl; intros y' (Hy' & x & Hx & Hcx).
+ simpl in Hcx; rewrite gr_sub_0_r in Hcx.
+ unfold Coker_eq; simpl.
+ enough (H : ∃ y z', y ∈ B ∧ z' ∈ A' ∧ (H_app b y = H_app f' z' - y')%G). {
+   destruct H as (y & z' & Hz' & Hy & Hby).
+   exists z'; split; [ easy | ].
+   now exists y.
+ }
 ...
