@@ -79,6 +79,32 @@ Add Parametric Relation {G} : (gr_set G) (@gr_eq G)
  transitivity proved by (@Equivalence_Transitive _ (@gr_eq G) (@gr_equiv G))
  as gr_eq_rel.
 
+Add Parametric Morphism {G} : (@gr_inv G)
+  with signature @gr_eq G ==> @gr_eq G
+  as gr_inv_morph.
+Proof.
+intros * Hxy.
+now apply gr_inv_compat.
+Qed.
+
+Add Parametric Morphism {G} : (@gr_add G)
+  with signature @gr_eq G ==> @gr_eq G ==> @gr_eq G
+  as gr_add_morph.
+Proof.
+intros * Hxy x' y' Hxy'.
+now apply gr_add_compat.
+Qed.
+
+Add Parametric Morphism {G} : (@gr_mem G)
+  with signature @gr_eq G ==> iff
+  as gr_mem_morph.
+Proof.
+intros * Hxy.
+split; intros H.
+-eapply gr_mem_compat; [ apply Hxy | easy ].
+-eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
+Qed.
+
 Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.
 
 Open Scope group_scope.
@@ -93,6 +119,15 @@ Arguments H_app [A] [B].
 Arguments H_mem_compat _ _ f : rename.
 Arguments H_app_compat _ _ f : rename.
 Arguments H_additive _ _ f : rename.
+
+Add Parametric Morphism {A B} : (@H_app A B)
+  with signature eq ==> @gr_eq A ==> @gr_eq B
+  as H_app_morph.
+Proof.
+intros f x y Hxy.
+apply H_app_compat.
+...
+Qed.
 
 Theorem gr_eq_trans : ∀ G (x y z : gr_set G), x ≡ y → y ≡ z → x ≡ z.
 Proof.
@@ -177,7 +212,7 @@ etransitivity.
  +apply gr_add_inv_l.
 Qed.
 
-Theorem gr_inv_inv : ∀ G (x : gr_set G), (- - x = x)%G.
+Theorem gr_inv_involutive : ∀ G (x : gr_set G), (- - x = x)%G.
 Proof.
 intros.
 transitivity (- - x + (- x + x))%G.
@@ -188,6 +223,16 @@ transitivity (- - x + (- x + x))%G.
 -etransitivity; [ symmetry; apply gr_add_assoc | ].
  etransitivity; [ | apply gr_add_0_l ].
  apply gr_add_compat; [ apply gr_add_inv_l | reflexivity ].
+Qed.
+
+Theorem gr_eq_inv_l : ∀ G (x y : gr_set G), (- x = y)%G ↔ (x = - y)%G.
+Proof.
+intros.
+split; intros Hxy.
+-rewrite <- Hxy; symmetry.
+ apply gr_inv_involutive.
+-rewrite Hxy.
+ apply gr_inv_involutive.
 Qed.
 
 Theorem H_zero : ∀ A B (f : HomGr A B), (H_app f 0 = 0)%G.
@@ -486,7 +531,7 @@ transitivity ((- (x - y))%G).
 +simpl; etransitivity; [ apply gr_inv_add_distr | ].
  etransitivity; [ apply gr_add_comm | ].
  apply gr_add_compat; [ | reflexivity ].
- apply gr_inv_inv.
+ apply gr_inv_involutive.
 Qed.
 
 Theorem Coker_eq_trans {G H} (f : HomGr G H) : Transitive (Coker_eq f).
@@ -1014,7 +1059,7 @@ assert (H4 : (y1 + y2 - y3)%G ∈ Ker g). {
    symmetry; apply gr_sub_move_r.
    etransitivity; [ apply gr_add_0_l | ].
    etransitivity; [ now apply gr_inv_compat, H_inv | ].
-   etransitivity; [ apply gr_inv_inv | ].
+   etransitivity; [ apply gr_inv_involutive | ].
    etransitivity.
    +apply Hg₁, C; [ apply Hx1 | apply Hx2 ].
    +symmetry; etransitivity; [ now apply H_additive | ].
@@ -1094,7 +1139,7 @@ apply (f'_is_inj sf') in Hfz.
   etransitivity.
   *simpl; apply gr_inv_add_distr.
   *apply gr_add_compat; [ apply gr_inv_add_distr | ].
-   apply gr_inv_inv.
+   apply gr_inv_involutive.
 -apply A'.
  +apply A'.
   *apply Hf'₁; exists x1.
@@ -1442,12 +1487,12 @@ split.
 -simpl.
  intros y' (z' & Hz' & y & Hy & Hby).
  simpl in Hby.
- symmetry in Hby.
- apply gr_sub_move_r in Hby.
- rewrite gr_add_comm in Hby.
- apply gr_sub_move_r in Hby.
  split.
- +eapply gr_mem_compat; [ apply Hby | ].
+ +symmetry in Hby.
+  apply gr_sub_move_r in Hby.
+  rewrite gr_add_comm in Hby.
+  apply gr_sub_move_r in Hby.
+  rewrite <- Hby.
   apply B'; [ now apply f' | now apply B', b ].
  +unfold Coker_eq; simpl.
   enough (H : ∃ x, x ∈ C ∧ (H_app c x = H_app g' y')%G). {
@@ -1456,4 +1501,9 @@ split.
     rewrite Hcx; symmetry.
     apply gr_sub_0_r.
   }
+  exists (- H_app g y).
+  split; [ now apply C, g | ].
+  rewrite H_inv, Hcgg'.
+  apply gr_eq_inv_l.
+
 ...
