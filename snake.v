@@ -112,22 +112,15 @@ Open Scope group_scope.
 Record HomGr (A B : AbGroup) :=
   { H_app : gr_set A → gr_set B;
     H_mem_compat : ∀ x, x ∈ A → H_app x ∈ B;
-    H_app_compat : ∀ x y, x ∈ A → y ∈ A → (x = y)%G → (H_app x = H_app y)%G;
-    H_additive : ∀ x y, x ∈ A → y ∈ A → (H_app (x + y) = H_app x + H_app y)%G }.
+    H_app_compat : ∀ x y,
+      x ∈ A → y ∈ A → (x = y)%G → (H_app x = H_app y)%G;
+    H_additive : ∀ x y,
+      x ∈ A → y ∈ A → (H_app (x + y) = H_app x + H_app y)%G }.
 
 Arguments H_app [A] [B].
 Arguments H_mem_compat _ _ f : rename.
 Arguments H_app_compat _ _ f : rename.
 Arguments H_additive _ _ f : rename.
-
-Add Parametric Morphism {A B} : (@H_app A B)
-  with signature eq ==> @gr_eq A ==> @gr_eq B
-  as H_app_morph.
-Proof.
-intros f x y Hxy.
-apply H_app_compat.
-...
-Qed.
 
 Theorem gr_eq_trans : ∀ G (x y z : gr_set G), x ≡ y → y ≡ z → x ≡ z.
 Proof.
@@ -1487,23 +1480,27 @@ split.
 -simpl.
  intros y' (z' & Hz' & y & Hy & Hby).
  simpl in Hby.
- split.
- +symmetry in Hby.
-  apply gr_sub_move_r in Hby.
-  rewrite gr_add_comm in Hby.
-  apply gr_sub_move_r in Hby.
-  rewrite <- Hby.
-  apply B'; [ now apply f' | now apply B', b ].
- +unfold Coker_eq; simpl.
-  enough (H : ∃ x, x ∈ C ∧ (H_app c x = H_app g' y')%G). {
-    destruct H as (x & Hx & Hcx).
-    exists x; split; [ easy | ].
-    rewrite Hcx; symmetry.
-    apply gr_sub_0_r.
-  }
-  exists (- H_app g y).
-  split; [ now apply C, g | ].
-  rewrite H_inv, Hcgg'.
-  apply gr_eq_inv_l.
-
+ assert (Hb' : y' ∈ B'). {
+   symmetry in Hby.
+   apply gr_sub_move_r in Hby.
+   rewrite gr_add_comm in Hby.
+   apply gr_sub_move_r in Hby.
+   rewrite <- Hby.
+   apply B'; [ now apply f' | now apply B', b ].
+ }
+ split; [ easy | ].
+ unfold Coker_eq; simpl.
+ enough (H : ∃ x, x ∈ C ∧ (H_app c x = H_app g' y')%G). {
+   destruct H as (x & Hx & Hcx).
+   exists x; split; [ easy | ].
+   rewrite Hcx; symmetry.
+   apply gr_sub_0_r.
+ }
+...
+ exists (- H_app g y).
+ split; [ now apply C, g | ].
+ rewrite H_inv, Hcgg'.
+ +apply gr_eq_inv_l.
+  rewrite <- H_inv.
+  *apply g'; [ now apply b | now apply B' | ].
 ...
