@@ -1356,97 +1356,66 @@ split.
    destruct H as (x & Hx).
    now exists x.
  }
- assert (Hgy : H_app g y ∈ Ker c). {
-   split; [ now apply g | ].
-   rewrite Hcgg'.
-   etransitivity.
-   -apply g'; [ now apply b | | apply Hby ].
-    now apply f'.
-   -enough (H : H_app f' z' ∈ Ker g') by apply H.
-    now apply sg'; simpl; exists z'.
- }
-(*
- assert (Hgf' : (H_app g' (H_app f' z') = 0)%G). {
-   destruct Hgy as (Hgy, Hcgy).
-   rewrite Hcgg' in Hcgy.
-   etransitivity; [ | apply Hcgy ].
-   apply H_app_compat; [ now apply f' | now apply b | symmetry; apply Hby ].
- }
-*)
- assert (Hz : g₁ 0 ∈ Im f). {
-   apply sf; simpl.
-   split; [ apply Hg₁, C | ].
-   etransitivity; [ apply Hg₁, C | easy ].
- }
- destruct Hz as (z & Hz & Hfz).
- assert (Hfa : (H_app f' (z' - H_app a z) = H_app b (y - g₁ 0))%G). {
-   rewrite H_additive; [ | easy | now apply A', a ].
-   rewrite H_additive; [ | easy | apply B, Hg₁, C ].
-   apply gr_add_compat; [ now symmetry | ].
-   rewrite H_inv; [ | now apply a ].
-   rewrite H_inv; [ | apply Hg₁, C ].
-   apply gr_inv_compat.
-   rewrite <- Hcff'.
-   apply b; [ now apply f | apply Hg₁, C | easy ].
- }
- assert (Hbg : H_app b (y - g₁ 0) ∈ Ker g'). {
-   apply sg'.
-   exists (z' - H_app a z).
-   split; [ | easy ].
-   apply A'; [ easy | now apply A', a ].
- }
- destruct Hbg as (Hbg, Hgb).
- rewrite <- Hcgg' in Hgb.
- exists (H_app g (y - g₁ 0)).
- split; [ admit | split ].
- +admit.
- +exists (- z); split; [ now apply A | ].
-  symmetry; simpl; apply gr_sub_move_r.
-  symmetry.
-  etransitivity; [ apply gr_add_comm | ].
-  etransitivity.
-  *apply gr_add_compat; [ easy | now apply H_inv ].
-  *apply (f'_is_inj sf'); [ | | ].
-  --apply A'; [ easy | now apply A', a ].
-  --apply dm; split; [ | easy ].
-    apply g, B; [ easy | apply B, Hg₁, C ].
-  --rewrite Hfa; symmetry.
-    etransitivity.
-   ++apply Hf'₁.
-     exists (H_app g (y - g₁ 0)).
-     split; [ | easy ].
-     split; [ | easy ].
-     apply g, B; [ easy | apply B, Hg₁, C ].
-   ++idtac.
-....
- exists (H_app g y).
- split; [ now apply g | split ].
- +rewrite <- Hgb.
-  apply c; [ now apply g | | ].
-  *apply g, B; [ apply Hg₁, C | easy ].
-  *rewrite H_additive; [ | apply Hg₁, C | easy ].
-   apply gr_sub_move_r.
-   rewrite gr_add_inv_r; symmetry.
-   apply Hg₁, C.
- +exists z; split; [ easy | ].
-  symmetry; simpl; apply gr_sub_move_r.
-  symmetry; apply (f'_is_inj sf'); [ | now apply dm | ].
-  *apply A'; [ now apply a | easy ].
-  *rewrite Hfa; symmetry.
-   etransitivity.
-  --now apply Hf'₁; exists (H_app g y).
-  --idtac.
-...
- assert (H : H_app a z + z' ∈ Ker dm). {
-   specialize (exact_sequence_1 f g f' g' a b c za') as H1.
-   specialize (H1 Hcff' Hcgg' sf sf').
-   specialize (exact_sequence_2 f g f' g' a b c za' g₁ f'₁ sf sf') as H2.
-   specialize (H2 Hcff' Hcgg' Hg₁ Hf'₁ dm (eq_refl _)).
 (**)
-...
  exists (H_app g y).
  split; [ now apply g | ].
- split; [ apply Hgy | ].
-...
-split; [ | easy ].
+ split.
+ +rewrite Hcgg'.
+  etransitivity.
+  *apply H_app_compat; [ now apply b | | apply Hby ].
+   now apply f'.
+  *assert (H : H_app f' z' ∈ Im f') by now exists z'.
+   now apply sg' in H; simpl in H.
+ +assert (H : g₁ (H_app g y) - y ∈ Ker g). {
+    split.
+    -apply B; [ now apply Hg₁, g | now apply B ].
+    -rewrite H_additive; [ | now apply Hg₁, g | now apply B ].
+     etransitivity; [ | apply gr_add_inv_r ].
+     apply gr_add_compat; [ now apply Hg₁, g | now apply H_inv ].
+  }
+  apply sf in H.
+  destruct H as (z & Hz & Hfz).
+  exists z; split; [ easy | ].
+  apply (H_app_compat _ _ b) in Hfz.
+  *rewrite H_additive in Hfz; [ | now apply Hg₁, g | now apply B ].
+   rewrite Hcff' in Hfz.
+  --apply (f'_is_inj sf'); [ now apply a | | ].
+   ++apply A'; [ | now apply A' ].
+     apply Hf'₁.
+     exists (H_app g y); split; [ | easy ].
+     split; [ now apply g | ].
+     rewrite Hcgg'.
+     etransitivity.
+    **apply H_app_compat; [ now apply b | | apply Hby ].
+      now apply f'.
+    **assert (H : H_app f' z' ∈ Im f') by (exists z'; easy).
+      now apply sg' in H; simpl in H.
+   ++rewrite Hfz.
+     symmetry; simpl; rewrite H_additive.
+     apply gr_add_compat.
+    **apply Hf'₁.
+      exists (H_app g y); split; [ | easy ].
+      split; [ now apply g | ].
+      rewrite Hcgg'.
+      etransitivity.
+    ---apply H_app_compat; [ now apply b | | apply Hby ].
+       now apply f'.
+    ---assert (H : H_app f' z' ∈ Im f') by (exists z'; easy).
+       now apply sg' in H; simpl in H.
+    **rewrite H_inv; [ | easy ].
+      rewrite H_inv; [ | easy ].
+      apply gr_inv_compat.
+      now symmetry.
+    **apply Hf'₁; exists (H_app g y); split; [ | easy ].
+      split; [ now apply g | ].
+      rewrite Hcgg'.
+      etransitivity.
+    ---apply H_app_compat; [ now apply b | | apply Hby ].
+       now apply f'.
+    ---assert (H : H_app f' z' ∈ Im f') by (exists z'; easy).
+       now apply sg' in H; simpl in H.
+    **now apply A'.
+  *now apply f.
+  *apply B; [ now apply Hg₁, g | now apply B ].
+-split; [ | easy ].
 ...
