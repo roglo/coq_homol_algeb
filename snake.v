@@ -338,7 +338,6 @@ Qed.
 Theorem Im_equiv {G} : Equivalence (@gr_eq G).
 Proof.
 apply gr_equiv.
-Show Proof.
 Qed.
 
 Theorem Im_mem_compat {G H} : ∀ f (x y : gr_set H),
@@ -1424,49 +1423,18 @@ split.
   *apply B; [ now apply Hg₁, g | now apply B ].
 Qed.
 
-Lemma snake :
-  ∀ (A B C A' B' C' : AbGroup)
-     (f : HomGr A B) (g : HomGr B C)
-     (f' : HomGr A' B') (g' : HomGr B' C')
-     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
-     (cz : HomGr C Gr0) (za' : HomGr Gr0 A'),
-  diagram_commutes f a b f'
-  → diagram_commutes g b c g'
-  → exact_sequence (Seq2 f (Seq2 g (Seq2 cz Seq1)))
-  → exact_sequence (Seq2 za' (Seq2 f' (Seq2 g' Seq1)))
-  → ∃ (fk : HomGr (Ker a) (Ker b)) (gk : HomGr (Ker b) (Ker c))
-        (fk' : HomGr (Coker a) (Coker b)) (gk' : HomGr (Coker b) (Coker c)),
-     ∃ (d : HomGr (Ker c) (Coker a)),
-        exact_sequence (Seq2 fk (Seq2 gk (Seq2 d (Seq2 fk' (Seq2 gk' Seq1))))).
+(* exact sequence CoKer a → CoKer b → Coker c *)
+Theorem exact_sequence_4 {A B C A' B' C'} :
+  ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
+    (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
+    (Hcff' : diagram_commutes f a b f')
+    (Hcgg' : diagram_commutes g b c g')
+    (sg' : Im f' == Ker g')
+    (g₁ : gr_set (Ker c) → gr_set B)
+    (Hg₁ : g₁_prop g c g₁),
+  Im (HomGr_Coker_Coker a b Hcff') == Ker (HomGr_Coker_Coker b c Hcgg').
 Proof.
-intros *.
-intros Hcff' Hcgg' s s'.
-exists (HomGr_Ker_Ker a b Hcff').
-exists (HomGr_Ker_Ker b c Hcgg').
-exists (HomGr_Coker_Coker a b Hcff').
-exists (HomGr_Coker_Coker b c Hcgg').
-destruct s as (sf & sg & _).
-destruct s' as (sf' & sg' & _).
-specialize (exists_Ker_C_to_B c sg) as H1.
-specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
-specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
-specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
-fold (g₁_prop g c g₁) in Hg₁.
-fold (f'₁_prop a b f' g₁ f'₁) in Hf'₁.
-move f'₁ before g₁.
-clear H1 H2.
-set (d := λ x, f'₁ (H_app b (g₁ x))).
-set
-  (dm :=
-   {| H_app := d;
-      H_mem_compat := d_mem_compat Hf'₁;
-      H_app_compat := d_app_compat Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁;
-      H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}).
-exists dm.
-split; [ now eapply exact_sequence_1 | ].
-split; [ now eapply exact_sequence_2; try easy | ].
-split; [ now eapply exact_sequence_3; try easy | ].
-split; [ | easy ].
+intros.
 split.
 -simpl.
  intros y' (z' & Hz' & y & Hy & Hby).
@@ -1529,3 +1497,54 @@ split.
  rewrite Hfz', gr_add_comm, <- gr_add_assoc, gr_add_inv_l, gr_add_0_l.
  now apply H_inv, Hg₁.
 Qed.
+
+Lemma snake :
+  ∀ (A B C A' B' C' : AbGroup)
+     (f : HomGr A B) (g : HomGr B C)
+     (f' : HomGr A' B') (g' : HomGr B' C')
+     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
+     (cz : HomGr C Gr0) (za' : HomGr Gr0 A'),
+  diagram_commutes f a b f'
+  → diagram_commutes g b c g'
+  → exact_sequence (Seq2 f (Seq2 g (Seq2 cz Seq1)))
+  → exact_sequence (Seq2 za' (Seq2 f' (Seq2 g' Seq1)))
+  → ∃ (fk : HomGr (Ker a) (Ker b)) (gk : HomGr (Ker b) (Ker c))
+        (fk' : HomGr (Coker a) (Coker b)) (gk' : HomGr (Coker b) (Coker c)),
+     ∃ (d : HomGr (Ker c) (Coker a)),
+        exact_sequence (Seq2 fk (Seq2 gk (Seq2 d (Seq2 fk' (Seq2 gk' Seq1))))).
+Proof.
+intros *.
+intros Hcff' Hcgg' s s'.
+exists (HomGr_Ker_Ker a b Hcff').
+exists (HomGr_Ker_Ker b c Hcgg').
+exists (HomGr_Coker_Coker a b Hcff').
+exists (HomGr_Coker_Coker b c Hcgg').
+destruct s as (sf & sg & _).
+destruct s' as (sf' & sg' & _).
+specialize (exists_Ker_C_to_B c sg) as H1.
+specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
+specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
+specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
+fold (g₁_prop g c g₁) in Hg₁.
+fold (f'₁_prop a b f' g₁ f'₁) in Hf'₁.
+move f'₁ before g₁.
+clear H1 H2.
+set (d := λ x, f'₁ (H_app b (g₁ x))).
+set
+  (dm :=
+   {| H_app := d;
+      H_mem_compat := d_mem_compat Hf'₁;
+      H_app_compat := d_app_compat Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁;
+      H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}).
+exists dm.
+split; [ now eapply exact_sequence_1 | ].
+split; [ now eapply exact_sequence_2; try easy | ].
+split; [ now eapply exact_sequence_3; try easy | ].
+split; [ eapply exact_sequence_4; try easy; apply Hg₁ | easy ].
+Qed.
+
+Check snake.
+
+(*
+Print Assumptions snake.
+*)

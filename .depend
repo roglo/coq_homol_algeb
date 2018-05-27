@@ -1,0 +1,2 @@
+snake.vio: snake.v
+snake.vo snake.glob snake.v.beautified: snake.v
