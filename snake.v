@@ -164,19 +164,8 @@ Theorem gr_sub_move_r : ∀ G (x y z : gr_set G),
 Proof.
 intros.
 split; intros Hxyz.
--transitivity ((x - y) + y)%G.
- +symmetry.
-  etransitivity; [ apply gr_add_assoc | ].
-  transitivity (x + 0)%G.
-  *apply gr_add_compat; [ reflexivity | apply gr_add_inv_l ].
-  *apply gr_add_0_r.
- +apply gr_add_compat; [ easy | reflexivity ].
--transitivity (z + y - y)%G.
- +apply gr_add_compat; [ easy | reflexivity ].
- +etransitivity; [ apply gr_add_assoc | ].
-  transitivity (z + 0)%G.
-  *apply gr_add_compat; [ reflexivity | apply gr_add_inv_r ].
-  *apply gr_add_0_r.
+-now rewrite <- Hxyz, gr_add_assoc, gr_add_inv_l, gr_add_0_r.
+-now rewrite Hxyz, gr_add_assoc, gr_add_inv_r, gr_add_0_r.
 Qed.
 
 Theorem gr_sub_move_l : ∀ G (x y z : gr_set G),
@@ -1521,4 +1510,6 @@ split.
    exists z'; split; [ easy | ].
    now exists y.
  }
+ exists (g₁ x).
+
 ...
