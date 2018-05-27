@@ -109,6 +109,8 @@ Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.
 
 Open Scope group_scope.
 
+(* Homomorphism between abelian groups *)
+
 Record HomGr (A B : AbGroup) :=
   { H_app : gr_set A → gr_set B;
     H_mem_compat : ∀ x, x ∈ A → H_app x ∈ B;
@@ -1496,11 +1498,20 @@ split.
    rewrite Hcx; symmetry.
    apply gr_sub_0_r.
  }
-...
  exists (- H_app g y).
  split; [ now apply C, g | ].
- rewrite H_inv, Hcgg'.
- +apply gr_eq_inv_l.
-  rewrite <- H_inv.
-  *apply g'; [ now apply b | now apply B' | ].
+ rewrite H_inv, Hcgg'; [ | now apply g ].
+ apply gr_eq_inv_l.
+ rewrite <- H_inv; [ | easy ].
+ symmetry.
+ transitivity (H_app g' (H_app f' z' - y')).
+ +rewrite H_additive; [ | now apply f' | now apply B' ].
+  rewrite <- gr_add_0_l at 1.
+  apply gr_add_compat; [ | easy ].
+  symmetry.
+  assert (H : H_app f' z' ∈ Im f') by (exists z'; easy).
+  now apply sg' in H; simpl in H.
+ +apply g'; [ | now apply b | now symmetry ].
+  apply B'; [ now apply f' | now apply B' ].
+-idtac.
 ...
