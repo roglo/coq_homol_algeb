@@ -1438,4 +1438,22 @@ split; [ now eapply exact_sequence_1 | ].
 split; [ now eapply exact_sequence_2; try easy | ].
 split; [ now eapply exact_sequence_3; try easy | ].
 split; [ | easy ].
+split.
+-simpl.
+ intros y' (z' & Hz' & y & Hy & Hby).
+ simpl in Hby.
+ symmetry in Hby.
+ apply gr_sub_move_r in Hby.
+ rewrite gr_add_comm in Hby.
+ apply gr_sub_move_r in Hby.
+ split.
+ +eapply gr_mem_compat; [ apply Hby | ].
+  apply B'; [ now apply f' | now apply B', b ].
+ +unfold Coker_eq; simpl.
+  enough (H : ∃ x, x ∈ C ∧ (H_app c x = H_app g' y')%G). {
+    destruct H as (x & Hx & Hcx).
+    exists x; split; [ easy | ].
+    rewrite Hcx; symmetry.
+    apply gr_sub_0_r.
+  }
 ...
