@@ -62,7 +62,6 @@ Arguments gr_inv_compat G : rename.
 
 Notation "x '∈' S" := (gr_mem S x) (at level 60).
 Notation "x '∉' S" := (¬ gr_mem S x) (at level 60).
-Notation "x '≡' y" := (gr_eq x y) (at level 70).
 
 Delimit Scope group_scope with G.
 
@@ -72,6 +71,8 @@ Notation "a ≠ b" := (¬ gr_eq a b) : group_scope.
 Notation "a + b" := (gr_add a b) : group_scope.
 Notation "a - b" := (gr_add a (gr_inv b)) : group_scope.
 Notation "- a" := (gr_inv a) : group_scope.
+
+Open Scope group_scope.
 
 Add Parametric Relation {G} : (gr_set G) (@gr_eq G)
  reflexivity proved by (@Equivalence_Reflexive _ (@gr_eq G) (@gr_equiv G))
@@ -107,8 +108,6 @@ Qed.
 
 Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.
 
-Open Scope group_scope.
-
 (* Homomorphism between abelian groups *)
 
 Record HomGr (A B : AbGroup) :=
@@ -124,7 +123,8 @@ Arguments H_mem_compat _ _ f : rename.
 Arguments H_app_compat _ _ f : rename.
 Arguments H_additive _ _ f : rename.
 
-Theorem gr_eq_trans : ∀ G (x y z : gr_set G), x ≡ y → y ≡ z → x ≡ z.
+Theorem gr_eq_trans : ∀ G (x y z : gr_set G),
+  (x = y)%G → (y = z)%G → (x = z)%G.
 Proof.
 apply gr_equiv.
 Qed.
@@ -286,21 +286,6 @@ Definition Gr0 :=
       gr_add_compat _ _ _ _ _ _ := eq_refl;
       gr_inv_compat _ _ H := H |}.
 
-Definition is_initial (G : AbGroup) :=
-  ∀ H (f g : HomGr G H) (x : gr_set G), H_app f x ≡ H_app g x.
-Definition is_final (G : AbGroup) :=
-  ∀ H (f g : HomGr H G) (x : gr_set H), H_app f x ≡ H_app g x.
-Definition is_null (G : AbGroup) := is_initial G ∧ is_final G.
-
-Theorem is_null_Gr0 : is_null Gr0.
-Proof.
-split; intros H f g x.
--destruct x.
- apply gr_eq_trans with (y := gr_zero); [ apply H_zero | ].
- symmetry; apply H_zero.
--now destruct (H_app f x), (H_app g x).
-Qed.
-
 Theorem Im_zero_mem {G H} : ∀ (f : HomGr G H),
   ∃ a : gr_set G, a ∈ G ∧ (H_app f a = 0)%G.
 Proof.
@@ -335,11 +320,6 @@ transitivity (gr_inv (H_app f y)).
 +now apply gr_inv_compat.
 Qed.
 
-Theorem Im_equiv {G} : Equivalence (@gr_eq G).
-Proof.
-apply gr_equiv.
-Qed.
-
 Theorem Im_mem_compat {G H} : ∀ f (x y : gr_set H),
   (x = y)%G
   → (∃ a, a ∈ G ∧ (H_app f a = x)%G)
@@ -354,7 +334,7 @@ Definition Im {G H : AbGroup} (f : HomGr G H) :=
   {| gr_set := gr_set H;
      gr_zero := gr_zero;
      gr_eq := @gr_eq H;
-     gr_mem := λ b, ∃ a, a ∈ G ∧ H_app f a ≡ b;
+     gr_mem := λ b, ∃ a, a ∈ G ∧ (H_app f a = b)%G;
      gr_add := @gr_add H;
      gr_inv := @gr_inv H;
      gr_zero_mem := Im_zero_mem f;
@@ -413,7 +393,7 @@ Definition Ker {G H : AbGroup} (f : HomGr G H) :=
   {| gr_set := gr_set G;
      gr_zero := gr_zero;
      gr_eq := @gr_eq G;
-     gr_mem := λ a, a ∈ G ∧ H_app f a ≡ gr_zero;
+     gr_mem := λ a, a ∈ G ∧ (H_app f a = gr_zero)%G;
      gr_add := @gr_add G;
      gr_inv := @gr_inv G;
      gr_zero_mem := Ker_zero_mem f;
@@ -427,8 +407,6 @@ Definition Ker {G H : AbGroup} (f : HomGr G H) :=
      gr_mem_compat := Ker_mem_compat f;
      gr_add_compat := gr_add_compat G;
      gr_inv_compat := gr_inv_compat G |}.
-
-Definition gr_sub {G} (x y : gr_set G) := gr_add x (gr_inv y).
 
 (* x ∈ Coker f ↔ x ∈ H/Im f
    quotient group is H with setoid, i.e. set with its own equality *)
@@ -651,7 +629,7 @@ Fixpoint exact_sequence {A : AbGroup} (S : sequence) :=
 *)
 Definition diagram_commutes {A B C D}
      (f : HomGr A B) (g : HomGr A C) (h : HomGr B D) (k : HomGr C D) :=
-  ∀ x, H_app h (H_app f x) ≡ H_app k (H_app g x).
+  ∀ x, (H_app h (H_app f x) = H_app k (H_app g x))%G.
 
 Theorem KK_mem_compat {A B A' B'} : ∀ (a : HomGr A A') (b : HomGr B B') f f',
   diagram_commutes f a b f'
@@ -748,7 +726,7 @@ Definition HomGr_Coker_Coker {A B A' B'}
 
 Theorem exists_Ker_C_to_B {B C C' g} (c : HomGr C C') {cz : HomGr C Gr0} :
   Im g == Ker cz
-  → ∀ x : gr_set (Ker c), ∃ y, x ∈ C → y ∈ B ∧ H_app g y ≡ x.
+  → ∀ x : gr_set (Ker c), ∃ y, x ∈ C → y ∈ B ∧ (H_app g y = x)%G.
 Proof.
 intros * sg x.
 destruct (MemDec C x) as [H2| H2]; [ | now exists 0%G ].
@@ -801,7 +779,8 @@ Qed.
 Theorem f'c_is_inj
     {A A' B'} {f' : HomGr A' B'} {a : HomGr A A'} {za' : HomGr Gr0 A'} :
   Im za' == Ker f'
-  → ∀ x y, x ∈ Coker a → y ∈ Coker a → (H_app f' x = H_app f' y)%G → (x = y)%G.
+  → ∀ x y, x ∈ Coker a → y ∈ Coker a →
+     (H_app f' x = H_app f' y)%G → (x = y)%G.
 Proof.
 intros * sf' * Hx Hy Hxy.
 simpl; unfold Coker_eq; simpl.
