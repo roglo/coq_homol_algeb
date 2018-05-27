@@ -1272,19 +1272,16 @@ Theorem exact_sequence_3 {A B C A' B' C'} :
     (Hg₁ : g₁_prop g c g₁)
     (Hf'₁ : f'₁_prop a b f' g₁ f'₁),
   let d := λ x : gr_set (Ker c), f'₁ (H_app b (g₁ x)) in
-  let dm := {|
-    H_app := d;
-    H_mem_compat := d_mem_compat Hf'₁;
-    H_app_compat := d_app_compat Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁;
-    H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}
-  in
+  ∀ (dm : HomGr (Ker c) (Coker a)), H_app dm = d →
   Im dm == Ker (HomGr_Coker_Coker a b Hcff').
 Proof.
 intros *.
+intros Hcgg' sf sf' sg' * Hg₁ Hf'₁ * Hdm.
 split.
 -intros z' Hz'.
  destruct Hz' as (x & Hx & z & Hz & Haz).
  move z before x.
+ rewrite Hdm in Haz.
  simpl in Haz.
  assert (Hz' : z' ∈ A'). {
    apply gr_mem_compat with (x := d x - H_app a z).
@@ -1329,6 +1326,7 @@ split.
  simpl in z', Hz', Hby.
  rewrite gr_sub_0_r in Hby.
  simpl; unfold Coker_eq; simpl.
+ rewrite Hdm.
  enough (H :
   ∃ x, x ∈ C ∧ (H_app c x = 0)%G ∧
   ∃ z, z ∈ A ∧ (H_app a z = d x - z')%G). {
@@ -1438,6 +1436,6 @@ set
 exists dm.
 split; [ now eapply exact_sequence_1 | ].
 split; [ now eapply exact_sequence_2; try easy | ].
-split; [ apply exact_sequence_3 | ].
+split; [ now eapply exact_sequence_3; try easy | ].
 split; [ | easy ].
 ...
