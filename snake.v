@@ -1109,6 +1109,7 @@ apply (f'_is_inj sf') in Hfz.
 -now apply a.
 Qed.
 
+(* exact sequence Ker a → Ker b → Ker c *)
 Theorem exact_sequence_1 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
      (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
@@ -1150,16 +1151,16 @@ split.
  etransitivity; [ symmetry; apply Hzz | apply H_zero ].
 Qed.
 
+(* exact sequence Ker b → Ker c → CoKer a *)
 Theorem exact_sequence_2 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
     (g₁ : gr_set (Ker c) → gr_set B) (f'₁ : gr_set B' → gr_set (Coker a))
     (sf : Im f == Ker g) (sf' : Im za' == Ker f')
     (Hcff' : diagram_commutes f a b f')
-    (Hcgg' : diagram_commutes g b c g'),
-  g₁_prop g c g₁
-  → f'₁_prop a b f' g₁ f'₁
-  → let d := λ x : gr_set (Ker c), f'₁ (H_app b (g₁ x)) in
+    (Hcgg' : diagram_commutes g b c g')
+    (Hg₁ : g₁_prop g c g₁) (Hf'₁ : f'₁_prop a b f' g₁ f'₁),
+ let d := λ x : gr_set (Ker c), f'₁ (H_app b (g₁ x)) in
  ∀ (dm : HomGr (Ker c) (Coker a)), H_app dm = d
  → Im (HomGr_Ker_Ker b c Hcgg') == Ker dm.
 Proof.
@@ -1259,49 +1260,27 @@ split.
  +eapply gr_mem_compat; [ apply Haz | now apply a ].
 Qed.
 
-Lemma snake :
-  ∀ (A B C A' B' C' : AbGroup)
-     (f : HomGr A B) (g : HomGr B C)
-     (f' : HomGr A' B') (g' : HomGr B' C')
-     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
-     (cz : HomGr C Gr0) (za' : HomGr Gr0 A'),
-  diagram_commutes f a b f'
-  → diagram_commutes g b c g'
-  → exact_sequence (Seq2 f (Seq2 g (Seq2 cz Seq1)))
-  → exact_sequence (Seq2 za' (Seq2 f' (Seq2 g' Seq1)))
-  → ∃ (fk : HomGr (Ker a) (Ker b)) (gk : HomGr (Ker b) (Ker c))
-        (fk' : HomGr (Coker a) (Coker b)) (gk' : HomGr (Coker b) (Coker c)),
-     ∃ (d : HomGr (Ker c) (Coker a)),
-        exact_sequence (Seq2 fk (Seq2 gk (Seq2 d (Seq2 fk' (Seq2 gk' Seq1))))).
+(* exact sequence Ker c → CoKer a → Coker b *)
+Theorem exact_sequence_3 {A B C A' B' C'} :
+  ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
+    (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
+    (Hcff' : diagram_commutes f a b f')
+    (Hcgg' : diagram_commutes g b c g')
+    (sf : Im f == Ker g) (sf' : Im za' == Ker f') (sg' : Im f' == Ker g')
+    (g₁ : gr_set (Ker c) → gr_set B)
+    (f'₁ : gr_set B' → gr_set (Coker a))
+    (Hg₁ : g₁_prop g c g₁)
+    (Hf'₁ : f'₁_prop a b f' g₁ f'₁),
+  let d := λ x : gr_set (Ker c), f'₁ (H_app b (g₁ x)) in
+  let dm := {|
+    H_app := d;
+    H_mem_compat := d_mem_compat Hf'₁;
+    H_app_compat := d_app_compat Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁;
+    H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}
+  in
+  Im dm == Ker (HomGr_Coker_Coker a b Hcff').
 Proof.
 intros *.
-intros Hcff' Hcgg' s s'.
-exists (HomGr_Ker_Ker a b Hcff').
-exists (HomGr_Ker_Ker b c Hcgg').
-exists (HomGr_Coker_Coker a b Hcff').
-exists (HomGr_Coker_Coker b c Hcgg').
-destruct s as (sf & sg & _).
-destruct s' as (sf' & sg' & _).
-specialize (exists_Ker_C_to_B c sg) as H1.
-specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
-specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
-specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
-fold (g₁_prop g c g₁) in Hg₁.
-fold (f'₁_prop a b f' g₁ f'₁) in Hf'₁.
-move f'₁ before g₁.
-clear H1 H2.
-set (d := λ x, f'₁ (H_app b (g₁ x))).
-set
-  (dm :=
-   {| H_app := d;
-      H_mem_compat := d_mem_compat Hf'₁;
-      H_app_compat := d_app_compat Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁;
-      H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}).
-exists dm.
-split; [ now eapply exact_sequence_1 | ].
-split; [ now eapply exact_sequence_2; try easy | ].
-split.
-(**)
 split.
 -intros z' Hz'.
  destruct Hz' as (x & Hx & z & Hz & Haz).
@@ -1356,7 +1335,6 @@ split.
    destruct H as (x & Hx).
    now exists x.
  }
-(**)
  exists (H_app g y).
  split; [ now apply g | ].
  split.
@@ -1417,5 +1395,49 @@ split.
     **now apply A'.
   *now apply f.
   *apply B; [ now apply Hg₁, g | now apply B ].
--split; [ | easy ].
+Qed.
+
+Lemma snake :
+  ∀ (A B C A' B' C' : AbGroup)
+     (f : HomGr A B) (g : HomGr B C)
+     (f' : HomGr A' B') (g' : HomGr B' C')
+     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
+     (cz : HomGr C Gr0) (za' : HomGr Gr0 A'),
+  diagram_commutes f a b f'
+  → diagram_commutes g b c g'
+  → exact_sequence (Seq2 f (Seq2 g (Seq2 cz Seq1)))
+  → exact_sequence (Seq2 za' (Seq2 f' (Seq2 g' Seq1)))
+  → ∃ (fk : HomGr (Ker a) (Ker b)) (gk : HomGr (Ker b) (Ker c))
+        (fk' : HomGr (Coker a) (Coker b)) (gk' : HomGr (Coker b) (Coker c)),
+     ∃ (d : HomGr (Ker c) (Coker a)),
+        exact_sequence (Seq2 fk (Seq2 gk (Seq2 d (Seq2 fk' (Seq2 gk' Seq1))))).
+Proof.
+intros *.
+intros Hcff' Hcgg' s s'.
+exists (HomGr_Ker_Ker a b Hcff').
+exists (HomGr_Ker_Ker b c Hcgg').
+exists (HomGr_Coker_Coker a b Hcff').
+exists (HomGr_Coker_Coker b c Hcgg').
+destruct s as (sf & sg & _).
+destruct s' as (sf' & sg' & _).
+specialize (exists_Ker_C_to_B c sg) as H1.
+specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
+specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
+specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
+fold (g₁_prop g c g₁) in Hg₁.
+fold (f'₁_prop a b f' g₁ f'₁) in Hf'₁.
+move f'₁ before g₁.
+clear H1 H2.
+set (d := λ x, f'₁ (H_app b (g₁ x))).
+set
+  (dm :=
+   {| H_app := d;
+      H_mem_compat := d_mem_compat Hf'₁;
+      H_app_compat := d_app_compat Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁;
+      H_additive := d_additive Hcff' sf sf' Hg₁ Hf'₁ |}).
+exists dm.
+split; [ now eapply exact_sequence_1 | ].
+split; [ now eapply exact_sequence_2; try easy | ].
+split; [ apply exact_sequence_3 | ].
+split; [ | easy ].
 ...
