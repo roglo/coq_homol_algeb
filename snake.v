@@ -44,6 +44,8 @@ Record AbGroup :=
     gr_add_compat : ∀ x y x' y', x ≡ y → x' ≡ y' → x + x' ≡ y + y';
     gr_inv_compat : ∀ x y, x ≡ y → - x ≡ - y }.
 
+(* coq stuff: implicit and renamed arguments *)
+
 Arguments gr_eq [_].
 Arguments gr_zero [_].
 Arguments gr_add [_].
@@ -60,8 +62,7 @@ Arguments gr_mem_compat G : rename.
 Arguments gr_add_compat G : rename.
 Arguments gr_inv_compat G : rename.
 
-Notation "x '∈' S" := (gr_mem S x) (at level 60).
-Notation "x '∉' S" := (¬ gr_mem S x) (at level 60).
+(* syntaxes for expressions in groups *)
 
 Delimit Scope group_scope with G.
 
@@ -72,13 +73,38 @@ Notation "a + b" := (gr_add a b) : group_scope.
 Notation "a - b" := (gr_add a (gr_inv b)) : group_scope.
 Notation "- a" := (gr_inv a) : group_scope.
 
+Notation "x '∈' S" := (gr_mem S x) (at level 60).
+Notation "x '∉' S" := (¬ gr_mem S x) (at level 60).
+
 Open Scope group_scope.
+
+(* Homomorphism between abelian groups *)
+
+Record HomGr (A B : AbGroup) :=
+  { H_app : gr_set A → gr_set B;
+    H_mem_compat : ∀ x, x ∈ A → H_app x ∈ B;
+    H_app_compat : ∀ x y,
+      x ∈ A → y ∈ A → (x = y)%G → (H_app x = H_app y)%G;
+    H_additive : ∀ x y,
+      x ∈ A → y ∈ A → (H_app (x + y) = H_app x + H_app y)%G }.
+
+(* coq stuff: implicit and renamed arguments *)
+
+Arguments H_app [A] [B].
+Arguments H_mem_compat _ _ f : rename.
+Arguments H_app_compat _ _ f : rename.
+Arguments H_additive _ _ f : rename.
+
+(* Equality (gr_eq) in groups is an equivalence relation *)
 
 Add Parametric Relation {G} : (gr_set G) (@gr_eq G)
  reflexivity proved by (@Equivalence_Reflexive _ (@gr_eq G) (@gr_equiv G))
  symmetry proved by (@Equivalence_Symmetric _ (@gr_eq G) (@gr_equiv G))
  transitivity proved by (@Equivalence_Transitive _ (@gr_eq G) (@gr_equiv G))
  as gr_eq_rel.
+
+(* Coq Morphisms: allows to use "rewrite" in expressions containing
+   inversions (-), additions (+) and memberships (∈) *)
 
 Add Parametric Morphism {G} : (@gr_inv G)
   with signature @gr_eq G ==> @gr_eq G
@@ -106,28 +132,11 @@ split; intros H.
 -eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
 Qed.
 
+(* We need that membership be decidable *)
+
 Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.
 
-(* Homomorphism between abelian groups *)
-
-Record HomGr (A B : AbGroup) :=
-  { H_app : gr_set A → gr_set B;
-    H_mem_compat : ∀ x, x ∈ A → H_app x ∈ B;
-    H_app_compat : ∀ x y,
-      x ∈ A → y ∈ A → (x = y)%G → (H_app x = H_app y)%G;
-    H_additive : ∀ x y,
-      x ∈ A → y ∈ A → (H_app (x + y) = H_app x + H_app y)%G }.
-
-Arguments H_app [A] [B].
-Arguments H_mem_compat _ _ f : rename.
-Arguments H_app_compat _ _ f : rename.
-Arguments H_additive _ _ f : rename.
-
-Theorem gr_eq_trans : ∀ G (x y z : gr_set G),
-  (x = y)%G → (y = z)%G → (x = z)%G.
-Proof.
-apply gr_equiv.
-Qed.
+(* Miscellaneous theorems in groups elements *)
 
 Theorem gr_add_0_r : ∀ G (x : gr_set G), (x + 0 = x)%G.
 Proof.
@@ -219,6 +228,8 @@ split; intros Hxy.
  apply gr_inv_involutive.
 Qed.
 
+(* Theorems on morphisms *)
+
 Theorem H_zero : ∀ A B (f : HomGr A B), (H_app f 0 = 0)%G.
 Proof.
 intros.
@@ -260,6 +271,8 @@ transitivity (0 - H_app f x)%G.
 -apply gr_add_0_l.
 Qed.
 
+(* The trivial group *)
+
 Inductive Gr0_set := G0 : Gr0_set.
 
 Theorem Gr0_add_0_l : ∀ x, (λ _ _ : Gr0_set, G0) G0 x = x.
@@ -285,6 +298,8 @@ Definition Gr0 :=
       gr_mem_compat _ _ _ _ := I;
       gr_add_compat _ _ _ _ _ _ := eq_refl;
       gr_inv_compat _ _ H := H |}.
+
+(* Group image *)
 
 Theorem Im_zero_mem {G H} : ∀ (f : HomGr G H),
   ∃ a : gr_set G, a ∈ G ∧ (H_app f a = 0)%G.
@@ -349,6 +364,8 @@ Definition Im {G H : AbGroup} (f : HomGr G H) :=
      gr_add_compat := gr_add_compat H;
      gr_inv_compat := gr_inv_compat H |}.
 
+(* Group kernel *)
+
 Theorem Ker_zero_mem {G H} : ∀ (f : HomGr G H), 0%G ∈ G ∧ (H_app f 0 = 0)%G.
 Proof.
 intros f.
@@ -408,7 +425,9 @@ Definition Ker {G H : AbGroup} (f : HomGr G H) :=
      gr_add_compat := gr_add_compat G;
      gr_inv_compat := gr_inv_compat G |}.
 
-(* x ∈ Coker f ↔ x ∈ H/Im f
+(* Group cokernel
+
+   x ∈ Coker f ↔ x ∈ H/Im f
    quotient group is H with setoid, i.e. set with its own equality *)
 
 Definition Coker_eq {G H} (f : HomGr G H) x y := (x - y)%G ∈ Im f.
@@ -450,9 +469,7 @@ split; [ apply gr_zero_mem | ].
 etransitivity; [ apply H_zero | ].
 symmetry.
 simpl.
-apply gr_eq_trans with (y := (0 - 0)%G).
--apply gr_add_compat; [ apply gr_add_inv_r | reflexivity ].
--apply gr_add_inv_r.
+now rewrite gr_add_inv_r, gr_sub_0_r.
 Qed.
 
 Theorem Coker_add_comm {G H} : ∀ (f : HomGr G H) x y,
@@ -601,6 +618,8 @@ Definition Coker {G H : AbGroup} (f : HomGr G H) :=
      gr_add_compat := Coker_add_compat f;
      gr_inv_compat := Coker_inv_compat f |}.
 
+(* Exact sequence *)
+
 Inductive sequence {A : AbGroup} :=
   | Seq1 : sequence
   | Seq2 : ∀ {B} (f : HomGr A B), @sequence B → sequence.
@@ -618,7 +637,8 @@ Fixpoint exact_sequence {A : AbGroup} (S : sequence) :=
       end
   end.
 
-(*      f
+(* Commuting diagram
+        f
     A------>B
     |       |
    g|       |h
@@ -630,6 +650,8 @@ Fixpoint exact_sequence {A : AbGroup} (S : sequence) :=
 Definition diagram_commutes {A B C D}
      (f : HomGr A B) (g : HomGr A C) (h : HomGr B D) (k : HomGr C D) :=
   ∀ x, (H_app h (H_app f x) = H_app k (H_app g x))%G.
+
+(* *)
 
 Theorem KK_mem_compat {A B A' B'} : ∀ (a : HomGr A A') (b : HomGr B B') f f',
   diagram_commutes f a b f'
@@ -743,6 +765,8 @@ simpl.
 now destruct (appcz x).
 Qed.
 
+(* Morphism f' in snake lemma is injective *)
+
 Theorem f'_is_inj {A' B'} {f' : HomGr A' B'} {za' : HomGr Gr0 A'} :
    Im za' == Ker f'
    → ∀ x y, x ∈ A' → y ∈ A' → (H_app f' x = H_app f' y)%G → (x = y)%G.
@@ -776,6 +800,8 @@ etransitivity; [ apply H5 | ].
 apply gr_add_0_l.
 Qed.
 
+(* Morphism f' (on cokernel) in snake lemma is injective *)
+
 Theorem f'c_is_inj
     {A A' B'} {f' : HomGr A' B'} {a : HomGr A A'} {za' : HomGr Gr0 A'} :
   Im za' == Ker f'
@@ -801,8 +827,12 @@ eapply (f'_is_inj sf'); [ apply a, A | | ].
     symmetry; apply gr_add_0_l.
 Qed.
 
+(* Property of g₁ function, inverse of snake lemma function g *)
+
 Definition g₁_prop {B C C'} g (c : HomGr C C') g₁ :=
   ∀ x : gr_set (Ker c), x ∈ C → g₁ x ∈ B ∧ (H_app g (g₁ x) = x)%G.
+
+(* Property of f'₁ function, inverse of snake lemma function f' *)
 
 Definition f'₁_prop
     {A A' B C B' C'} (a : HomGr A A') (b : HomGr B B') {c : HomGr C C'}
@@ -817,6 +847,8 @@ Proof.
 intros * Hg₁ * Hx.
 now specialize (Hg₁ x Hx) as H.
 Qed.
+
+(* *)
 
 Theorem exists_B'_to_Coker_a : ∀ {A A' B B' C C' g f'}
   {g' : HomGr B' C'} (a : HomGr A A') {b : HomGr B B'} {c : HomGr C C'} {g₁},
@@ -853,6 +885,8 @@ destruct (MemDec (Im b) y') as [Hy'| Hy'].
  split; [ apply (g₁_in_B Hg₁); now simpl in Hx' | ].
  now symmetry.
 Qed.
+
+(* Connecting homomorphism: d *)
 
 Theorem d_mem_compat
      {A A' B B' C C'} {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'}
@@ -1116,7 +1150,8 @@ apply (f'_is_inj sf') in Hfz.
 -now apply a.
 Qed.
 
-(* exact sequence Ker a → Ker b → Ker c *)
+(* Proof exact sequence: Ker a → Ker b → Ker c *)
+
 Theorem exact_sequence_1 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
      (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
@@ -1158,7 +1193,8 @@ split.
  etransitivity; [ symmetry; apply Hzz | apply H_zero ].
 Qed.
 
-(* exact sequence Ker b → Ker c → CoKer a *)
+(* Proof exact sequence: Ker b → Ker c → CoKer a *)
+
 Theorem exact_sequence_2 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
@@ -1267,7 +1303,8 @@ split.
  +eapply gr_mem_compat; [ apply Haz | now apply a ].
 Qed.
 
-(* exact sequence Ker c → CoKer a → Coker b *)
+(* Proof exact sequence: Ker c → CoKer a → Coker b *)
+
 Theorem exact_sequence_3 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
@@ -1402,7 +1439,8 @@ split.
   *apply B; [ now apply Hg₁, g | now apply B ].
 Qed.
 
-(* exact sequence CoKer a → CoKer b → Coker c *)
+(* Proof exact sequence: CoKer a → CoKer b → Coker c *)
+
 Theorem exact_sequence_4 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
@@ -1476,6 +1514,8 @@ split.
  rewrite Hfz', gr_add_comm, <- gr_add_assoc, gr_add_inv_l, gr_add_0_l.
  now apply H_inv, Hg₁.
 Qed.
+
+(* The final lemma *)
 
 Lemma snake :
   ∀ (A B C A' B' C' : AbGroup)
