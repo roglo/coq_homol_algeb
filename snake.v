@@ -1510,6 +1510,22 @@ split.
    exists z'; split; [ easy | ].
    now exists y.
  }
- exists (g₁ x).
-
-...
+ assert (Hby : y' - H_app b (g₁ x) ∈ Ker g'). {
+   split.
+   -apply B'; [ easy | now apply B', b, Hg₁ ].
+   -rewrite H_additive; [ | easy | now apply B', b, Hg₁ ].
+    rewrite <- Hcx, H_inv; [ | now apply b, Hg₁ ].
+    rewrite <- Hcgg'.
+    etransitivity; [ | apply gr_add_inv_r ].
+    apply gr_add_compat; [ easy | ].
+    apply gr_inv_compat.
+    apply H_app_compat; [ now apply g, Hg₁ | apply Hx | now apply Hg₁ ].
+ }
+ apply sg' in Hby.
+ destruct Hby as (z' & Hz' & Hfz').
+ exists (- g₁ x), z'.
+ split; [ now apply B, Hg₁ | ].
+ split; [ easy | ].
+ rewrite Hfz', gr_add_comm, <- gr_add_assoc, gr_add_inv_l, gr_add_0_l.
+ now apply H_inv, Hg₁.
+Qed.
