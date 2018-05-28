@@ -1,7 +1,9 @@
-TARGET=snake.vo five.vo
+TARGET=snake.vo
 FILESFORDEP=`LC_ALL=C ls *.v`
 
-all: $(TARGET)
+allok: $(TARGET)
+
+all: $(TARGET) five.vo
 
 clean:
 	rm -f *.glob *.vo *.cm[iox] *.out *.o
