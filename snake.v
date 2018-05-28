@@ -1005,35 +1005,24 @@ assert (Hy1 : y1 ∈ B) by apply (g₁_in_B Hg₁), Hx1.
 assert (Hy2 : y2 ∈ B) by apply (g₁_in_B Hg₁), Hx2.
 assert (Hy3 : y3 ∈ B) by (apply (g₁_in_B Hg₁), C; [ apply Hx1 | apply Hx2 ]).
 assert (H4 : (y1 + y2 - y3)%G ∈ Ker g). {
-  split.
-  -now apply B; apply B.
-  -etransitivity; [ now apply H_additive; apply B | ].
-   symmetry; apply gr_sub_move_r.
-   etransitivity; [ apply gr_add_0_l | ].
-   etransitivity; [ now apply gr_inv_compat, H_inv | ].
-   etransitivity; [ apply gr_inv_involutive | ].
-   etransitivity.
-   +apply Hg₁, C; [ apply Hx1 | apply Hx2 ].
-   +symmetry; etransitivity; [ now apply H_additive | ].
-    etransitivity.
-    *apply gr_add_compat; [ apply H1 | apply H2 ].
-    *reflexivity.
+  split; [ now apply B; apply B | ].
+  rewrite H_additive; [ | now apply B | now apply B ].
+  symmetry; apply gr_sub_move_r.
+  rewrite gr_add_0_l, H_inv; [ | easy ].
+  rewrite gr_inv_involutive, H3.
+  apply Hg₁, C; [ apply Hx1 | apply Hx2 ].
 }
 assert (Hfx1 : (H_app f' z1 = H_app b y1)%G). {
-  apply Hf'₁; exists x1.
-  split; [ easy | reflexivity ].
+  now apply Hf'₁; exists x1.
 }
 assert (Hfx2 : (H_app f' z2 = H_app b y2)%G). {
-  apply Hf'₁; exists x2.
-  split; [ easy | reflexivity ].
+  now apply Hf'₁; exists x2.
 }
 assert (Hfx3 : (H_app f' z3 = H_app b y3)%G). {
   unfold z3, y3.
   apply Hf'₁.
   exists x3.
-  split; [ | reflexivity ].
-  unfold x3.
-  now apply (Ker c).
+  split; [ now apply (Ker c)| easy ].
 }
 assert
   (Hfzzz :
@@ -1041,69 +1030,50 @@ assert
   assert (Hz1A' : z1 ∈ A' ∧ z2 ∈ A' ∧ z3 ∈ A'). {
     assert (H : z1 ∈ A' ∧ z2 ∈ A'). {
       split.
-      -apply Hf'₁.
-       exists x1; split; [ easy | reflexivity ].
-      -apply Hf'₁.
-       exists x2; split; [ easy | reflexivity ].
+      -now apply Hf'₁; exists x1.
+      -now apply Hf'₁; exists x2.
     }
     split; [ easy | ].
     split; [ easy | ].
     unfold z3.
     apply Hf'₁.
-    exists x3; split; [ | reflexivity ].
-    unfold x3.
-    now apply (Ker c).
+    exists x3; split; [ now apply (Ker c) | easy ].
   }
-  etransitivity; simpl.
-  -now apply H_additive; apply A'.
-  -apply gr_add_compat.
-   +etransitivity; [ now apply H_additive | ].
-    now apply gr_add_compat.
-   +etransitivity; [ now apply H_inv | ].
-    now apply gr_inv_compat.
+  simpl; rewrite H_additive; [ | now apply A' | now apply A' ].
+  apply gr_add_compat.
+  -rewrite H_additive; [ now apply gr_add_compat | easy | easy ].
+  -rewrite H_inv; [ now apply gr_inv_compat | easy ].
 }
 apply sf in H4.
 destruct H4 as (z & Hz & Hzf).
 assert (Hfz : (H_app f' (z1 + z2 - z3) = H_app f' (H_app a z))%G). {
-  etransitivity; [ apply Hfzzz | ].
+  rewrite Hfzzz.
   etransitivity.
-  -apply gr_add_compat; [ now symmetry; apply b | ].
-   +now symmetry; apply H_inv.
-  -etransitivity.
-   +now symmetry; apply H_additive; apply B.
-   +etransitivity.
-    *apply H_app_compat; [ | | symmetry; apply Hzf ].
-    --now apply B; apply B.
-    --now apply f.
-    *apply Hcff'.
+  -apply gr_add_compat; [ now symmetry; apply b | now symmetry; apply H_inv ].
+  -rewrite <- H_additive; [ | now apply B | now apply B ].
+   rewrite <- Hcff'.
+   apply b; [ | now apply f | now apply B; apply B ].
+   rewrite <- Hzf.
+   now apply f.
 }
-apply (f'_is_inj sf') in Hfz.
+apply (f'_is_inj sf') in Hfz; [ | | now apply a ].
 -simpl; unfold Coker_eq; simpl.
  exists (- z).
  split; [ now apply A | ].
- etransitivity; [ now apply H_inv | ].
- etransitivity; [ apply gr_inv_compat; symmetry; apply Hfz | ].
- symmetry.
- etransitivity; [ apply gr_add_comm | ].
- etransitivity.
- +apply gr_add_compat; [ apply gr_inv_add_distr | reflexivity ].
- +symmetry.
-  etransitivity.
-  *simpl; apply gr_inv_add_distr.
-  *apply gr_add_compat; [ apply gr_inv_add_distr | ].
-   apply gr_inv_involutive.
+ rewrite H_inv; [ | easy ].
+ rewrite <- Hfz.
+ symmetry; rewrite gr_add_comm.
+ rewrite gr_inv_add_distr.
+ apply gr_eq_inv_l.
+ rewrite gr_inv_add_distr.
+ simpl; apply gr_add_compat; [ | easy ].
+ rewrite gr_inv_add_distr.
+ now do 2 rewrite gr_inv_involutive.
 -apply A'.
- +apply A'.
-  *apply Hf'₁; exists x1.
-   split; [ easy | reflexivity ].
-  *apply Hf'₁; exists x2.
-   split; [ easy | reflexivity ].
+ +apply A'; [ now apply Hf'₁; exists x1 | now apply Hf'₁; exists x2 ].
  +apply A'.
   apply Hf'₁; exists x3.
-  split; [ | reflexivity ].
-  unfold x3.
-  now apply (Ker c).
--now apply a.
+  split; [ now apply (Ker c) | easy ].
 Qed.
 
 (* Proof exact sequence: Ker a → Ker b → Ker c *)
