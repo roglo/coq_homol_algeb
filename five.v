@@ -113,8 +113,11 @@ assert
      etransitivity.
      -apply j'; [ now apply d, d₁, h' | | apply Hdd₁ ].
       now apply h'.
-     -idtac.
+     -
 (* perhaps should make a lemma for this case... *)
+...
+   }
+   destruct H as (Hj & Hej).
 ...
    assert (H : Happ d₁ (Happ h' x') ∈ Ker j). {
      split; [ now apply d₁, h' | ].
