@@ -7,16 +7,16 @@ Require Import AbGroup.
 
 Definition is_mono {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : HomGr C A),
-  (∀ x, H_app f (H_app g₁ x) = H_app f (H_app g₂ x))
-  → (∀ x, H_app g₂ x = H_app g₂ x).
+  (∀ x, Happ f (Happ g₁ x) = Happ f (Happ g₂ x))
+  → (∀ x, Happ g₂ x = Happ g₂ x).
 
 Definition is_epi {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : HomGr B C),
-  (∀ x, H_app g₁ (H_app f x) = H_app g₂ (H_app f x))
-  → (∀ y, H_app g₂ y = H_app g₂ y).
+  (∀ x, Happ g₁ (Happ f x) = Happ g₂ (Happ f x))
+  → (∀ y, Happ g₂ y = Happ g₂ y).
 
 Definition is_iso {A B} (f : HomGr A B) :=
-  ∃ g : HomGr B A, (∀ x, H_app g (H_app f x) = x) ∧ (∀ y, H_app f (H_app g y) = y).
+  ∃ g : HomGr B A, (∀ x, Happ g (Happ f x) = x) ∧ (∀ y, Happ f (Happ g y) = y).
 
 (* The five lemma
          f      g       h        j
@@ -54,17 +54,29 @@ Lemma five :
   → is_iso c.
 Proof.
 intros * Hcff' Hcgg' Hchh' Hcjj' s s' (Hea & Hib & Hid & Hme).
-destruct Hib as (b' & Hb'b & Hbb').
-destruct Hid as (d' & Hd'd & Hdd').
+destruct Hib as (b₁ & Hb₁b & Hbb₁).
+destruct Hid as (d₁ & Hd₁d & Hdd₁).
 unfold is_epi in Hea.
 unfold is_mono in Hme.
-move b' before s'; move d' before b'.
+move b₁ before s'; move d₁ before b₁.
 unfold is_iso.
 enough
   (H : ∃ c',
-   (∀ x : gr_set C, H_app c' (H_app c x) = x) ∧
-   (∀ y : gr_set C', H_app c (H_app c' y) = y)). {
+   (∀ x : gr_set C, Happ c' (Happ c x) = x) ∧
+   (∀ y : gr_set C', Happ c (Happ c' y) = y)). {
   destruct H as (c' & Hc'c & Hcc').
   now exists c'.
 }
+assert
+  (H : ∀ x', ∃ x, x' ∈ C' → x ∈ C ∧ (Happ h x = Happ d₁ (Happ h' x'))%G). {
+  intros x'.
+  destruct (MemDec C' x') as [Hx'| Hx'].
+  -assert (H : Happ d₁ (Happ h' x') ∈ Ker j). {
+     split; [ now apply d₁, h' | ].
+(* I should:
+   -either define Hcomp = composition of morphisms
+   -or define is_mono as is_inj like in snake.v *)
+...
+specialize (Hme _ (Happ j (Happ d₁ (Happ h' x')))) as H1.
+     eapply Hme.
 ...

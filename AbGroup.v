@@ -79,19 +79,19 @@ Open Scope group_scope.
 (* Homomorphism between groups *)
 
 Record HomGr (A B : AbGroup) :=
-  { H_app : gr_set A → gr_set B;
-    H_mem_compat : ∀ x, x ∈ A → H_app x ∈ B;
-    H_app_compat : ∀ x y,
-      x ∈ A → y ∈ A → (x = y)%G → (H_app x = H_app y)%G;
-    H_additive : ∀ x y,
-      x ∈ A → y ∈ A → (H_app (x + y) = H_app x + H_app y)%G }.
+  { Happ : gr_set A → gr_set B;
+    Hmem_compat : ∀ x, x ∈ A → Happ x ∈ B;
+    Happ_compat : ∀ x y,
+      x ∈ A → y ∈ A → (x = y)%G → (Happ x = Happ y)%G;
+    Hadditive : ∀ x y,
+      x ∈ A → y ∈ A → (Happ (x + y) = Happ x + Happ y)%G }.
 
 (* coq stuff: implicit and renamed arguments *)
 
-Arguments H_app [A] [B].
-Arguments H_mem_compat _ _ f : rename.
-Arguments H_app_compat _ _ f : rename.
-Arguments H_additive _ _ f : rename.
+Arguments Happ [A] [B].
+Arguments Hmem_compat _ _ f : rename.
+Arguments Happ_compat _ _ f : rename.
+Arguments Hadditive _ _ f : rename.
 
 (* Equality (gr_eq) in groups is an equivalence relation *)
 
@@ -160,7 +160,7 @@ Add Parametric Relation {G} : _ (@gr_mem_eq G)
  transitivity proved by gr_mem_trans
  as gr_mem_rel.
 
-Definition M_app A B (f : HomGr A B) (x : gr_elem A) := H_app f (proj1_sig x).
+Definition M_app A B (f : HomGr A B) (x : gr_elem A) := Happ f (proj1_sig x).
 
 Add Parametric Morphism {G H} : (M_app G H)
   with signature eq ==> gr_mem_eq G ==> @gr_eq H
@@ -169,7 +169,7 @@ Proof.
 intros f (x, Hx) (y, Hy) Hxy.
 unfold gr_mem_eq in Hxy; simpl in Hxy.
 unfold M_app; simpl.
-now apply H_app_compat.
+now apply Happ_compat.
 Qed.
 *)
 
@@ -255,38 +255,38 @@ Qed.
 
 (* Theorems on homomorphisms *)
 
-Theorem H_zero : ∀ A B (f : HomGr A B), (H_app f 0 = 0)%G.
+Theorem Hzero : ∀ A B (f : HomGr A B), (Happ f 0 = 0)%G.
 Proof.
 intros.
 assert (H1 : (@gr_zero A + 0 = 0)%G) by apply A.
-assert (H2 : (H_app f 0 + H_app f 0 = H_app f 0)%G). {
-  rewrite <- H_additive; [ | apply A | apply A ].
+assert (H2 : (Happ f 0 + Happ f 0 = Happ f 0)%G). {
+  rewrite <- Hadditive; [ | apply A | apply A ].
   apply f; [ apply A; apply A | apply A | easy ].
 }
-assert (H3 : (H_app f 0 + H_app f 0 - H_app f 0 = H_app f 0 - H_app f 0)%G). {
+assert (H3 : (Happ f 0 + Happ f 0 - Happ f 0 = Happ f 0 - Happ f 0)%G). {
   apply gr_add_compat; [ apply H2 | easy ].
 }
-assert (H4 : (H_app f 0 + H_app f 0 - H_app f 0 = 0)%G). {
+assert (H4 : (Happ f 0 + Happ f 0 - Happ f 0 = 0)%G). {
   rewrite H3; apply gr_add_inv_r.
 }
 rewrite <- H4.
 now rewrite gr_add_assoc, gr_add_inv_r, gr_add_0_r.
 Qed.
 
-Theorem H_inv : ∀ A B (f : HomGr A B) x,
-  x ∈ A → (H_app f (- x) = - H_app f x)%G.
+Theorem Hinv : ∀ A B (f : HomGr A B) x,
+  x ∈ A → (Happ f (- x) = - Happ f x)%G.
 Proof.
 intros * Hx.
 assert (H1 : (x - x = 0)%G) by apply A.
-assert (H2 : (H_app f (x - x) = H_app f 0)%G). {
-  apply H_app_compat; [ now apply A, A | apply A | apply H1 ].
+assert (H2 : (Happ f (x - x) = Happ f 0)%G). {
+  apply Happ_compat; [ now apply A, A | apply A | apply H1 ].
 }
-assert (H3 : (H_app f x + H_app f (- x) = H_app f 0)%G). {
+assert (H3 : (Happ f x + Happ f (- x) = Happ f 0)%G). {
   rewrite <- H2.
-  symmetry; apply H_additive; [ easy | now apply A ].
+  symmetry; apply Hadditive; [ easy | now apply A ].
 }
-assert (H4 : (H_app f x + H_app f (- x) = 0)%G). {
-  rewrite H3; apply H_zero.
+assert (H4 : (Happ f x + Happ f (- x) = 0)%G). {
+  rewrite H3; apply Hzero.
 }
 symmetry; rewrite <- gr_add_0_l.
 apply gr_sub_move_l.
@@ -296,40 +296,40 @@ Qed.
 (* Images *)
 
 Theorem Im_zero_mem {G H} : ∀ (f : HomGr G H),
-  ∃ a : gr_set G, a ∈ G ∧ (H_app f a = 0)%G.
+  ∃ a : gr_set G, a ∈ G ∧ (Happ f a = 0)%G.
 Proof.
 intros.
 exists 0%G.
-split; [ apply gr_zero_mem | apply H_zero ].
+split; [ apply gr_zero_mem | apply Hzero ].
 Qed.
 
 Theorem Im_add_mem {G H} : ∀ f (x y : gr_set H),
-  (∃ a : gr_set G, a ∈ G ∧ (H_app f a = x)%G)
-  → (∃ a : gr_set G, a ∈ G ∧ (H_app f a = y)%G)
-  → ∃ a : gr_set G, a ∈ G ∧ (H_app f a = x + y)%G.
+  (∃ a : gr_set G, a ∈ G ∧ (Happ f a = x)%G)
+  → (∃ a : gr_set G, a ∈ G ∧ (Happ f a = y)%G)
+  → ∃ a : gr_set G, a ∈ G ∧ (Happ f a = x + y)%G.
 Proof.
 intros f y y' (x & Hxg & Hx) (x' & Hx'g & Hx').
 exists (gr_add x x').
 split; [ now apply G | ].
-rewrite H_additive; [ | easy | easy ].
+rewrite Hadditive; [ | easy | easy ].
 now apply gr_add_compat.
 Qed.
 
 Theorem Im_inv_mem {G H} : ∀ (f : HomGr G H) (x : gr_set H),
-  (∃ a : gr_set G, a ∈ G ∧ (H_app f a = x)%G)
-  → ∃ a : gr_set G, a ∈ G ∧ (H_app f a = - x)%G.
+  (∃ a : gr_set G, a ∈ G ∧ (Happ f a = x)%G)
+  → ∃ a : gr_set G, a ∈ G ∧ (Happ f a = - x)%G.
 Proof.
 intros f x (y & Hy & Hyx).
 exists (gr_inv y).
 split; [ now apply gr_inv_mem | ].
 rewrite <- Hyx.
-now apply H_inv.
+now apply Hinv.
 Qed.
 
 Theorem Im_mem_compat {G H} : ∀ f (x y : gr_set H),
   (x = y)%G
-  → (∃ a, a ∈ G ∧ (H_app f a = x)%G)
-  → ∃ a, a ∈ G ∧ (H_app f a = y)%G.
+  → (∃ a, a ∈ G ∧ (Happ f a = x)%G)
+  → ∃ a, a ∈ G ∧ (Happ f a = y)%G.
 intros * Hxy (z & Hz & Hfz).
 exists z.
 split; [ easy | now rewrite Hfz ].
@@ -339,7 +339,7 @@ Definition Im {G H : AbGroup} (f : HomGr G H) :=
   {| gr_set := gr_set H;
      gr_zero := gr_zero;
      gr_eq := @gr_eq H;
-     gr_mem := λ b, ∃ a, a ∈ G ∧ (H_app f a = b)%G;
+     gr_mem := λ b, ∃ a, a ∈ G ∧ (Happ f a = b)%G;
      gr_add := @gr_add H;
      gr_inv := @gr_inv H;
      gr_zero_mem := Im_zero_mem f;
@@ -356,35 +356,35 @@ Definition Im {G H : AbGroup} (f : HomGr G H) :=
 
 (* Kernels *)
 
-Theorem Ker_zero_mem {G H} : ∀ (f : HomGr G H), 0%G ∈ G ∧ (H_app f 0 = 0)%G.
+Theorem Ker_zero_mem {G H} : ∀ (f : HomGr G H), 0%G ∈ G ∧ (Happ f 0 = 0)%G.
 Proof.
 intros f.
-split; [ apply gr_zero_mem | apply H_zero ].
+split; [ apply gr_zero_mem | apply Hzero ].
 Qed.
 
 Theorem Ker_add_mem {G H} : ∀ (f : HomGr G H) (x y : gr_set G),
-  x ∈ G ∧ (H_app f x = 0)%G
-  → y ∈ G ∧ (H_app f y = 0)%G → (x + y)%G ∈ G ∧ (H_app f (x + y) = 0)%G.
+  x ∈ G ∧ (Happ f x = 0)%G
+  → y ∈ G ∧ (Happ f y = 0)%G → (x + y)%G ∈ G ∧ (Happ f (x + y) = 0)%G.
 Proof.
 intros f x x' (Hx, Hfx) (Hx', Hfx').
 split; [ now apply gr_add_mem | ].
-rewrite H_additive; [ | easy | easy ].
+rewrite Hadditive; [ | easy | easy ].
 rewrite Hfx, Hfx'.
 apply gr_add_0_r.
 Qed.
 
 Theorem Ker_inv_mem {G H} : ∀ (f : HomGr G H) (x : gr_set G),
-  x ∈ G ∧ (H_app f x = 0)%G → (- x)%G ∈ G ∧ (H_app f (- x) = 0)%G.
+  x ∈ G ∧ (Happ f x = 0)%G → (- x)%G ∈ G ∧ (Happ f (- x) = 0)%G.
 Proof.
 intros f x (Hx & Hfx).
 split; [ now apply gr_inv_mem | ].
-rewrite H_inv; [ | easy ].
+rewrite Hinv; [ | easy ].
 rewrite Hfx.
 apply gr_inv_zero.
 Qed.
 
 Theorem Ker_mem_compat {G H} : ∀ (f : HomGr G H) x y,
-  (x = y)%G → x ∈ G ∧ (H_app f x = 0)%G → y ∈ G ∧ (H_app f y = 0)%G.
+  (x = y)%G → x ∈ G ∧ (Happ f x = 0)%G → y ∈ G ∧ (Happ f y = 0)%G.
 Proof.
 intros * Hxy (ax, Hx).
 split.
@@ -398,7 +398,7 @@ Definition Ker {G H : AbGroup} (f : HomGr G H) :=
   {| gr_set := gr_set G;
      gr_zero := gr_zero;
      gr_eq := @gr_eq G;
-     gr_mem := λ a, a ∈ G ∧ (H_app f a = gr_zero)%G;
+     gr_mem := λ a, a ∈ G ∧ (Happ f a = gr_zero)%G;
      gr_add := @gr_add G;
      gr_inv := @gr_inv G;
      gr_zero_mem := Ker_zero_mem f;
@@ -453,4 +453,10 @@ Arguments exact_sequence _ S%S.
 
 Definition diagram_commutes {A B C D}
      (f : HomGr A B) (g : HomGr A C) (h : HomGr B D) (k : HomGr C D) :=
-  ∀ x, (H_app h (H_app f x) = H_app k (H_app g x))%G.
+  ∀ x, (Happ h (Happ f x) = Happ k (Happ g x))%G.
+
+(* We sometimes need axiom of choice and that membership be decidable *)
+
+Axiom ClassicalChoice : ∀ {A B} (R : A → B → Prop),
+   (∀ x : A, ∃ y : B, R x y) → ∃ f : A → B, ∀ x : A, R x (f x).
+Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.
