@@ -50,15 +50,15 @@ Lemma five :
   → diagram_commutes j d e j'
   → exact_sequence [f; g; h; j]
   → exact_sequence [f'; g'; h'; j']
-  → is_iso b ∧ is_iso d ∧ is_epi a ∧ is_mono e
+  → is_epi a ∧ is_iso b ∧ is_iso d ∧ is_mono e
   → is_iso c.
 Proof.
-intros * Hcff' Hcgg' Hchh' Hcjj' s s' (Hib & Hid & Hea & Hme).
+intros * Hcff' Hcgg' Hchh' Hcjj' s s' (Hea & Hib & Hid & Hme).
 destruct Hib as (b' & Hb'b & Hbb').
 destruct Hid as (d' & Hd'd & Hdd').
-move d' before b'.
 unfold is_epi in Hea.
 unfold is_mono in Hme.
+move b' before s'; move d' before b'.
 unfold is_iso.
 enough
   (H : ∃ c',
