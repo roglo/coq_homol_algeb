@@ -143,9 +143,18 @@ now unfold gr_mem_eq.
 Qed.
 
 Theorem gr_mem_symm {A} : Symmetric (gr_mem_eq A).
-...
+Proof.
+intros (x & Hx) (y & Hy).
+unfold gr_mem_eq; simpl; intros Hxy.
+now symmetry.
+Qed.
+
 Theorem gr_mem_trans {A} : Transitive (gr_mem_eq A).
-...
+Proof.
+intros (x & Hx) (y & Hy) (z & Hz).
+unfold gr_mem_eq; simpl; intros Hxy Hyz.
+now transitivity y.
+Qed.
 
 Add Parametric Relation {G} : _ (@gr_mem_eq G)
  reflexivity proved by gr_mem_refl
@@ -157,7 +166,7 @@ Definition M_app A B (f : HomGr A B) (x : gr_elem A) := H_app f (proj1_sig x).
 
 Add Parametric Morphism {G H} : (M_app G H)
   with signature eq ==> gr_mem_eq G ==> @gr_eq H
-  as gr_app_morph.
+  as M_app_morph.
 Proof.
 intros f (x, Hx) (y, Hy) Hxy.
 unfold gr_mem_eq in Hxy; simpl in Hxy.
@@ -1092,11 +1101,10 @@ split.
  *transitivity (H_app b (H_app f x)).
  --apply b; [ | now apply f | now symmetry ].
    eapply gr_mem_compat; [ apply Hxy | now apply f ].
- --etransitivity; [ apply Hcff' | ].
+ --rewrite Hcff'.
    transitivity (H_app f' (@gr_zero A')); [ | apply H_zero ].
    apply f'; [ now apply a | apply A' | easy ].
- *apply sf.
-  exists x; easy.
+ *now apply sf; exists x.
 +intros y ((Hy & Hby) & Hgy).
  assert (H : y ∈ Im f) by now apply sf; split.
  destruct H as (x & Hx & Hxy).
@@ -1105,16 +1113,15 @@ split.
  specialize (proj2 sf' (H_app a x)) as H1.
  assert (H3 : H_app a x ∈ Ker f'). {
    split; [ now apply a | ].
-   specialize (Hcff' x) as H3.
-   etransitivity; [ symmetry; apply H3 | ].
+   rewrite <- Hcff'.
    transitivity (H_app b y); [ | easy ].
-   apply b; [ | easy | easy ].
-   now apply f.
+   apply b; [ now apply f | easy | easy ].
  }
  specialize (H1 H3).
  destruct H1 as (z & _ & Hzz).
+ rewrite <- Hzz.
  destruct z.
- etransitivity; [ symmetry; apply Hzz | apply H_zero ].
+ apply H_zero.
 Qed.
 
 (* Proof exact sequence: Ker b → Ker c → CoKer a *)
@@ -1142,13 +1149,13 @@ split.
   transitivity (H_app c (H_app g y)).
   *eapply c; [ | now apply g | now apply C ].
    eapply C; [ apply Hyx | now apply g ].
-  *etransitivity; [ apply H1 | ].
+  *rewrite H1.
    transitivity (H_app g' (@gr_zero B')); [ | apply H_zero ].
    apply g'; [ now apply b | apply B' | easy ].
  +simpl in Hyx.
   assert (Hgy : H_app g y ∈ Ker c). {
     split; [ now apply g | ].
-    etransitivity; [ apply Hcgg' | ].
+    rewrite Hcgg'.
     etransitivity; [ | apply H_zero ].
     apply g'; [ now apply b | apply B' | easy ].
   }
@@ -1163,13 +1170,12 @@ split.
   assert (Hyk : g₁ x - y ∈ Ker g). {
     split.
     -apply B; [ apply (g₁_in_B Hg₁), Hxk | now apply B ].
-    -etransitivity.
-     +apply H_additive; [ apply (g₁_in_B Hg₁), Hxk | now apply B ].
-     +etransitivity.
-      *apply gr_add_compat; [ apply Hg₁, Hxk | ].
-       now simpl; apply H_inv.
-      *apply gr_sub_move_r; rewrite <- Hyx.
-       symmetry; apply gr_add_0_l.
+    -rewrite H_additive; [ | apply (g₁_in_B Hg₁), Hxk | now apply B ].
+     etransitivity.
+     *apply gr_add_compat; [ apply Hg₁, Hxk | ].
+      now simpl; apply H_inv.
+     *apply gr_sub_move_r; rewrite <- Hyx.
+      symmetry; apply gr_add_0_l.
   }
   apply sf in Hyk.
   destruct Hyk as (z & Hz & Haz).
@@ -1177,22 +1183,19 @@ split.
     apply (f'c_is_inj sf'); [ | now apply a | ].
     -now apply (d_mem_compat Hf'₁).
     -etransitivity; [ apply Hf'₁; now exists x | ].
-     symmetry.
-     etransitivity; [ symmetry; apply Hcff' | ].
+     rewrite <- Hcff'; symmetry.
      etransitivity.
      +apply H_app_compat; [ | | apply Haz ].
       *apply H_mem_compat, Hz.
       *apply B; [ apply (g₁_in_B Hg₁), Hxk | now apply B ].
-     +etransitivity.
-      *apply H_additive; [ apply (g₁_in_B Hg₁), Hxk | now apply B ].
+     +rewrite H_additive; [ | apply (g₁_in_B Hg₁), Hxk | now apply B ].
+      etransitivity.
+      *apply gr_add_compat; [ easy | now simpl; apply H_inv ].
       *etransitivity.
-      --apply gr_add_compat; [ easy | now simpl; apply H_inv ].
-      --etransitivity.
-       ++apply gr_add_compat; [ easy | apply gr_inv_compat, Hay ].
-       ++etransitivity; [ apply gr_sub_0_r | ].
-         apply b; [ | | easy ].
-        **apply (g₁_in_B Hg₁), Hxk.
-        **apply (g₁_in_B Hg₁), Hxk.
+      --apply gr_add_compat; [ easy | apply gr_inv_compat, Hay ].
+      --rewrite gr_sub_0_r.
+        apply b; [ apply (g₁_in_B Hg₁), Hxk | apply (g₁_in_B Hg₁), Hxk | ].
+        easy.
   }
   rewrite Hd.
   simpl; rewrite Hdx.
@@ -1213,19 +1216,16 @@ split.
    etransitivity.
   --apply gr_add_compat; [ easy | now apply H_inv, f ].
   --apply gr_sub_move_r; rewrite gr_add_0_l; symmetry.
-    etransitivity; [ apply Haz | ].
-    etransitivity; [ now apply Hf'₁; exists x | easy ].
-  *etransitivity.
-  --apply H_additive; [ apply Hg₁, Hx | now apply B, f ].
+    now rewrite Haz; apply Hf'₁; exists x.
+  *rewrite H_additive; [ | apply Hg₁, Hx | now apply B, f ].
   --etransitivity.
    ++apply gr_add_compat; [ easy | now apply H_inv, f ].
    ++apply gr_sub_move_l.
-    etransitivity; [ apply Hg₁, Hx | ].
-    symmetry.
-    etransitivity; [ | apply gr_add_0_l ].
-    apply gr_add_compat; [ | easy ].
-    enough (H1 : H_app f z ∈ Ker g) by now simpl in H1.
-    now apply sf; exists z.
+     etransitivity; [ apply Hg₁, Hx | ].
+     rewrite <- gr_add_0_l at 1.
+     apply gr_add_compat; [ | easy ].
+     enough (H1 : H_app f z ∈ Ker g) by now simpl in H1.
+     now apply sf; exists z.
  +eapply gr_mem_compat; [ apply Haz | now apply a ].
 Qed.
 
