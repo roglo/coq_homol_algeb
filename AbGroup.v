@@ -455,6 +455,34 @@ Definition diagram_commutes {A B C D}
      (f : HomGr A B) (g : HomGr A C) (h : HomGr B D) (k : HomGr C D) :=
   ∀ x, (Happ h (Happ f x) = Happ k (Happ g x))%G.
 
+(* The trivial group *)
+
+Inductive Gr0_set := G0 : Gr0_set.
+
+Theorem Gr0_add_0_l : ∀ x, (λ _ _ : Gr0_set, G0) G0 x = x.
+Proof.
+now intros x; destruct x.
+Qed.
+
+Definition Gr0 :=
+   {| gr_set := Gr0_set;
+      gr_mem _ := True;
+      gr_eq := eq;
+      gr_zero := G0;
+      gr_add _ _ := G0;
+      gr_inv x := x;
+      gr_zero_mem := I;
+      gr_add_mem _ _ _ _ := I;
+      gr_add_0_l := Gr0_add_0_l;
+      gr_add_assoc _ _ _ := eq_refl G0;
+      gr_inv_mem _ H := H;
+      gr_add_inv_r _ := eq_refl;
+      gr_add_comm _ _ := eq_refl G0;
+      gr_equiv := eq_equivalence;
+      gr_mem_compat _ _ _ _ := I;
+      gr_add_compat _ _ _ _ _ _ := eq_refl;
+      gr_inv_compat _ _ H := H |}.
+
 (* We sometimes need axiom of choice and that membership be decidable *)
 
 Axiom ClassicalChoice : ∀ {A B} (R : A → B → Prop),

@@ -8,15 +8,49 @@ Require Import AbGroup.
 Definition is_mono {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : HomGr C A),
   (∀ x, Happ f (Happ g₁ x) = Happ f (Happ g₂ x))
-  → (∀ x, Happ g₂ x = Happ g₂ x).
+  → (∀ x, Happ g₁ x = Happ g₂ x).
 
 Definition is_epi {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : HomGr B C),
   (∀ x, Happ g₁ (Happ f x) = Happ g₂ (Happ f x))
-  → (∀ y, Happ g₂ y = Happ g₂ y).
+  → (∀ y, Happ g₁ y = Happ g₂ y).
 
 Definition is_iso {A B} (f : HomGr A B) :=
   ∃ g : HomGr B A, (∀ x, Happ g (Happ f x) = x) ∧ (∀ y, Happ f (Happ g y) = y).
+
+(* Composition of homomorphims *)
+
+Theorem comp_mem_compat {A B C} (f : HomGr A B) (g : HomGr B C) :
+  ∀ x : gr_set A, x ∈ A → Happ g (Happ f x) ∈ C.
+Proof.
+intros x Hx.
+now apply g, f.
+Qed.
+
+Theorem comp_app_compat {A B C} (f : HomGr A B) (g : HomGr B C) :
+  ∀ x y : gr_set A,
+  x ∈ A → y ∈ A → (x = y)%G → (Happ g (Happ f x) = Happ g (Happ f y))%G.
+Proof.
+intros * Hx Hy Hxy.
+apply Happ_compat; now apply f.
+Qed.
+
+Theorem comp_additive {A B C} (f : HomGr A B) (g : HomGr B C) :
+  ∀ x y : gr_set A,
+  x ∈ A
+  → y ∈ A
+  → (Happ g (Happ f (x + y)) = Happ g (Happ f x) + Happ g (Happ f y))%G.
+Proof.
+intros * Hx Hy.
+rewrite <- Hadditive; [ | now apply f | now apply f ].
+apply g; [ now apply f, A | now apply B; apply f | now apply Hadditive ].
+Qed.
+
+Definition Hcomp {A B C} (g : HomGr B C) (f : HomGr A B) :=
+  {| Happ x := Happ g (Happ f x);
+     Hmem_compat := comp_mem_compat f g;
+     Happ_compat := comp_app_compat f g;
+     Hadditive := comp_additive f g |}.
 
 (* The five lemma
          f      g       h        j
@@ -73,10 +107,7 @@ assert
   destruct (MemDec C' x') as [Hx'| Hx'].
   -assert (H : Happ d₁ (Happ h' x') ∈ Ker j). {
      split; [ now apply d₁, h' | ].
-(* I should:
-   -either define Hcomp = composition of morphisms
-   -or define is_mono as is_inj like in snake.v *)
-...
-specialize (Hme _ (Happ j (Happ d₁ (Happ h' x')))) as H1.
-     eapply Hme.
+     specialize (Hme _ (Hcomp j (Hcomp d₁ h'))) as H1.
+(* faire plutôt le morphisme de 0 dans E
+   ouais, enfin bon, faut voir... *)
 ...
