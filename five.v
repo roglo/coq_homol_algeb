@@ -53,4 +53,5 @@ Lemma five :
   → is_iso b ∧ is_iso d ∧ is_epi a ∧ is_mono e
   → is_iso c.
 Proof.
+intros * Hcff' Hcgg' Hchh' Hcjj' s s' (Hib & Hid & Hea & Hme).
 ...
