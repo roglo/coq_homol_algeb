@@ -916,11 +916,13 @@ destruct H2 as (z'2 & Hz'2 & Hfz'2).
 move z'2 before z'1; move Hz'2 before Hz'1.
 assert (H3 : (H_app f' (z'1 - z'2) = H_app b (g₁ x1 - g₁ x2))%G). {
   rewrite H_additive; [ | easy | now apply A' ].
-  rewrite H_additive; [ | apply (g₁_in_B Hg₁), Hx1 | apply B, (g₁_in_B Hg₁), Hx2 ].
-  apply gr_add_compat; [ apply Hfz'1 | ].
-  rewrite H_inv; [ | easy ].
-  rewrite H_inv; [ | apply Hg₁, Hx2 ].
-  now rewrite Hfz'2.
+  rewrite H_additive.
+  -apply gr_add_compat; [ apply Hfz'1 | ].
+   rewrite H_inv; [ | easy ].
+   rewrite H_inv; [ | apply Hg₁, Hx2 ].
+   now rewrite Hfz'2.
+  -apply (g₁_in_B Hg₁), Hx1.
+  -apply B, (g₁_in_B Hg₁), Hx2.
 }
 assert (H4 : g₁ x1 - g₁ x2 ∈ Im f). {
   apply sf.
@@ -995,13 +997,9 @@ set (z3 := d x3).
 assert (H1 : (H_app g y1 = x1)%G) by now apply Hg₁; simpl in Hx1.
 assert (H2 : (H_app g y2 = x2)%G) by now apply Hg₁; simpl in Hx2.
 assert (H3 : (H_app g (y1 + y2)%G = x3)%G). {
-  etransitivity.
-  -apply H_additive.
-   +now apply (g₁_in_B Hg₁); simpl in Hx1.
-   +now apply (g₁_in_B Hg₁); simpl in Hx2.
-  -etransitivity.
-   +apply gr_add_compat; [ apply H1 | apply H2 ].
-   +reflexivity.
+  rewrite H_additive; [ now rewrite H1, H2 | | ].
+  -apply (g₁_in_B Hg₁), Hx1.
+  -apply (g₁_in_B Hg₁), Hx2.
 }
 assert (Hy1 : y1 ∈ B) by apply (g₁_in_B Hg₁), Hx1.
 assert (Hy2 : y2 ∈ B) by apply (g₁_in_B Hg₁), Hx2.
@@ -1224,7 +1222,9 @@ split.
       --etransitivity.
        ++apply gr_add_compat; [ easy | apply gr_inv_compat, Hay ].
        ++etransitivity; [ apply gr_sub_0_r | ].
-         apply b; [ apply (g₁_in_B Hg₁), Hxk | apply (g₁_in_B Hg₁), Hxk | easy ].
+         apply b; [ | | easy ].
+        **apply (g₁_in_B Hg₁), Hxk.
+        **apply (g₁_in_B Hg₁), Hxk.
   }
   rewrite Hd.
   simpl; rewrite Hdx.
