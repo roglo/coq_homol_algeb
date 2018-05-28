@@ -515,16 +515,15 @@ Theorem Coker_eq_trans {G H} (f : HomGr G H) : Transitive (Coker_eq f).
 Proof.
 intros x y z Hxy Hyz.
 simpl in Hxy, Hyz.
-destruct Hxy as (t, Ht).
-destruct Hyz as (u, Hu).
+destruct Hxy as (t & Ht & Hft).
+destruct Hyz as (u & Hu & Hfu).
 exists (t + u)%G.
 split; [ now apply gr_add_mem | ].
 rewrite H_additive; [ | easy | easy ].
-transitivity ((x - y + (y - z))%G).
-+now simpl; apply gr_add_compat.
-+rewrite gr_add_assoc.
- simpl; apply gr_add_compat; [ easy | ].
- now rewrite <- gr_add_assoc, gr_add_inv_l, gr_add_0_l.
+rewrite Hft, Hfu.
+simpl; rewrite gr_add_assoc.
+apply gr_add_compat; [ easy | ].
+now rewrite <- gr_add_assoc, gr_add_inv_l, gr_add_0_l.
 Qed.
 
 Theorem Coker_equiv {G H} : ∀ (f : HomGr G H), Equivalence (Coker_eq f).
@@ -564,15 +563,14 @@ exists (z + z')%G.
 split.
 -now apply gr_add_mem.
 -rewrite H_additive; [ | easy | easy ].
- transitivity (((x - y) + (x' - y'))%G); simpl.
- +now apply gr_add_compat.
- +rewrite gr_add_assoc; symmetry.
-  rewrite gr_add_assoc; symmetry.
-  apply gr_add_compat; [ easy | ].
-  rewrite gr_add_comm, gr_add_assoc.
-  apply gr_add_compat; [ easy | ].
-  rewrite gr_add_comm; symmetry.
-  apply gr_inv_add_distr.
+ rewrite Hfz, Hfz'; simpl.
+ rewrite gr_add_assoc; symmetry.
+ rewrite gr_add_assoc; symmetry.
+ apply gr_add_compat; [ easy | ].
+ rewrite gr_add_comm, gr_add_assoc.
+ apply gr_add_compat; [ easy | ].
+ rewrite gr_add_comm; symmetry.
+ apply gr_inv_add_distr.
 Qed.
 
 Theorem Coker_inv_compat {G H} :∀ (f : HomGr G H) x y,
