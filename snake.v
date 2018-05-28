@@ -583,19 +583,19 @@ Definition Coker {G H : AbGroup} (f : HomGr G H) :=
 (* Exact sequence *)
 
 Inductive sequence {A : AbGroup} :=
-  | Seq1 : sequence
-  | Seq2 : ∀ {B} (f : HomGr A B), @sequence B → sequence.
+  | SeqEnd : sequence
+  | Seq : ∀ {B} (f : HomGr A B), @sequence B → sequence.
 
 Notation "A ⊂ B" := (∀ a, a ∈ A → a ∈ B) (at level 60).
 Notation "A == B" := (A ⊂ B ∧ B ⊂ A) (at level 60).
 
 Fixpoint exact_sequence {A : AbGroup} (S : sequence) :=
   match S with
-  | Seq1 => True
-  | Seq2 f S' =>
+  | SeqEnd => True
+  | Seq f S' =>
       match S' with
-      | Seq1 => True
-      | Seq2 g S'' => Im f == Ker g ∧ exact_sequence S'
+      | SeqEnd => True
+      | Seq g S'' => Im f == Ker g ∧ exact_sequence S'
       end
   end.
 
@@ -1477,7 +1477,16 @@ split.
  now apply H_inv, Hg₁.
 Qed.
 
-(* The final lemma *)
+(* The final lemma
+                f      g       cz
+            A------>B------>C------>0
+            |       |       |
+           a|      b|      c|
+            |       |       |
+            v       v       v
+     0----->A'----->B'----->C'
+       za'      f'      g'
+*)
 
 Lemma snake :
   ∀ (A B C A' B' C' : AbGroup)
@@ -1487,12 +1496,12 @@ Lemma snake :
      (cz : HomGr C Gr0) (za' : HomGr Gr0 A'),
   diagram_commutes f a b f'
   → diagram_commutes g b c g'
-  → exact_sequence (Seq2 f (Seq2 g (Seq2 cz Seq1)))
-  → exact_sequence (Seq2 za' (Seq2 f' (Seq2 g' Seq1)))
+  → exact_sequence (Seq f (Seq g (Seq cz SeqEnd)))
+  → exact_sequence (Seq za' (Seq f' (Seq g' SeqEnd)))
   → ∃ (fk : HomGr (Ker a) (Ker b)) (gk : HomGr (Ker b) (Ker c))
         (fk' : HomGr (Coker a) (Coker b)) (gk' : HomGr (Coker b) (Coker c)),
      ∃ (d : HomGr (Ker c) (Coker a)),
-        exact_sequence (Seq2 fk (Seq2 gk (Seq2 d (Seq2 fk' (Seq2 gk' Seq1))))).
+        exact_sequence (Seq fk (Seq gk (Seq d (Seq fk' (Seq gk' SeqEnd))))).
 Proof.
 intros *.
 intros Hcff' Hcgg' s s'.
