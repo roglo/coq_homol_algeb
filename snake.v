@@ -132,6 +132,40 @@ split; intros H.
 -eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
 Qed.
 
+(*
+Definition gr_elem A := { a : gr_set A | a ∈ A }.
+Definition gr_mem_eq A (x y : gr_elem A) := (proj1_sig x = proj1_sig y)%G.
+
+Theorem gr_mem_refl {A} : Reflexive (gr_mem_eq A).
+Proof.
+intros (x & Hx).
+now unfold gr_mem_eq.
+Qed.
+
+Theorem gr_mem_symm {A} : Symmetric (gr_mem_eq A).
+...
+Theorem gr_mem_trans {A} : Transitive (gr_mem_eq A).
+...
+
+Add Parametric Relation {G} : _ (@gr_mem_eq G)
+ reflexivity proved by gr_mem_refl
+ symmetry proved by gr_mem_symm
+ transitivity proved by gr_mem_trans
+ as gr_mem_rel.
+
+Definition M_app A B (f : HomGr A B) (x : gr_elem A) := H_app f (proj1_sig x).
+
+Add Parametric Morphism {G H} : (M_app G H)
+  with signature eq ==> gr_mem_eq G ==> @gr_eq H
+  as gr_app_morph.
+Proof.
+intros f (x, Hx) (y, Hy) Hxy.
+unfold gr_mem_eq in Hxy; simpl in Hxy.
+unfold M_app; simpl.
+now apply H_app_compat.
+Qed.
+*)
+
 (* We need that membership be decidable *)
 
 Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.
@@ -232,7 +266,7 @@ assert (H3 : (H_app f 0 + H_app f 0 - H_app f 0 = H_app f 0 - H_app f 0)%G). {
 assert (H4 : (H_app f 0 + H_app f 0 - H_app f 0 = 0)%G). {
   etransitivity; [ apply H3 | apply B ].
 }
-etransitivity; [ | apply H4 ].
+rewrite <- H4.
 now rewrite gr_add_assoc, gr_add_inv_r, gr_add_0_r.
 Qed.
 
@@ -512,17 +546,11 @@ Theorem Coker_mem_compat {G H} : ∀ (f : HomGr G H) x y,
   Coker_eq f x y → x ∈ H → y ∈ H.
 Proof.
 intros * Heq Hx.
-destruct Heq as (z, Hz).
+destruct Heq as (z & Hz & Hfz).
 apply gr_mem_compat with (x := (x - H_app f z)%G).
--transitivity ((x - (x - y))%G); simpl.
- +apply gr_add_compat; [ reflexivity | ].
-  now apply gr_inv_compat.
- +apply gr_sub_move_r; symmetry.
-  etransitivity; [ apply gr_add_comm | ].
-  etransitivity; [ apply gr_add_assoc | ].
-  transitivity ((x + 0)%G); simpl.
-  *apply gr_add_compat; [ reflexivity | apply gr_add_inv_l ].
-  *apply gr_add_0_r.
+-rewrite Hfz.
+ simpl; apply gr_sub_move_r.
+ now rewrite gr_add_comm, gr_add_assoc, gr_add_inv_l, gr_add_0_r.
 -simpl; apply gr_add_mem; [ easy | ].
  apply gr_inv_mem.
  now apply f.
@@ -535,17 +563,16 @@ intros f x y x' y' (z & Hz & Hfz) (z' & Hz' & Hfz').
 exists (z + z')%G.
 split.
 -now apply gr_add_mem.
--etransitivity; [ now apply H_additive | ].
+-rewrite H_additive; [ | easy | easy ].
  transitivity (((x - y) + (x' - y'))%G); simpl.
  +now apply gr_add_compat.
- +etransitivity; [ apply gr_add_assoc | symmetry ].
-  etransitivity; [ apply gr_add_assoc | symmetry ].
-  apply gr_add_compat; [ reflexivity | ].
-  etransitivity; [ apply gr_add_comm | ].
-  etransitivity; [ apply gr_add_assoc | ].
-  apply gr_add_compat; [ reflexivity | ].
-  etransitivity; [ apply gr_add_comm | ].
-  symmetry; apply gr_inv_add_distr.
+ +rewrite gr_add_assoc; symmetry.
+  rewrite gr_add_assoc; symmetry.
+  apply gr_add_compat; [ easy | ].
+  rewrite gr_add_comm, gr_add_assoc.
+  apply gr_add_compat; [ easy | ].
+  rewrite gr_add_comm; symmetry.
+  apply gr_inv_add_distr.
 Qed.
 
 Theorem Coker_inv_compat {G H} :∀ (f : HomGr G H) x y,
@@ -555,10 +582,9 @@ intros * (z & Hz & Hfz).
 unfold Coker_eq; simpl.
 exists (- z)%G.
 split; [ now apply gr_inv_mem | ].
-etransitivity; [ now apply H_inv | ].
-transitivity ((- (x - y))%G); simpl.
--now apply gr_inv_compat.
--apply gr_inv_add_distr.
+rewrite H_inv; [ | easy ].
+rewrite Hfz.
+simpl; apply gr_inv_add_distr.
 Qed.
 
 Definition Coker {G H : AbGroup} (f : HomGr G H) :=
@@ -613,17 +639,16 @@ Definition diagram_commutes {A B C D}
      (f : HomGr A B) (g : HomGr A C) (h : HomGr B D) (k : HomGr C D) :=
   ∀ x, (H_app h (H_app f x) = H_app k (H_app g x))%G.
 
-(* *)
+(* Functor HomGr A B → HomGr (KerA) (KerB) *)
 
 Theorem KK_mem_compat {A B A' B'} : ∀ (a : HomGr A A') (b : HomGr B B') f f',
   diagram_commutes f a b f'
   → ∀ x : gr_set (Ker a), x ∈ Ker a → H_app f x ∈ Ker b.
-intros * Hc * Hx.
-split; [ now apply f; simpl in Hx | ].
-etransitivity; [ apply Hc | ].
-transitivity (H_app f' 0%G).
--apply f'; [ apply a, Hx | apply A' | apply Hx ].
--apply H_zero.
+intros * Hc * (Hx & Hax).
+split; [ now apply f | ].
+rewrite Hc.
+transitivity (H_app f' 0%G); [ | apply H_zero ].
+apply f'; [ apply a, Hx | apply A' | apply Hax ].
 Qed.
 
 Theorem KK_app_compat {A B A'} : ∀ (f : HomGr A B) (a : HomGr A A'),
@@ -651,6 +676,8 @@ Definition HomGr_Ker_Ker {A B A' B'}
      H_app_compat := KK_app_compat f a;
      H_additive := KK_additive f a |}.
 
+(* Functor f:HomGr A B → g:HomGr B C → HomGr (CoKer f) (Coker g) *)
+
 Theorem CC_mem_compat {A B A' B'} :
   ∀ (f' : HomGr A' B') (a : HomGr A A') (b : HomGr B B'),
   ∀ x : gr_set (Coker a), x ∈ Coker a → H_app f' x ∈ Coker b.
@@ -674,13 +701,12 @@ destruct Hxy as (z & Hz & Haz).
 simpl; unfold Coker_eq; simpl.
 exists (H_app f z).
 split; [ now apply f | ].
-etransitivity; [ apply Hc | ].
+rewrite Hc.
 transitivity (H_app f' (x - y)%G).
 -apply H_app_compat; [ now apply a | | easy ].
  apply A'; [ easy | now apply A' ].
--etransitivity.
- +apply H_additive; [ easy | now apply A' ].
- +apply gr_add_compat; [ reflexivity | now apply H_inv ].
+-rewrite H_additive; [ | easy | now apply A' ].
+ apply gr_add_compat; [ easy | now apply H_inv ].
 Qed.
 
 Theorem CC_additive {A B A' B'} :
@@ -693,11 +719,10 @@ Proof.
 intros * Hx Hy; simpl in Hx, Hy.
 exists 0%G.
 split; [ apply B | ].
-etransitivity; [ apply H_zero | apply B' ].
+rewrite H_zero; symmetry.
 simpl; apply gr_sub_move_r.
-apply B'.
-etransitivity; [ apply gr_add_0_l | ].
-now apply B', f'.
+rewrite gr_add_0_l.
+now apply H_additive.
 Qed.
 
 Definition HomGr_Coker_Coker {A B A' B'}
@@ -708,9 +733,11 @@ Definition HomGr_Coker_Coker {A B A' B'}
      H_app_compat := CC_app_compat f f' a b Hc;
      H_additive := CC_additive f' a b |}.
 
-Theorem exists_Ker_C_to_B {B C C' g} (c : HomGr C C') {cz : HomGr C Gr0} :
-  Im g == Ker cz
-  → ∀ x : gr_set (Ker c), ∃ y, x ∈ C → y ∈ B ∧ (H_app g y = x)%G.
+(* Morphism g in snake lemma is surjective *)
+
+Theorem g_is_surj {B C C' g} (c : HomGr C C') {cz : HomGr C Gr0} :
+   Im g == Ker cz
+   → ∀ x : gr_set (Ker c), ∃ y, x ∈ C → y ∈ B ∧ (H_app g y = x)%G.
 Proof.
 intros * sg x.
 destruct (MemDec C x) as [H2| H2]; [ | now exists 0%G ].
@@ -721,10 +748,7 @@ enough (H : x ∈ Im g). {
 }
 apply sg.
 split; [ easy | ].
-simpl in x; simpl.
-destruct cz as (appcz, czin, czlin, czcomp).
-simpl.
-now destruct (appcz x).
+now destruct (H_app cz x).
 Qed.
 
 (* Morphism f' in snake lemma is injective *)
@@ -1511,7 +1535,7 @@ exists (HomGr_Coker_Coker a b Hcff').
 exists (HomGr_Coker_Coker b c Hcgg').
 destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
-specialize (exists_Ker_C_to_B c sg) as H1.
+specialize (g_is_surj c sg) as H1.
 specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
 specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
 specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
