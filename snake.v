@@ -206,20 +206,6 @@ Definition Coker {G H : AbGroup} (f : HomGr G H) :=
      gr_add_compat := Coker_add_compat f;
      gr_inv_compat := Coker_inv_compat f |}.
 
-(* Commuting diagram
-        f
-    A------>B
-    |       |
-   g|       |h
-    |       |
-    v       v
-    C------>D
-        k
-*)
-Definition diagram_commutes {A B C D}
-     (f : HomGr A B) (g : HomGr A C) (h : HomGr B D) (k : HomGr C D) :=
-  ∀ x, (H_app h (H_app f x) = H_app k (H_app g x))%G.
-
 (* Functor HomGr A B → HomGr (KerA) (KerB) *)
 
 Theorem KK_mem_compat {A B A' B'} : ∀ (a : HomGr A A') (b : HomGr B B') f f',

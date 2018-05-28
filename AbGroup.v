@@ -431,3 +431,18 @@ Fixpoint exact_sequence {A : AbGroup} (S : sequence) :=
       | Seq g S'' => Im f == Ker g ∧ exact_sequence S'
       end
   end.
+
+(* Commuting diagram
+        f
+    A------>B
+    |       |
+   g|       |h
+    |       |
+    v       v
+    C------>D
+        k
+*)
+
+Definition diagram_commutes {A B C D}
+     (f : HomGr A B) (g : HomGr A C) (h : HomGr B D) (k : HomGr C D) :=
+  ∀ x, (H_app h (H_app f x) = H_app k (H_app g x))%G.

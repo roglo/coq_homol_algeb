@@ -3,13 +3,13 @@
 Require Import Utf8.
 Require Import AbGroup.
 
-Definition is_mono {A B C} (f : HomGr B C) :=
-  ∀ g₁ g₂ : HomGr A B,
+Definition is_mono {A B} (f : HomGr A B) :=
+  ∀ C (g₁ g₂ : HomGr C A),
   (∀ x, H_app f (H_app g₁ x) = H_app f (H_app g₂ x))
   → (∀ x, H_app g₂ x = H_app g₂ x).
 
-Definition is_epi {A B C} (f : HomGr A B) :=
-  ∀ g₁ g₂ : HomGr B C,
+Definition is_epi {A B} (f : HomGr A B) :=
+  ∀ C (g₁ g₂ : HomGr B C),
   (∀ x, H_app g₁ (H_app f x) = H_app g₂ (H_app f x))
   → (∀ y, H_app g₂ y = H_app g₂ y).
 
