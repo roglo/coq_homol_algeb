@@ -3,7 +3,6 @@
 Require Import Utf8.
 Require Import Classes.RelationClasses.
 Require Import Setoid.
-Require ClassicalChoice.
 
 Reserved Notation "x '∈' S" (at level 60).
 Reserved Notation "x '≡' y" (at level 70).
@@ -175,8 +174,10 @@ now apply H_app_compat.
 Qed.
 *)
 
-(* We need that membership be decidable *)
+(* We need axiom of choice and that membership be decidable *)
 
+Axiom ClassicalChoice : ∀ {A B} (R : A → B → Prop),
+   (∀ x : A, ∃ y : B, R x y) → ∃ f : A → B, ∀ x : A, R x (f x).
 Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.
 
 (* Miscellaneous theorems in groups elements *)
@@ -1083,7 +1084,7 @@ apply (f'_is_inj sf') in Hfz; [ | | now apply a ].
   split; [ now apply (Ker c) | easy ].
 Qed.
 
-(* Proof exact sequence: Ker a → Ker b → Ker c *)
+(* 1/ proof exact sequence: Ker a → Ker b → Ker c *)
 
 Theorem exact_sequence_1 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
@@ -1124,7 +1125,7 @@ split.
  apply H_zero.
 Qed.
 
-(* Proof exact sequence: Ker b → Ker c → CoKer a *)
+(* 2/ proof exact sequence: Ker b → Ker c → CoKer a *)
 
 Theorem exact_sequence_2 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
@@ -1229,7 +1230,7 @@ split.
  +eapply gr_mem_compat; [ apply Haz | now apply a ].
 Qed.
 
-(* Proof exact sequence: Ker c → CoKer a → Coker b *)
+(* 3/ proof exact sequence: Ker c → CoKer a → Coker b *)
 
 Theorem exact_sequence_3 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
@@ -1362,7 +1363,7 @@ split.
   *apply B; [ now apply Hg₁, g | now apply B ].
 Qed.
 
-(* Proof exact sequence: CoKer a → CoKer b → Coker c *)
+(* 4/ proof exact sequence: CoKer a → CoKer b → Coker c *)
 
 Theorem exact_sequence_4 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
@@ -1473,9 +1474,9 @@ exists (HomGr_Coker_Coker b c Hcgg').
 destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
 specialize (g_is_surj c sg) as H1.
-specialize (ClassicalChoice.choice _ H1) as (g₁, Hg₁).
+specialize (ClassicalChoice _ H1) as (g₁, Hg₁).
 specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
-specialize (ClassicalChoice.choice _ H2) as (f'₁, Hf'₁).
+specialize (ClassicalChoice _ H2) as (f'₁, Hf'₁).
 fold (g₁_prop g c g₁) in Hg₁.
 fold (f'₁_prop a b f' g₁ f'₁) in Hf'₁.
 move f'₁ before g₁.
