@@ -54,4 +54,17 @@ Lemma five :
   → is_iso c.
 Proof.
 intros * Hcff' Hcgg' Hchh' Hcjj' s s' (Hib & Hid & Hea & Hme).
+destruct Hib as (b' & Hb'b & Hbb').
+destruct Hid as (d' & Hd'd & Hdd').
+move d' before b'.
+unfold is_epi in Hea.
+unfold is_mono in Hme.
+unfold is_iso.
+enough
+  (H : ∃ c',
+   (∀ x : gr_set C, H_app c' (H_app c x) = x) ∧
+   (∀ y : gr_set C', H_app c (H_app c' y) = y)). {
+  destruct H as (c' & Hc'c & Hcc').
+  now exists c'.
+}
 ...
