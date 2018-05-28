@@ -12,15 +12,15 @@ Reserved Notation "x '≡' y" (at level 70).
 
    Notes:
 
-   -sets in groups are represented by predicates; so a value of type
+   -sets in groups are predicates (naive theory of sets); a value of type
     gr_set is not necessarily in the group set. To be in the group set, it
     must satisfy the predicate gr_mem, which is later syntaxified by the
     usual symbol ∈.
 
-   -moreover group sets are setoids: there is a specific equality (gr_eq)
-    which must be compatible with membership (gr_mem_compat), with addition
-    (gr_add_compat), and with inverse (gr_inv_compat). This allows to define
-    quotient groups by changing this equality, for example in cokernels
+   -group sets are setoids: there is a specific equality (gr_eq) which is
+    compatible with membership (gr_mem_compat), addition (gr_add_compat),
+    and inverse (gr_inv_compat). This allows to define quotient groups,
+    for example in cokernets, by changing this equality.
 *)
 
 Record AbGroup :=
@@ -62,7 +62,7 @@ Arguments gr_mem_compat G : rename.
 Arguments gr_add_compat G : rename.
 Arguments gr_inv_compat G : rename.
 
-(* syntaxes for expressions in groups *)
+(* syntaxes for expressions for groups elements and sets *)
 
 Delimit Scope group_scope with G.
 
@@ -78,7 +78,7 @@ Notation "x '∉' S" := (¬ gr_mem S x) (at level 60).
 
 Open Scope group_scope.
 
-(* Homomorphism between abelian groups *)
+(* Homomorphism between groups *)
 
 Record HomGr (A B : AbGroup) :=
   { H_app : gr_set A → gr_set B;
@@ -103,7 +103,7 @@ Add Parametric Relation {G} : (gr_set G) (@gr_eq G)
  transitivity proved by (@Equivalence_Transitive _ (@gr_eq G) (@gr_equiv G))
  as gr_eq_rel.
 
-(* Coq Morphisms: allows to use "rewrite" in expressions containing
+(* Coq "Morphisms": they allow to use "rewrite" in expressions containing
    inversions (-), additions (+) and memberships (∈) *)
 
 Add Parametric Morphism {G} : (@gr_inv G)
