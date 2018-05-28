@@ -3,6 +3,19 @@
 Require Import Utf8.
 Require Import AbGroup.
 
+Definition is_mono {A B C} (f : HomGr B C) :=
+  ∀ g₁ g₂ : HomGr A B,
+  (∀ x, H_app f (H_app g₁ x) = H_app f (H_app g₂ x))
+  → (∀ x, H_app g₂ x = H_app g₂ x).
+
+Definition is_epi {A B C} (f : HomGr A B) :=
+  ∀ g₁ g₂ : HomGr B C,
+  (∀ x, H_app g₁ (H_app f x) = H_app g₂ (H_app f x))
+  → (∀ y, H_app g₂ y = H_app g₂ y).
+
+Definition is_iso {A B} (f : HomGr A B) :=
+  ∃ g : HomGr B A, (∀ x, H_app g (H_app f x) = x) ∧ (∀ y, H_app f (H_app g y) = y).
+
 (* The five lemma
          f      g       h        j
      A------>B------>C------>D------>E
@@ -26,7 +39,9 @@ Lemma five :
   ∀ (A B C D E A' B' C' D' E' : AbGroup)
      (f : HomGr A B) (g : HomGr B C) (h : HomGr C D) (j : HomGr D E)
      (f' : HomGr A' B') (g' : HomGr B' C')
-     (h' : HomGr C' D') (j' : HomGr D' E'),
+     (h' : HomGr C' D') (j' : HomGr D' E')
+     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
+     (d : HomGr D D') (e : HomGr E E'),
   diagram_commutes f a b f'
   → diagram_commutes g b c g'
   → diagram_commutes h c d h'
