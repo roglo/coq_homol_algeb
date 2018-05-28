@@ -483,8 +483,8 @@ Definition Gr0 :=
       gr_add_compat _ _ _ _ _ _ := eq_refl;
       gr_inv_compat _ _ H := H |}.
 
-(* We sometimes need axiom of choice and that membership be decidable *)
+(* We sometimes need these axioms *)
 
-Axiom ClassicalChoice : ∀ {A B} (R : A → B → Prop),
+Axiom Function_of_Relation : ∀ {A B} {R : A → B → Prop},
    (∀ x : A, ∃ y : B, R x y) → ∃ f : A → B, ∀ x : A, R x (f x).
 Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.

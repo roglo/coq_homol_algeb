@@ -1005,9 +1005,9 @@ exists (HomGr_Coker_Coker b c Hcgg').
 destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
 specialize (g_is_surj c sg) as H1.
-specialize (ClassicalChoice _ H1) as (g₁, Hg₁).
+specialize (Function_of_Relation H1) as (g₁, Hg₁).
 specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
-specialize (ClassicalChoice _ H2) as (f'₁, Hf'₁).
+specialize (Function_of_Relation H2) as (f'₁, Hf'₁).
 fold (g₁_prop g c g₁) in Hg₁.
 fold (f'₁_prop a b f' g₁ f'₁) in Hf'₁.
 move f'₁ before g₁.
