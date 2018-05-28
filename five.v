@@ -107,9 +107,10 @@ assert
   (H : ∀ x', ∃ x, x' ∈ C' → x ∈ C ∧ (Happ h x = Happ d₁ (Happ h' x'))%G). {
   intros x'.
   destruct (MemDec C' x') as [Hx'| Hx'].
-  -assert (H : Happ j (Happ d₁ (Happ h' x')) ∈ Ker e). {
+  -set (y := Happ j (Happ d₁ (Happ h' x'))).
+   assert (H : y ∈ Ker e). {
      split; [ now apply j, d₁, h' | ].
-     rewrite Hcjj'.
+     unfold y; rewrite Hcjj'.
      etransitivity.
      -apply j'; [ now apply d, d₁, h' | | apply Hdd₁ ].
       now apply h'.
