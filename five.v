@@ -6,9 +6,9 @@ Require Import Utf8.
 Require Import AbGroup.
 
 Definition is_mono {A B} (f : HomGr A B) :=
-  ∀ C (g₁ g₂ : HomGr C A),
-  (∀ x, (Happ f (Happ g₁ x) = Happ f (Happ g₂ x))%G)
-  → (∀ x, (Happ g₁ x = Happ g₂ x)%G).
+  ∀ C (g₁ g₂ : C → gr_set A),
+  (∀ x, Happ f (g₁ x) = Happ f (g₂ x))
+  → (∀ x, g₁ x = g₂ x).
 
 Definition is_epi {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : HomGr B C),
