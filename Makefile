@@ -1,4 +1,4 @@
-TARGET=snake.vo
+TARGET=snake.vo five.vo
 FILESFORDEP=`LC_ALL=C ls *.v`
 
 all: $(TARGET)
