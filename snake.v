@@ -1023,8 +1023,8 @@ Lemma snake :
      (cz : HomGr C Gr0) (za' : HomGr Gr0 A'),
   diagram_commutes f a b f'
   → diagram_commutes g b c g'
-  → exact_sequence (Seq f (Seq g (Seq cz SeqEnd)))
-  → exact_sequence (Seq za' (Seq f' (Seq g' SeqEnd)))
+  → exact_sequence [f; g; cz]
+  → exact_sequence [za'; f'; g']
   → ∃ (fk : HomGr (Ker a) (Ker b)) (gk : HomGr (Ker b) (Ker c))
         (fk' : HomGr (Coker a) (Coker b)) (gk' : HomGr (Coker b) (Coker c)),
      ∃ (d : HomGr (Ker c) (Coker a)),

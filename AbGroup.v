@@ -432,6 +432,14 @@ Fixpoint exact_sequence {A : AbGroup} (S : sequence) :=
       end
   end.
 
+Delimit Scope seq_scope with S.
+
+Notation "[ ]" := SeqEnd (format "[ ]") : seq_scope.
+Notation "[ x ]" := (Seq x SeqEnd) : seq_scope.
+Notation "[ x ; y ; .. ; z ]" := (Seq x (Seq y .. (Seq z SeqEnd) ..)) : seq_scope.
+
+Arguments exact_sequence _ S%S.
+
 (* Commuting diagram
         f
     A------>B

@@ -46,8 +46,8 @@ Lemma five :
   → diagram_commutes g b c g'
   → diagram_commutes h c d h'
   → diagram_commutes j d e j'
-  → exact_sequence (Seq f (Seq g (Seq h (Seq j SeqEnd))))
-  → exact_sequence (Seq f' (Seq g' (Seq h' (Seq j' SeqEnd))))
+  → exact_sequence [f; g; h; j]
+  → exact_sequence [f'; g'; h'; j']
   → is_iso b ∧ is_iso d ∧ is_epi a ∧ is_mono e
   → is_iso c.
 Proof.
