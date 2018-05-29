@@ -135,4 +135,27 @@ assert
 }
 specialize (Function_of_Relation H1) as (cf₁, Hc₁).
 clear H1.
+assert (cmem_compat : ∀ x : gr_set C', x ∈ C' → cf₁ x ∈ C). {
+  intros * Hx.
+  now apply Hc₁.
+}
+assert
+  (capp_compat :
+   ∀ x y : gr_set C', x ∈ C' → y ∈ C' → (x = y)%G → (cf₁ x = cf₁ y)%G). {
+  intros * Hx Hy Hxy.
+  specialize (Hc₁ x Hx) as H; destruct H as (Hcx, Hhx).
+  specialize (Hc₁ y Hy) as H; destruct H as (Hcy, Hhy).
+  move Hcy before Hcx.
+...
+  assert (Hc₁x : cf₁ x ∈ C) by now apply Hc₁.
+  assert (Hc₁y : cf₁ y ∈ C) by now apply Hc₁.
+  specialize (Happ_compat _ _ h (cf₁ x) (cf₁ y) Hc₁x Hc₁y) as H1.
+    apply Hc₁.
+...
+}
+assert (cadditive : ∀ x y : gr_set C', x ∈ C' → y ∈ C' → (cf₁ (x + y) = cf₁ x + cf₁ y)%G). ...
+set
+  (c₁ :=
+     {| Happ := cf₁; Hmem_compat := cmem_compat; Happ_compat := capp_compat;
+        Hadditive := cadditive |}).
 ...
