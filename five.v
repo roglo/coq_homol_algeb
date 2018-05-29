@@ -135,6 +135,9 @@ assert
 }
 specialize (Function_of_Relation H1) as (cf₁, Hc₁).
 clear H1.
+assert (Hcc₁ : ∀ x, (Happ c (cf₁ x) = x)%G). {
+  intros x.
+...
 assert (cmem_compat : ∀ x : gr_set C', x ∈ C' → cf₁ x ∈ C). {
   intros * Hx.
   now apply Hc₁.
