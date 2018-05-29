@@ -150,11 +150,14 @@ assert
     now apply d₁; apply h'.
   }
   rewrite <- Hhx, <- Hhy in H1.
-...
-  assert (Hc₁x : cf₁ x ∈ C) by now apply Hc₁.
-  assert (Hc₁y : cf₁ y ∈ C) by now apply Hc₁.
-  specialize (Happ_compat _ _ h (cf₁ x) (cf₁ y) Hc₁x Hc₁y) as H1.
-    apply Hc₁.
+  assert (H2 : (cf₁ x - cf₁ y) ∈ Ker h). {
+    split.
+    -apply C; [ easy | now apply C ].
+    -rewrite Hadditive; [ | easy | now apply C ].
+     rewrite H1, Hinv; [ | easy ].
+     apply gr_add_inv_r.
+  }
+  apply s in H2; destruct H2 as (z & Hz & Hgz).
 ...
 }
 assert (cadditive : ∀ x y : gr_set C', x ∈ C' → y ∈ C' → (cf₁ (x + y) = cf₁ x + cf₁ y)%G). ...
