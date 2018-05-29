@@ -150,7 +150,7 @@ assert
     now apply d₁; apply h'.
   }
   rewrite <- Hhx, <- Hhy in H1.
-  assert (H2 : (cf₁ x - cf₁ y) ∈ Ker h). {
+  assert (H2 : cf₁ x - cf₁ y ∈ Ker h). {
     split.
     -apply C; [ easy | now apply C ].
     -rewrite Hadditive; [ | easy | now apply C ].
