@@ -146,6 +146,10 @@ assert
   specialize (Hc₁ x Hx) as H; destruct H as (Hcx, Hhx).
   specialize (Hc₁ y Hy) as H; destruct H as (Hcy, Hhy).
   move Hcy before Hcx.
+  assert (H1 : (Happ d₁ (Happ h' x) = Happ d₁ (Happ h' y))%G). {
+    now apply d₁; apply h'.
+  }
+  rewrite <- Hhx, <- Hhy in H1.
 ...
   assert (Hc₁x : cf₁ x ∈ C) by now apply Hc₁.
   assert (Hc₁y : cf₁ y ∈ C) by now apply Hc₁.
