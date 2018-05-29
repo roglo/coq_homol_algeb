@@ -3,17 +3,17 @@
 (* Five lemma *)
 
 Require Import Utf8.
-Require Import AbGroup.
+Require Import AbGroup Setoid.
 
 Definition is_mono {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : C → gr_set A),
-  (∀ x, Happ f (g₁ x) = Happ f (g₂ x))
-  → (∀ x, g₁ x = g₂ x).
+  (∀ x, (Happ f (g₁ x) = Happ f (g₂ x))%G)
+  → (∀ x, (g₁ x = g₂ x)%G).
 
 Definition is_epi {A B} (f : HomGr A B) :=
-  ∀ C (g₁ g₂ : HomGr B C),
-  (∀ x, (Happ g₁ (Happ f x) = Happ g₂ (Happ f x))%G)
-  → (∀ y, (Happ g₁ y = Happ g₂ y)%G).
+  ∀ C (g₁ g₂ : gr_set B → C),
+  (∀ x, g₁ (Happ f x) = g₂ (Happ f x))
+  → (∀ y, g₁ y = g₂ y).
 
 Definition is_iso {A B} (f : HomGr A B) :=
   ∃ g : HomGr B A,
@@ -92,19 +92,17 @@ Proof.
 intros * Hcff' Hcgg' Hchh' Hcjj' s s' (Hea & Hib & Hid & Hme).
 destruct Hib as (b₁ & Hb₁b & Hbb₁).
 destruct Hid as (d₁ & Hd₁d & Hdd₁).
-unfold is_epi in Hea.
-unfold is_mono in Hme.
 move b₁ before s'; move d₁ before b₁.
 unfold is_iso.
 enough
-  (H : ∃ c',
-   (∀ x : gr_set C, (Happ c' (Happ c x) = x)%G) ∧
-   (∀ y : gr_set C', (Happ c (Happ c' y) = y)%G)). {
+  (H : ∃ c₁,
+   (∀ x : gr_set C, (Happ c₁ (Happ c x) = x)%G) ∧
+   (∀ y : gr_set C', (Happ c (Happ c₁ y) = y)%G)). {
   destruct H as (c' & Hc'c & Hcc').
   now exists c'.
 }
 assert
-  (H : ∀ x', ∃ x, x' ∈ C' → x ∈ C ∧ (Happ h x = Happ d₁ (Happ h' x'))%G). {
+  (H1 : ∀ x', ∃ x, x' ∈ C' → x ∈ C ∧ (Happ h x = Happ d₁ (Happ h' x'))%G). {
   intros x'.
   destruct (MemDec C' x') as [Hx'| Hx'].
   -set (y := Happ j (Happ d₁ (Happ h' x'))).
@@ -118,7 +116,23 @@ assert
       now simpl in H.
    }
    destruct H as (Hj & Hej).
-...
-   assert (H : Happ d₁ (Happ h' x') ∈ Ker j). {
-     split; [ now apply d₁, h' | ].
+   specialize (Hme bool (λ b, if b then 0 else y) (λ _, 0)) as H1.
+   simpl in Hme.
+   assert (H : ∀ x : bool, (Happ e (if x then 0 else y) = Happ e 0)%G). {
+     intros.
+     destruct x; [ easy | now rewrite Hej, Hzero ].
+   }
+   specialize (H1 H); clear H.
+   simpl in H1.
+   specialize (H1 false); simpl in H1.
+   assert (H2 : Happ d₁ (Happ h' x') ∈ Ker j). {
+     split; [ now apply d₁, h' | easy ].
+   }
+   apply s in H2.
+   destruct H2 as (x & Hx & Hhx).
+   exists x; intros Hx'2; easy.
+  -exists 0; intros; easy.
+}
+specialize (Function_of_Relation H1) as (cf₁, Hc₁).
+clear H1.
 ...
