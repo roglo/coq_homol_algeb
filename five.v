@@ -132,19 +132,19 @@ assert
   destruct H2 as (z & Hz & Hhz).
   exists z; intros Hz'2; easy.
 }
-specialize (Function_of_Relation H1) as (cf₁, Hc₁).
+specialize (Function_of_Relation H1) as (fc₁, Hc₁).
 clear H1.
-assert (Hzz1 : ∀ z', (Happ c (cf₁ z') = z')%G). {
+assert (Hzz1 : ∀ z', (Happ c (fc₁ z') = z')%G). {
   intros z'.
 ...
-assert (cmem_compat : ∀ z' : gr_set C', z' ∈ C' → cf₁ z' ∈ C). {
+assert (cmem_compat : ∀ z' : gr_set C', z' ∈ C' → fc₁ z' ∈ C). {
   intros * Hz'.
   now apply Hc₁.
 }
 assert
   (capp_compat :
    ∀ z'1 z'2 : gr_set C', z'1 ∈ C' → z'2 ∈ C'
-   → (z'1 = z'2)%G → (cf₁ z'1 = cf₁ z'2)%G). {
+   → (z'1 = z'2)%G → (fc₁ z'1 = fc₁ z'2)%G). {
   intros * Hz'1 Hz'2 Hzz.
   specialize (Hc₁ z'1 Hz'1) as H; destruct H as (Hcz'1, Hhz'1).
   specialize (Hc₁ z'2 Hz'2) as H; destruct H as (Hcz'2, Hhz'2).
@@ -153,7 +153,7 @@ assert
     now apply d₁; apply h'.
   }
   rewrite <- Hhz'1, <- Hhz'2 in H1.
-  assert (H2 : cf₁ z'1 - cf₁ z'2 ∈ Ker h). {
+  assert (H2 : fc₁ z'1 - fc₁ z'2 ∈ Ker h). {
     split.
     -apply C; [ easy | now apply C ].
     -rewrite Hadditive; [ | easy | now apply C ].
@@ -163,10 +163,10 @@ assert
   apply s in H2; destruct H2 as (y & Hy & Hgy).
 ...
 }
-assert (cadditive : ∀ z'1 z'2, z'1 ∈ C' → z'2 ∈ C' → (cf₁ (z'1 + z'2) = cf₁ z'1 + cf₁ z'2)%G).
+assert (cadditive : ∀ z'1 z'2, z'1 ∈ C' → z'2 ∈ C' → (fc₁ (z'1 + z'2) = fc₁ z'1 + fc₁ z'2)%G).
  ...
 set
   (c₁ :=
-     {| Happ := cf₁; Hmem_compat := cmem_compat; Happ_compat := capp_compat;
+     {| Happ := fc₁; Hmem_compat := cmem_compat; Happ_compat := capp_compat;
         Hadditive := cadditive |}).
 ...
