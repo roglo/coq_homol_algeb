@@ -134,6 +134,24 @@ assert
 }
 specialize (Function_of_Relation H1) as (fc₁, Hc₁).
 clear H1.
+assert (Hzy : ∀ z', z' ∈ C' → ∃ y', (Happ g' y' = z' - Happ c (fc₁ z'))%G). {
+  intros z' Hz'.
+  assert (H : z' - Happ c (fc₁ z') ∈ Ker h'). {
+    split.
+    -apply C'; [ easy | now apply C', c, Hc₁ ].
+    -rewrite Hadditive; [ | easy | now apply C', c, Hc₁ ].
+     rewrite Hinv; [ | now apply c, Hc₁ ].
+     apply gr_sub_move_r; rewrite gr_add_0_l.
+     rewrite <- Hchh'.
+     symmetry.
+     etransitivity; [ | apply Hdd₁ ].
+     apply d; [ | apply d₁, h', Hz' | now apply Hc₁ ].
+     now apply h, Hc₁.
+  }
+  apply s' in H.
+  destruct H as (y' & Hy' & Hgy').
+  now exists y'.
+}
 assert (Hzz1 : ∀ z', (Happ c (fc₁ z') = z')%G). {
   intros z'.
 ...
