@@ -2,5 +2,7 @@ AbGroup.vio: AbGroup.v
 AbGroup.vo AbGroup.glob AbGroup.v.beautified: AbGroup.v
 five.vio: five.v AbGroup.vio
 five.vo five.glob five.v.beautified: five.v AbGroup.vo
+four.vio: four.v AbGroup.vio
+four.vo four.glob four.v.beautified: four.v AbGroup.vo
 snake.vio: snake.v AbGroup.vio
 snake.vo snake.glob snake.v.beautified: snake.v AbGroup.vo
