@@ -5,21 +5,6 @@
 Require Import Utf8.
 Require Import AbGroup Setoid.
 
-Definition is_mono {A B} (f : HomGr A B) :=
-  ∀ C (g₁ g₂ : C → gr_set A),
-  (∀ x, (Happ f (g₁ x) = Happ f (g₂ x))%G)
-  → (∀ x, (g₁ x = g₂ x)%G).
-
-Definition is_epi {A B} (f : HomGr A B) :=
-  ∀ C (g₁ g₂ : gr_set B → C),
-  (∀ x, g₁ (Happ f x) = g₂ (Happ f x))
-  → (∀ y, g₁ y = g₂ y).
-
-Definition is_iso {A B} (f : HomGr A B) :=
-  ∃ g : HomGr B A,
-  (∀ x, (Happ g (Happ f x) = x)%G) ∧
-  (∀ y, (Happ f (Happ g y) = y)%G).
-
 (* Composition of homomorphims *)
 
 Theorem comp_mem_compat {A B C} (f : HomGr A B) (g : HomGr B C) :
