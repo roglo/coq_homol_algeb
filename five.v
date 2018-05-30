@@ -102,68 +102,69 @@ enough
   now exists c'.
 }
 assert
-  (H1 : ∀ x', ∃ x, x' ∈ C' → x ∈ C ∧ (Happ h x = Happ d₁ (Happ h' x'))%G). {
-  intros x'.
-  destruct (MemDec C' x') as [Hx'| Hx'].
-  -set (y := Happ j (Happ d₁ (Happ h' x'))).
-   assert (H : y ∈ Ker e). {
-     split; [ now apply j, d₁, h' | ].
-     unfold y; rewrite Hcjj'.
-     etransitivity.
-     -apply j'; [ now apply d, d₁, h' | | apply Hdd₁ ].
-      now apply h'.
-     -assert (H : Happ h' x' ∈ Ker j') by now apply s'; exists x'.
-      now simpl in H.
-   }
-   destruct H as (Hj & Hej).
-   specialize (Hme bool (λ b, if b then 0 else y) (λ _, 0)) as H1.
-   simpl in Hme.
-   assert (H : ∀ x : bool, (Happ e (if x then 0 else y) = Happ e 0)%G). {
-     intros.
-     destruct x; [ easy | now rewrite Hej, Hzero ].
-   }
-   specialize (H1 H); clear H.
-   simpl in H1.
-   specialize (H1 false); simpl in H1.
-   assert (H2 : Happ d₁ (Happ h' x') ∈ Ker j). {
-     split; [ now apply d₁, h' | easy ].
-   }
-   apply s in H2.
-   destruct H2 as (x & Hx & Hhx).
-   exists x; intros Hx'2; easy.
-  -exists 0; intros; easy.
+  (H1 : ∀ z', ∃ z, z' ∈ C' → z ∈ C ∧ (Happ h z = Happ d₁ (Happ h' z'))%G). {
+  intros z'.
+  destruct (MemDec C' z') as [Hz'| Hz']; [ | now exists 0 ].
+  set (u := Happ j (Happ d₁ (Happ h' z'))).
+  assert (H : u ∈ Ker e). {
+    split; [ now apply j, d₁, h' | ].
+    unfold u; rewrite Hcjj'.
+    etransitivity.
+    -apply j'; [ now apply d, d₁, h' | | apply Hdd₁ ].
+     now apply h'.
+    -assert (H : Happ h' z' ∈ Ker j') by now apply s'; exists z'.
+     now simpl in H.
+  }
+  destruct H as (Hj & Hej).
+  specialize (Hme bool (λ b, if b then 0 else u) (λ _, 0)) as H1.
+  simpl in Hme.
+  assert (H : ∀ x : bool, (Happ e (if x then 0 else u) = Happ e 0)%G). {
+    intros.
+    destruct x; [ easy | now rewrite Hej, Hzero ].
+  }
+  specialize (H1 H); clear H.
+  simpl in H1.
+  specialize (H1 false); simpl in H1.
+  assert (H2 : Happ d₁ (Happ h' z') ∈ Ker j). {
+    split; [ now apply d₁, h' | easy ].
+  }
+  apply s in H2.
+  destruct H2 as (z & Hz & Hhz).
+  exists z; intros Hz'2; easy.
 }
 specialize (Function_of_Relation H1) as (cf₁, Hc₁).
 clear H1.
-assert (Hcc₁ : ∀ x, (Happ c (cf₁ x) = x)%G). {
-  intros x.
+assert (Hzz1 : ∀ z', (Happ c (cf₁ z') = z')%G). {
+  intros z'.
 ...
-assert (cmem_compat : ∀ x : gr_set C', x ∈ C' → cf₁ x ∈ C). {
-  intros * Hx.
+assert (cmem_compat : ∀ z' : gr_set C', z' ∈ C' → cf₁ z' ∈ C). {
+  intros * Hz'.
   now apply Hc₁.
 }
 assert
   (capp_compat :
-   ∀ x y : gr_set C', x ∈ C' → y ∈ C' → (x = y)%G → (cf₁ x = cf₁ y)%G). {
-  intros * Hx Hy Hxy.
-  specialize (Hc₁ x Hx) as H; destruct H as (Hcx, Hhx).
-  specialize (Hc₁ y Hy) as H; destruct H as (Hcy, Hhy).
-  move Hcy before Hcx.
-  assert (H1 : (Happ d₁ (Happ h' x) = Happ d₁ (Happ h' y))%G). {
+   ∀ z'1 z'2 : gr_set C', z'1 ∈ C' → z'2 ∈ C'
+   → (z'1 = z'2)%G → (cf₁ z'1 = cf₁ z'2)%G). {
+  intros * Hz'1 Hz'2 Hzz.
+  specialize (Hc₁ z'1 Hz'1) as H; destruct H as (Hcz'1, Hhz'1).
+  specialize (Hc₁ z'2 Hz'2) as H; destruct H as (Hcz'2, Hhz'2).
+  move Hcz'2 before Hcz'1.
+  assert (H1 : (Happ d₁ (Happ h' z'1) = Happ d₁ (Happ h' z'2))%G). {
     now apply d₁; apply h'.
   }
-  rewrite <- Hhx, <- Hhy in H1.
-  assert (H2 : cf₁ x - cf₁ y ∈ Ker h). {
+  rewrite <- Hhz'1, <- Hhz'2 in H1.
+  assert (H2 : cf₁ z'1 - cf₁ z'2 ∈ Ker h). {
     split.
     -apply C; [ easy | now apply C ].
     -rewrite Hadditive; [ | easy | now apply C ].
      rewrite H1, Hinv; [ | easy ].
      apply gr_add_inv_r.
   }
-  apply s in H2; destruct H2 as (z & Hz & Hgz).
+  apply s in H2; destruct H2 as (y & Hy & Hgy).
 ...
 }
-assert (cadditive : ∀ x y : gr_set C', x ∈ C' → y ∈ C' → (cf₁ (x + y) = cf₁ x + cf₁ y)%G). ...
+assert (cadditive : ∀ z'1 z'2, z'1 ∈ C' → z'2 ∈ C' → (cf₁ (z'1 + z'2) = cf₁ z'1 + cf₁ z'2)%G).
+ ...
 set
   (c₁ :=
      {| Happ := cf₁; Hmem_compat := cmem_compat; Happ_compat := capp_compat;
