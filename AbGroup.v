@@ -479,6 +479,43 @@ Definition Gr1 :=
       gr_add_compat _ _ _ _ _ _ := eq_refl;
       gr_inv_compat _ _ H := H |}.
 
+(* The 2 group *)
+
+Theorem Gr2_add_assoc : ∀ x y z : bool,
+  (if if x then negb y else y then negb z else z) =
+  (if x then negb (if y then negb z else z) else if y then negb z else z).
+Proof. intros; now destruct x, y, z. Qed.
+
+Theorem Gr2_add_inv_r : ∀ x : bool, (if x then negb x else x) = false.
+Proof. intros; now destruct x. Qed.
+
+Theorem Gr2_add_comm : ∀ x y : bool,
+  (if x then negb y else y) = (if y then negb x else x).
+Proof. intros; now destruct x, y. Qed.
+
+Theorem Gr2_add_compat : ∀ x y x' y' : bool,
+  x = y → x' = y' → (if x then negb x' else x') = (if y then negb y' else y').
+Proof. intros; now destruct x, y, x', y'. Qed.
+
+Definition Gr2 :=
+   {| gr_set := bool;
+      gr_mem _ := True;
+      gr_eq := eq;
+      gr_zero := false;
+      gr_add x y := if x then negb y else y;
+      gr_inv x := x;
+      gr_zero_mem := I;
+      gr_add_mem _ _ _ _ := I;
+      gr_add_0_l _ := eq_refl;
+      gr_add_assoc := Gr2_add_assoc;
+      gr_inv_mem _ H := H;
+      gr_add_inv_r := Gr2_add_inv_r;
+      gr_add_comm := Gr2_add_comm;
+      gr_equiv := eq_equivalence;
+      gr_mem_compat _ _ _ _ := I;
+      gr_add_compat := Gr2_add_compat;
+      gr_inv_compat _ _ H := H |}.
+
 (* *)
 
 Definition is_mono {A B} (f : HomGr A B) :=
