@@ -47,7 +47,39 @@ enough
   now intros T g₁ g₂ H1; apply H.
 }
 intros * Hgc * Hz'.
+Theorem glop : ∀ D C' D' (h' : HomGr C' D') (d : HomGr D D'),
+  Decidable_Equality * Excluded_Middle
+  → is_epi d
+  → ∀ z', z' ∈ C'
+  → ∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G.
+Proof.
+intros * (eq_dec, excl_midd) Hed * Hz'.
+  assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ Happ h' z')%G)). {
+    set (v d' := if eq_dec _ d' (Happ h' z') then true else false).
+    set (w (d' : gr_set D') := false).
+    specialize (Hed _ v w) as H1.
+    intros H2.
+    assert (H : ∀ t, t ∈ D → v (Happ d t) = w (Happ d t)). {
+      intros t Ht.
+      unfold v, w.
+      destruct (eq_dec _ (Happ d t) (Happ h' z')) as [H| H]; [ | easy ].
+      now specialize (H2 t Ht).
+    }
+    specialize (H1 H (Happ h' z')); clear H.
+    assert (H : Happ h' z' ∈ D') by now apply h'.
+    specialize (H1 H); clear H.
+    unfold v, w in H1.
+    destruct (eq_dec _ (Happ h' z') (Happ h' z')) as [H3| H3]; [ easy | ].
+    now apply H3.
+  }
+  specialize (excl_midd (∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G)) as H2.
+  destruct H2 as [H2| H2]; [ easy | ].
+  exfalso; apply Hn; intros t Ht H3.
+  apply H2.
+  now exists t.
+Qed.
 assert (H : ∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G). {
+clear - eq_dec excl_midd Hed Hz'.
   assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ Happ h' z')%G)). {
     set (v d' := if eq_dec _ d' (Happ h' z') then true else false).
     set (w (d' : gr_set D') := false).
@@ -114,4 +146,6 @@ assert (H : Happ c z - z' ∈ Ker h'). {
 apply s' in H.
 destruct H as (y' & Hy' & Hgy').
 move y' after z'; move Hy' before Hz'.
+assert (H : ∃ y, y ∈ B ∧ (Happ b y = y')%G). {
+Check glop.
 ...
