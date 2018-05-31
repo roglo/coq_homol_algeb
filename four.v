@@ -100,4 +100,18 @@ assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
 }
 destruct H as (z & Hz & Hhz).
 move z after t; move Hz after Ht.
+assert (H : Happ c z - z' ∈ Ker h'). {
+  split.
+  -apply C'; [ now apply c | now apply C' ].
+  -rewrite Hadditive; [ | now apply c | now apply C' ].
+   rewrite Hinv; [ | easy ].
+   rewrite <- Hchh'.
+   apply gr_sub_move_r.
+   rewrite gr_add_0_l.
+   etransitivity; [ | apply Hdt ].
+   apply d; [ now apply h | easy | apply Hhz ].
+}
+apply s' in H.
+destruct H as (y' & Hy' & Hgy').
+move y' after z'; move Hy' before Hz'.
 ...
