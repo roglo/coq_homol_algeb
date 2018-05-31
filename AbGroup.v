@@ -487,13 +487,13 @@ Definition Gr0 :=
 
 Definition is_mono {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : C → gr_set A),
-  (∀ x, (Happ f (g₁ x) = Happ f (g₂ x))%G)
-  → (∀ x, (g₁ x = g₂ x)%G).
+  (∀ z, (Happ f (g₁ z) = Happ f (g₂ z))%G)
+  → (∀ z, (g₁ z = g₂ z)%G).
 
 Definition is_epi {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : gr_set B → C),
-  (∀ x, g₁ (Happ f x) = g₂ (Happ f x))
-  → (∀ y, g₁ y = g₂ y).
+  (∀ x, x ∈ A → g₁ (Happ f x) = g₂ (Happ f x))
+  → (∀ y, y ∈ B → g₁ y = g₂ y).
 
 Definition is_iso {A B} (f : HomGr A B) :=
   ∃ g : HomGr B A,

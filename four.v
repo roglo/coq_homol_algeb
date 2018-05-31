@@ -42,38 +42,41 @@ intros * (eq_dec, excl_midd) Hcgg' Hchh' Hcjj' s s' (Heb & Hed & Hme).
 unfold is_epi.
 enough
   (∀ T (g₁ g₂ : gr_set C' → T),
-  (∀ z : gr_set C, g₁ (Happ c z) = g₂ (Happ c z))
-  → ∀ z' : gr_set C', g₁ z' = g₂ z'). {
+  (∀ z, z ∈ C → g₁ (Happ c z) = g₂ (Happ c z))
+  → ∀ z', z' ∈ C' → g₁ z' = g₂ z'). {
   now intros T g₁ g₂ H1; apply H.
 }
-intros * Hgc *.
+intros * Hgc * Hz'.
 unfold is_epi in Heb, Hed.
 unfold is_mono in Hme.
-assert (H : ∃ t, (Happ d t = Happ h' z')%G). {
-  assert (Hn : ¬ (∀ t, (Happ d t ≠ Happ h' z')%G)). {
+assert (H : ∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G). {
+  assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ Happ h' z')%G)). {
     set (v d' := if eq_dec _ d' (Happ h' z') then true else false).
     set (w (d' : gr_set D') := false).
     specialize (Hed _ v w) as H1.
     intros H2.
-    assert (H : ∀ t : gr_set D, v (Happ d t) = w (Happ d t)). {
-      intros t.
+    assert (H : ∀ t, t ∈ D → v (Happ d t) = w (Happ d t)). {
+      intros t Ht.
       unfold v, w.
       destruct (eq_dec _ (Happ d t) (Happ h' z')) as [H| H]; [ | easy ].
-      now specialize (H2 t).
+      now specialize (H2 t Ht).
     }
-    specialize (H1 H (Happ h' z')).
+    specialize (H1 H (Happ h' z')); clear H.
+    assert (H : Happ h' z' ∈ D') by now apply h'.
+    specialize (H1 H); clear H.
     unfold v, w in H1.
     destruct (eq_dec _ (Happ h' z') (Happ h' z')) as [H3| H3]; [ easy | ].
     now apply H3.
   }
-  specialize (excl_midd (∃ t, Happ d t = Happ h' z')) as H2.
+  specialize (excl_midd (∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G)) as H2.
   destruct H2 as [H2| H2]; [ easy | ].
-  exfalso; apply Hn; intros t H3.
+  exfalso; apply Hn; intros t Ht H3.
   apply H2.
   now exists t.
 }
-destruct H as (t & Ht).
+destruct H as (t & Ht & Hdt).
+move t before z'.
 assert (H : ∃ z, (Happ h z = t)%G). {
   assert (H : t ∈ Ker j). {
-    simpl.
+    split; [ easy | ].
 ...
