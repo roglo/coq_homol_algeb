@@ -73,8 +73,8 @@ assert (H : ∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G). {
   now exists t.
 }
 destruct H as (t & Ht & Hdt).
-move t before z'.
-assert (H : ∃ z, (Happ h z = t)%G). {
+move t after z'; move Ht after Hz'.
+assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
   assert (H : t ∈ Ker j). {
     split; [ easy | ].
     assert (H : (Happ e (Happ j t) = 0)%G). {
@@ -85,4 +85,19 @@ assert (H : ∃ z, (Happ h z = t)%G). {
       -assert (H : Happ h' z' ∈ Im h') by (exists z'; easy).
        now apply s' in H; simpl in H.
     }
+    specialize (Hme bool (λ b, if b then Happ j t else 0) (λ _, 0)) as H1.
+    simpl in H1.
+    assert
+      (H2 : ∀ x : bool, (Happ e (if x then Happ j t else 0) = Happ e 0)%G). {
+      intros x; destruct x; [ | easy ].
+      now rewrite Hzero.
+    }
+    now specialize (H1 H2 true); clear H2.
+  }
+  apply s in H.
+  destruct H as (z & Hz & Hhz).
+  now exists z.
+}
+destruct H as (z & Hz & Hhz).
+move z after t; move Hz after Ht.
 ...
