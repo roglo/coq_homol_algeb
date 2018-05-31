@@ -73,4 +73,7 @@ assert (H : ∃ t, (Happ d t = Happ h' z')%G). {
   now exists t.
 }
 destruct H as (t & Ht).
+assert (H : ∃ z, (Happ h z = t)%G). {
+  assert (H : t ∈ Ker j). {
+    simpl.
 ...
