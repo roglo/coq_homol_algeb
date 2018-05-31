@@ -65,7 +65,8 @@ Lemma five :
      (h' : HomGr C' D') (j' : HomGr D' E')
      (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
      (d : HomGr D D') (e : HomGr E E'),
-  diagram_commutes f a b f'
+  (Decidable_Membership * Choice)
+  → diagram_commutes f a b f'
   → diagram_commutes g b c g'
   → diagram_commutes h c d h'
   → diagram_commutes j d e j'
@@ -74,7 +75,8 @@ Lemma five :
   → is_epi a ∧ is_iso b ∧ is_iso d ∧ is_mono e
   → is_iso c.
 Proof.
-intros * Hcff' Hcgg' Hchh' Hcjj' s s' (Hea & Hib & Hid & Hme).
+intros *.
+intros (mem_dec, choice) Hcff' Hcgg' Hchh' Hcjj' s s' (Hea & Hib & Hid & Hme).
 destruct Hib as (b₁ & Hb₁b & Hbb₁).
 destruct Hid as (d₁ & Hd₁d & Hdd₁).
 move b₁ before s'; move d₁ before b₁.
@@ -89,7 +91,7 @@ enough
 assert
   (H1 : ∀ z', ∃ z, z' ∈ C' → z ∈ C ∧ (Happ h z = Happ d₁ (Happ h' z'))%G). {
   intros z'.
-  destruct (MemDec C' z') as [Hz'| Hz']; [ | now exists 0 ].
+  destruct (mem_dec C' z') as [Hz'| Hz']; [ | now exists 0 ].
   set (u := Happ j (Happ d₁ (Happ h' z'))).
   assert (H : u ∈ Ker e). {
     split; [ now apply j, d₁, h' | ].
@@ -117,7 +119,7 @@ assert
   destruct H2 as (z & Hz & Hhz).
   exists z; intros Hz'2; easy.
 }
-specialize (Function_of_Relation H1) as (fc₁, Hc₁).
+specialize (choice _ _ _ H1) as (fc₁, Hc₁).
 clear H1.
 assert (Hzy : ∀ z', z' ∈ C' → ∃ y', (Happ g' y' = z' - Happ c (fc₁ z'))%G). {
   intros z' Hz'.

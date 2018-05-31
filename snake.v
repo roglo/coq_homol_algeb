@@ -269,11 +269,12 @@ Definition HomGr_Coker_Coker {A B A' B'}
 (* Morphism g in snake lemma is surjective *)
 
 Theorem g_is_surj {B C C' g} (c : HomGr C C') {cz : HomGr C Gr0} :
-   Im g == Ker cz
+   Decidable_Membership
+   → Im g == Ker cz
    → ∀ x : gr_set (Ker c), ∃ y, x ∈ C → y ∈ B ∧ (Happ g y = x)%G.
 Proof.
-intros * sg x.
-destruct (MemDec C x) as [H2| H2]; [ | now exists 0%G ].
+intros * mem_dec sg x.
+destruct (mem_dec C x) as [H2| H2]; [ | now exists 0%G ].
 enough (H : x ∈ Im g). {
   simpl in H.
   destruct H as (y & Hy & Hyx).
@@ -363,16 +364,17 @@ Qed.
 
 Theorem exists_B'_to_Coker_a : ∀ {A A' B B' C C' g f'}
   {g' : HomGr B' C'} (a : HomGr A A') {b : HomGr B B'} {c : HomGr C C'} {g₁},
-  Im f' == Ker g'
+  Decidable_Membership
+  → Im f' == Ker g'
   → g₁_prop g c g₁
   → diagram_commutes g b c g'
   → ∀ y', ∃ z',
     (∃ x, x ∈ Ker c ∧ (y' = Happ b (g₁ x))%G)
     → z' ∈ Coker a ∧ (Happ f' z' = y')%G.
 Proof.
-intros * sg' Hg₁ Hcgg' *.
-destruct (MemDec (Im b) y') as [Hy'| Hy'].
--destruct (MemDec (Im f') y') as [(z' & Hz' & Hfz')| Hfy'].
+intros * mem_dec sg' Hg₁ Hcgg' *.
+destruct (mem_dec (Im b) y') as [Hy'| Hy'].
+-destruct (mem_dec (Im f') y') as [(z' & Hz' & Hfz')| Hfy'].
  +exists z'; now intros (x' & Hx' & Hyx').
  +exists 0%G; intros (x' & Hx' & Hyx').
   exfalso; apply Hfy', sg'; simpl.
@@ -987,7 +989,8 @@ Lemma snake :
      (f' : HomGr A' B') (g' : HomGr B' C')
      (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
      (cz : HomGr C Gr0) (za' : HomGr Gr0 A'),
-  diagram_commutes f a b f'
+  Decidable_Membership * Choice
+  → diagram_commutes f a b f'
   → diagram_commutes g b c g'
   → exact_sequence [f; g; cz]
   → exact_sequence [za'; f'; g']
@@ -997,17 +1000,17 @@ Lemma snake :
         exact_sequence (Seq fk (Seq gk (Seq d (Seq fk' (Seq gk' SeqEnd))))).
 Proof.
 intros *.
-intros Hcff' Hcgg' s s'.
+intros (mem_dec, choice) Hcff' Hcgg' s s'.
 exists (HomGr_Ker_Ker a b Hcff').
 exists (HomGr_Ker_Ker b c Hcgg').
 exists (HomGr_Coker_Coker a b Hcff').
 exists (HomGr_Coker_Coker b c Hcgg').
 destruct s as (sf & sg & _).
 destruct s' as (sf' & sg' & _).
-specialize (g_is_surj c sg) as H1.
-specialize (Function_of_Relation H1) as (g₁, Hg₁).
-specialize (exists_B'_to_Coker_a a sg' Hg₁ Hcgg') as H2.
-specialize (Function_of_Relation H2) as (f'₁, Hf'₁).
+specialize (g_is_surj c mem_dec sg) as H1.
+specialize (choice _ _ _ H1) as H; destruct H as (g₁, Hg₁).
+specialize (exists_B'_to_Coker_a a mem_dec sg' Hg₁ Hcgg') as H2.
+specialize (choice _ _ _ H2) as H; destruct H as (f'₁, Hf'₁).
 fold (g₁_prop g c g₁) in Hg₁.
 fold (f'₁_prop a b f' g₁ f'₁) in Hf'₁.
 move f'₁ before g₁.

@@ -502,6 +502,10 @@ Definition is_iso {A B} (f : HomGr A B) :=
 
 (* We sometimes need these axioms *)
 
-Axiom Function_of_Relation : ∀ {A B} {R : A → B → Prop},
+Definition Excluded_Middle := ∀ P, P ∨ ¬ P.
+Definition Choice := ∀ {A B} {R : A → B → Prop},
    (∀ x : A, ∃ y : B, R x y) → ∃ f : A → B, ∀ x : A, R x (f x).
-Axiom MemDec : ∀ G x, {x ∈ G} + {x ∉ G}.
+
+Definition Decidable_Membership := ∀ G x, {x ∈ G} + {x ∉ G}.
+Definition Decidable_Equality :=
+  ∀ {A}, ∀x y : gr_set A, {(x = y)%G} + {(x ≠ y)%G}.
