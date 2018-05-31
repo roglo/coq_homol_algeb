@@ -34,7 +34,6 @@ assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ t')%G)). {
     -destruct (eq_dec D' x t') as [H3| H3].
      +destruct (eq_dec D' y t') as [H4| H4]; [ simpl | easy ].
       rewrite H3, H4 in H2.
-(* je pense qu'il faut faire une addition dans Gr2 qui renvoie toujours 0. *)
 ...
   set (hv :=
     {| Happ := v;
