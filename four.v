@@ -5,6 +5,35 @@
 Require Import Utf8.
 Require Import AbGroup Setoid.
 
+Theorem epi_is_surj : ∀ D D' (d : HomGr D D'),
+  Decidable_Equality * Excluded_Middle
+  → is_epi d
+  → ∀ t', t' ∈ D' → ∃ t, t ∈ D ∧ (Happ d t = t')%G.
+Proof.
+intros * (eq_dec, excl_midd) Hed * Ht'.
+assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ t')%G)). {
+  set (v d' := if eq_dec _ d' t' then true else false).
+  set (w (d' : gr_set D') := false).
+  specialize (Hed _ v w) as H1.
+  intros H2.
+  assert (H : ∀ t, t ∈ D → v (Happ d t) = w (Happ d t)). {
+    intros t Ht.
+    unfold v, w.
+    destruct (eq_dec _ (Happ d t) t') as [H| H]; [ | easy ].
+    now specialize (H2 t Ht).
+  }
+  specialize (H1 H t' Ht'); clear H.
+  unfold v, w in H1.
+  destruct (eq_dec _ t' t') as [H3| H3]; [ easy | ].
+  now apply H3.
+}
+specialize (excl_midd (∃ t, t ∈ D ∧ (Happ d t = t')%G)) as H2.
+destruct H2 as [H2| H2]; [ easy | ].
+exfalso; apply Hn; intros t Ht H3.
+apply H2.
+now exists t.
+Qed.
+
 (* Four lemma #1
            g       h        j
         B------>C------>D------>E
@@ -47,62 +76,8 @@ enough
   now intros T g₁ g₂ H1; apply H.
 }
 intros * Hgc * Hz'.
-Theorem glop : ∀ D C' D' (h' : HomGr C' D') (d : HomGr D D'),
-  Decidable_Equality * Excluded_Middle
-  → is_epi d
-  → ∀ z', z' ∈ C'
-  → ∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G.
-Proof.
-intros * (eq_dec, excl_midd) Hed * Hz'.
-  assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ Happ h' z')%G)). {
-    set (v d' := if eq_dec _ d' (Happ h' z') then true else false).
-    set (w (d' : gr_set D') := false).
-    specialize (Hed _ v w) as H1.
-    intros H2.
-    assert (H : ∀ t, t ∈ D → v (Happ d t) = w (Happ d t)). {
-      intros t Ht.
-      unfold v, w.
-      destruct (eq_dec _ (Happ d t) (Happ h' z')) as [H| H]; [ | easy ].
-      now specialize (H2 t Ht).
-    }
-    specialize (H1 H (Happ h' z')); clear H.
-    assert (H : Happ h' z' ∈ D') by now apply h'.
-    specialize (H1 H); clear H.
-    unfold v, w in H1.
-    destruct (eq_dec _ (Happ h' z') (Happ h' z')) as [H3| H3]; [ easy | ].
-    now apply H3.
-  }
-  specialize (excl_midd (∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G)) as H2.
-  destruct H2 as [H2| H2]; [ easy | ].
-  exfalso; apply Hn; intros t Ht H3.
-  apply H2.
-  now exists t.
-Qed.
 assert (H : ∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G). {
-clear - eq_dec excl_midd Hed Hz'.
-  assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ Happ h' z')%G)). {
-    set (v d' := if eq_dec _ d' (Happ h' z') then true else false).
-    set (w (d' : gr_set D') := false).
-    specialize (Hed _ v w) as H1.
-    intros H2.
-    assert (H : ∀ t, t ∈ D → v (Happ d t) = w (Happ d t)). {
-      intros t Ht.
-      unfold v, w.
-      destruct (eq_dec _ (Happ d t) (Happ h' z')) as [H| H]; [ | easy ].
-      now specialize (H2 t Ht).
-    }
-    specialize (H1 H (Happ h' z')); clear H.
-    assert (H : Happ h' z' ∈ D') by now apply h'.
-    specialize (H1 H); clear H.
-    unfold v, w in H1.
-    destruct (eq_dec _ (Happ h' z') (Happ h' z')) as [H3| H3]; [ easy | ].
-    now apply H3.
-  }
-  specialize (excl_midd (∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G)) as H2.
-  destruct H2 as [H2| H2]; [ easy | ].
-  exfalso; apply Hn; intros t Ht H3.
-  apply H2.
-  now exists t.
+apply epi_is_surj; [ easy | easy | now apply h' ].
 }
 destruct H as (t & Ht & Hdt).
 move t after z'; move Ht after Hz'.
@@ -146,6 +121,24 @@ assert (H : Happ c z - z' ∈ Ker h'). {
 apply s' in H.
 destruct H as (y' & Hy' & Hgy').
 move y' after z'; move Hy' before Hz'.
-assert (H : ∃ y, y ∈ B ∧ (Happ b y = y')%G). {
-Check glop.
+assert (H : ∃ y, y ∈ B ∧ (Happ b y = y')%G) by now apply epi_is_surj.
+destruct H as (y & Hy & Hby).
+move y after z; move Hy before Hz.
+specialize (Hgc (z - Happ g y)) as H1.
+assert (H : z - Happ g y ∈ C). {
+  apply C; [ easy | now apply C, g ].
+}
+specialize (H1 H); clear H.
+assert (H : (Happ c (z - Happ g y) = z')%G). {
+  rewrite Hadditive; [ | easy | now apply C, g ].
+  rewrite Hinv; [ | now apply g ].
+  apply gr_sub_move_r.
+  apply gr_sub_move_l.
+  rewrite <- Hgy'.
+  rewrite Hcgg'.
+  apply g'; [ easy | now apply b | ].
+  now symmetry.
+}
+(* rats! g₁ and g₂ must be morphisms,
+   I must change the definition of is_epi *)
 ...
