@@ -12,10 +12,38 @@ Theorem epi_is_surj : ∀ D D' (d : HomGr D D'),
 Proof.
 intros * (eq_dec, excl_midd) Hed * Ht'.
 assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ t')%G)). {
-  set (v d' := if eq_dec _ d' t' then true else false).
-  set (w (d' : gr_set D') := false).
+  set (v t'₁ := if eq_dec _ t'₁ t' then (true : gr_set Gr2) else false).
   specialize (Hed Gr2) as H1.
+  assert (Hmc : ∀ t'₁, t'₁ ∈ D' → v t'₁ ∈ Gr2). {
+    intros * Ht'₁.
+    now destruct (eq_dec _ t'₁ t').
+  }
+  assert (Hac : ∀ x y, x ∈ D' → y ∈ D' → (x = y)%G → (v x = v y)%G). {
+    intros * Hx Hy Hxy.
+    unfold v.
+    destruct (eq_dec _ x t') as [H2| H2].
+    -destruct (eq_dec _ y t') as [H3| H3]; [ easy | ].
+     now rewrite Hxy in H2.
+    -destruct (eq_dec _ y t') as [H3| H3]; [ | easy ].
+     now rewrite Hxy in H2.
+  }
+  assert (Had : ∀ x y, x ∈ D' → y ∈ D' → (v (x + y) = v x + v y)%G). {
+    intros * Hx Hy.
+    unfold v.
+    destruct (eq_dec D' (x + y) t') as [H2| H2].
+    -destruct (eq_dec D' x t') as [H3| H3].
+     +destruct (eq_dec D' y t') as [H4| H4]; [ simpl | easy ].
+      rewrite H3, H4 in H2.
+(* je pense qu'il faut faire une addition dans Gr2 qui renvoie toujours 0. *)
 ...
+  set (hv :=
+    {| Happ := v;
+       Hmem_compat := Hmc;
+       Happ_compat := Hac;
+       Hadditive := Had |}).
+
+...
+  set (w (d' : gr_set D') := false).
   specialize (Hed _ v w) as H1.
   intros H2.
   assert (H : ∀ t, t ∈ D → v (Happ d t) = w (Happ d t)). {
