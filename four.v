@@ -49,17 +49,19 @@ enough
 intros * Hgc *.
 unfold is_epi in Heb, Hed.
 unfold is_mono in Hme.
-assert (H : ∃ t, (Happ d t = Happ h' z')%G). {
-  assert (Hn : ¬ (∀ t, (Happ d t ≠ Happ h' z')%G)). {
+assert (H : ∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G). {
+  assert (Hn : ¬ (∀ t, t ∉ D ∨ (Happ d t ≠ Happ h' z')%G)). {
     set (v d' := if eq_dec _ d' (Happ h' z') then true else false).
     set (w (d' : gr_set D') := false).
     specialize (Hed _ v w) as H1.
     intros H2.
-    assert (H : ∀ x : gr_set D, v (Happ d x) = w (Happ d x)). {
+    assert (H : ∀ t : gr_set D, v (Happ d t) = w (Happ d t)). {
       intros t.
       unfold v, w.
       destruct (eq_dec _ (Happ d t) (Happ h' z')) as [H| H]; [ | easy ].
-      now specialize (H2 t).
+      specialize (H2 t).
+      destruct H2 as [H2| H2]; [ | easy ].
+...
     }
     specialize (H1 H (Happ h' z')).
     unfold v, w in H1.
