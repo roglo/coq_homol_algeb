@@ -14,7 +14,7 @@ intros * (eq_dec, excl_midd) Hed * Ht'.
 assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ t')%G)). {
   set (v d' := if eq_dec _ d' t' then true else false).
   set (w (d' : gr_set D') := false).
-  specialize (Hed _ v w) as H1.
+  specialize (Hed Gr2 v w) as H1.
   intros H2.
   assert (H : ∀ t, t ∈ D → v (Happ d t) = w (Happ d t)). {
     intros t Ht.

@@ -268,7 +268,7 @@ Definition HomGr_Coker_Coker {A B A' B'}
 
 (* Morphism g in snake lemma is surjective *)
 
-Theorem g_is_surj {B C C' g} (c : HomGr C C') {cz : HomGr C Gr0} :
+Theorem g_is_surj {B C C' g} (c : HomGr C C') {cz : HomGr C Gr1} :
    Decidable_Membership
    → Im g == Ker cz
    → ∀ x : gr_set (Ker c), ∃ y, x ∈ C → y ∈ B ∧ (Happ g y = x)%G.
@@ -287,7 +287,7 @@ Qed.
 
 (* Morphism f' in snake lemma is injective *)
 
-Theorem f'_is_inj {A' B'} {f' : HomGr A' B'} {za' : HomGr Gr0 A'} :
+Theorem f'_is_inj {A' B'} {f' : HomGr A' B'} {za' : HomGr Gr1 A'} :
    Im za' == Ker f'
    → ∀ x y, x ∈ A' → y ∈ A' → (Happ f' x = Happ f' y)%G → (x = y)%G.
 Proof.
@@ -321,7 +321,7 @@ Qed.
 (* Morphism f' (on cokernel) in snake lemma is injective *)
 
 Theorem f'c_is_inj
-    {A A' B'} {f' : HomGr A' B'} {a : HomGr A A'} {za' : HomGr Gr0 A'} :
+    {A A' B'} {f' : HomGr A' B'} {a : HomGr A A'} {za' : HomGr Gr1 A'} :
   Im za' == Ker f'
   → ∀ x y, x ∈ Coker a → y ∈ Coker a →
      (Happ f' x = Happ f' y)%G → (x = y)%G.
@@ -416,7 +416,7 @@ Qed.
 Theorem d_app_compat
     {A A' B B' C C'} {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'}
     {f : HomGr A B} {g : HomGr B C} {f' : HomGr A' B'} {g' : HomGr B' C'}
-    {za' : HomGr Gr0 A'} {g₁ f'₁} :
+    {za' : HomGr Gr1 A'} {g₁ f'₁} :
   diagram_commutes f a b f'
   → diagram_commutes g b c g'
   → Im f == Ker g
@@ -511,7 +511,7 @@ Qed.
 
 Theorem d_additive
     {A A' B B' C C'} {f : HomGr A B} {g : HomGr B C} {f' : HomGr A' B'}
-    {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'} {za' : HomGr Gr0 A'}
+    {a : HomGr A A'} {b : HomGr B B'} {c : HomGr C C'} {za' : HomGr Gr1 A'}
     {g₁ f'₁} :
   diagram_commutes f a b f'
   → Im f == Ker g
@@ -615,7 +615,7 @@ Qed.
 
 Theorem exact_sequence_1 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
-     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
+     (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr1 A')
      (Hcff' : diagram_commutes f a b f') (Hcgg' : diagram_commutes g b c g'),
   Im f == Ker g
   → Im za' == Ker f'
@@ -656,7 +656,7 @@ Qed.
 
 Theorem exact_sequence_2 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
-    (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
+    (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr1 A')
     (g₁ : gr_set (Ker c) → gr_set B) (f'₁ : gr_set B' → gr_set (Coker a))
     (sf : Im f == Ker g) (sf' : Im za' == Ker f')
     (Hcff' : diagram_commutes f a b f')
@@ -761,7 +761,7 @@ Qed.
 
 Theorem exact_sequence_3 {A B C A' B' C'} :
   ∀ (f : HomGr A B) (g : HomGr B C) (f' : HomGr A' B') (g' : HomGr B' C')
-    (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr0 A')
+    (a : HomGr A A') (b : HomGr B B') (c : HomGr C C') (za' : HomGr Gr1 A')
     (Hcff' : diagram_commutes f a b f')
     (Hcgg' : diagram_commutes g b c g')
     (sf : Im f == Ker g) (sf' : Im za' == Ker f') (sg' : Im f' == Ker g')
@@ -988,7 +988,7 @@ Lemma snake :
      (f : HomGr A B) (g : HomGr B C)
      (f' : HomGr A' B') (g' : HomGr B' C')
      (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
-     (cz : HomGr C Gr0) (za' : HomGr Gr0 A'),
+     (cz : HomGr C Gr1) (za' : HomGr Gr1 A'),
   Decidable_Membership * Choice
   → diagram_commutes f a b f'
   → diagram_commutes g b c g'

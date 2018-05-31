@@ -457,27 +457,23 @@ Definition diagram_commutes {A B C D}
 
 (* The trivial group *)
 
-Inductive Gr0_set := G0 : Gr0_set.
+Theorem Gr1_add_0_l : ∀ x : True, I = x.
+Proof. now destruct x. Qed.
 
-Theorem Gr0_add_0_l : ∀ x, (λ _ _ : Gr0_set, G0) G0 x = x.
-Proof.
-now intros x; destruct x.
-Qed.
-
-Definition Gr0 :=
-   {| gr_set := Gr0_set;
+Definition Gr1 :=
+   {| gr_set := True;
       gr_mem _ := True;
       gr_eq := eq;
-      gr_zero := G0;
-      gr_add _ _ := G0;
+      gr_zero := I;
+      gr_add _ _ := I;
       gr_inv x := x;
       gr_zero_mem := I;
       gr_add_mem _ _ _ _ := I;
-      gr_add_0_l := Gr0_add_0_l;
-      gr_add_assoc _ _ _ := eq_refl G0;
+      gr_add_0_l := Gr1_add_0_l;
+      gr_add_assoc _ _ _ := eq_refl;
       gr_inv_mem _ H := H;
       gr_add_inv_r _ := eq_refl;
-      gr_add_comm _ _ := eq_refl G0;
+      gr_add_comm _ _ := eq_refl;
       gr_equiv := eq_equivalence;
       gr_mem_compat _ _ _ _ := I;
       gr_add_compat _ _ _ _ _ _ := eq_refl;
@@ -491,9 +487,9 @@ Definition is_mono {A B} (f : HomGr A B) :=
   → (∀ z, (g₁ z = g₂ z)%G).
 
 Definition is_epi {A B} (f : HomGr A B) :=
-  ∀ C (g₁ g₂ : gr_set B → C),
-  (∀ x, x ∈ A → g₁ (Happ f x) = g₂ (Happ f x))
-  → (∀ y, y ∈ B → g₁ y = g₂ y).
+  ∀ C (g₁ g₂ : HomGr B C),
+  (∀ x, x ∈ A → (Happ g₁ (Happ f x) = Happ g₂ (Happ f x))%G)
+  → (∀ y, y ∈ B → (Happ g₁ y = Happ g₂ y)%G).
 
 Definition is_iso {A B} (f : HomGr A B) :=
   ∃ g : HomGr B A,
