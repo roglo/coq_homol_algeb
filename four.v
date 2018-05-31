@@ -47,8 +47,6 @@ enough
   now intros T g₁ g₂ H1; apply H.
 }
 intros * Hgc * Hz'.
-unfold is_epi in Heb, Hed.
-unfold is_mono in Hme.
 assert (H : ∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G). {
   assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ Happ h' z')%G)). {
     set (v d' := if eq_dec _ d' (Happ h' z') then true else false).
@@ -79,4 +77,12 @@ move t before z'.
 assert (H : ∃ z, (Happ h z = t)%G). {
   assert (H : t ∈ Ker j). {
     split; [ easy | ].
+    assert (H : (Happ e (Happ j t) = 0)%G). {
+      rewrite Hcjj'.
+      etransitivity.
+      -apply Happ_compat; [ now apply d | | apply Hdt ].
+       now apply h'.
+      -assert (H : Happ h' z' ∈ Im h') by (exists z'; easy).
+       now apply s' in H; simpl in H.
+    }
 ...
