@@ -23,6 +23,31 @@ Require Import AbGroup Setoid.
      c is an epimorphism.
 *)
 
+Theorem mono_is_inj : ∀ A B (f : HomGr A B),
+  is_mono f
+  → ∀ x1 x2, x1 ∈ A → x2 ∈ A → (Happ f x1 = Happ f x2)%G → (x1 = x2)%G.
+Proof.
+intros * Hf * Hx1 Hx2 Hxx.
+(* morphism identity from Ker f to A *)
+set (v x := let _ : gr_set (Ker f) := x in x : gr_set A).
+assert (Hmc : ∀ x, x ∈ Ker f → v x ∈ A) by (intros x Hx; apply Hx).
+set (hv :=
+  {| Happ := v;
+     Hmem_compat := Hmc;
+     Happ_compat _ _ _ _ H := H;
+     Hadditive _ _ _ _ := gr_eq_rel_Reflexive _ |}).
+(* morphism null from Ker f to A *)
+set (hw :=
+  {| Happ x := let _ : gr_set (Ker f) := x in 0 : gr_set A;
+     Hmem_compat _ _ := gr_zero_mem A;
+     Happ_compat _ _ _ _ _ := gr_eq_rel_Reflexive _;
+     Hadditive _ _ _ _ := gr_eq_rel_Symmetric _ _ (gr_add_0_r _ _) |}).
+specialize (Hf (Ker f) hv hw) as H1.
+assert (H : ∀ z, (Happ f (Happ hv z) = Happ f (Happ hw z))%G). {
+  intros z.
+  unfold hv, hw, v; simpl.
+...
+
 Lemma four_1 :
   ∀ (B C D E B' C' D' E' : AbGroup)
      (g : HomGr B C) (h : HomGr C D) (j : HomGr D E)
@@ -62,7 +87,6 @@ assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
       -assert (H : Happ h' z' ∈ Im h') by (exists z'; easy).
        now apply s' in H; simpl in H.
     }
-    set (v x := let _ : gr_set (Ker e) := x in x : gr_set E).
 ...
     set (v (b : gr_set Gr2) := if b then Happ j t else 0).
     assert (Hmc : ∀ x : gr_set Gr2, x ∈ Gr2 → v x ∈ E). {
