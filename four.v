@@ -8,7 +8,7 @@ Require Import AbGroup Setoid.
 (* Four lemma #1
            g       h        j
         B------>C------>D------>E
-        |       |       |       Γ
+        |       |       |       ∩
        b|      c|      d|      e|
         v       |       v       |
         v       v       v       v
@@ -122,3 +122,38 @@ Check four_1.
 (*
 Print Assumptions four_1.
 *)
+
+(* Four lemma #2
+            f      g       h
+        A------>B------>C------>D
+        |       ∩       |       ∩
+       a|      b|      c|      d|
+        v       |       |       |
+        v       v       v       v
+        A'----->B'----->C'----->D'
+           f'      g'      h'
+
+  If 1/ the diagram is commutative,
+     2/ (f, g, h) and (f', g', h') are exact,
+     3/ b and d are monomorphisms,
+     4/ a is epimorphism,
+  Then
+     d is an monomorphism.
+*)
+
+Lemma four_2 :
+  ∀ (A B C D A' B' C' D' : AbGroup)
+     (f : HomGr A B) (g : HomGr B C) (h : HomGr C D)
+     (f' : HomGr A' B') (g' : HomGr B' C') (h' : HomGr C' D')
+     (a : HomGr A A') (b : HomGr B B')
+     (c : HomGr C C') (d : HomGr D D'),
+  diagram_commutes f a b f'
+  → diagram_commutes g b c g'
+  → diagram_commutes h c d h'
+  → exact_sequence [f; g; h]
+  → exact_sequence [f'; g'; h']
+  → is_mono b ∧ is_mono d ∧ is_epi a
+  → is_epi d.
+Proof.
+intros * Hcff' Hcgg' Hchh' s s' (Hmb & Hmd & Hea).
+...
