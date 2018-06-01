@@ -13,7 +13,6 @@ Proof.
 intros * (eq_dec, excl_midd) Hed * Ht'.
 assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ t')%G)). {
   set (v t'₁ := (if eq_dec _ t'₁ t' then t' else 0) : gr_set (Coker d)).
-  specialize (Hed (Coker d)) as H1.
   assert (Hmc : ∀ t : gr_set D', t ∈ D' → v t ∈ D'). {
     intros * Ht'₁.
     unfold v.
@@ -51,6 +50,8 @@ assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ t')%G)). {
 
 ...
   set (w (d' : gr_set D') := false).
+  specialize (Hed (Coker d)) as H1.
+...
   specialize (Hed _ v w) as H1.
   intros H2.
   assert (H : ∀ t, t ∈ D → v (Happ d t) = w (Happ d t)). {
