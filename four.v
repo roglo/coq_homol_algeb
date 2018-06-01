@@ -12,41 +12,35 @@ Theorem epi_is_surj : ∀ D D' (d : HomGr D D'),
 Proof.
 intros * (eq_dec, excl_midd) Hed * Ht'.
 assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ t')%G)). {
-  set (v t'₁ := (if eq_dec _ t'₁ t' then t' else 0) : gr_set (Coker d)).
-  assert (Hmc : ∀ t : gr_set D', t ∈ D' → v t ∈ D'). {
-    intros * Ht'₁.
-    unfold v.
-    destruct (eq_dec _ t t'); [ easy | apply D' ].
+(*
+  set (v t'₁ := (t'₁ : gr_set (Coker d))).
+*)
+  (* trick to make identity of type gr_set D' → gr_set (Coker d) *)
+  set (v t'₁ := (if eq_dec _ t'₁ t' then t'₁ else t'₁) : gr_set (Coker d)).
+(**)
+  assert (Hvid : ∀ x, v x = x). {
+    intros; unfold v.
+    now destruct (eq_dec _ x t').
+  }
+  assert (Hmc : ∀ t, t ∈ D' → v t ∈ D'). {
+    intros t Ht; now rewrite Hvid.
   }
   assert (Hac : ∀ x y, x ∈ D' → y ∈ D' → (x = y)%G → (v x = v y)%G). {
     intros * Hx Hy Hxy.
-    unfold v; simpl.
-    destruct (eq_dec _ x t') as [H2| H2].
-    -destruct (eq_dec _ y t') as [H3| H3].
-     +exists 0; split; [ apply D | now rewrite Hzero, gr_add_inv_r ].
-     +now rewrite Hxy in H2.
-    -destruct (eq_dec _ y t') as [H3| H3].
-     +now rewrite Hxy in H2.
-     +exists 0; split; [ apply D | now rewrite Hzero, gr_add_inv_r ].
+    do 2 rewrite Hvid.
+    simpl; unfold Coker_eq; simpl.
+    exists 0; split; [ apply D | now rewrite Hzero, Hxy, gr_add_inv_r ].
   }
   assert (Had : ∀ x y, x ∈ D' → y ∈ D' → (v (x + y) = v x + v y)%G). {
     intros * Hx Hy.
-    unfold v.
-    destruct (eq_dec D' (x + y) t') as [H2| H2].
-    -destruct (eq_dec D' x t') as [H3| H3].
-     +destruct (eq_dec D' y t') as [H4| H4]; [ | now rewrite gr_add_0_r ].
-      simpl; unfold Coker_eq; simpl.
-      exists 0; split; [ apply D | ].
-      rewrite H3, H4 in H2.
-      rewrite H2, gr_add_inv_r; apply Hzero.
-     +destruct (eq_dec D' y t') as [H4| H4]; [ now rewrite gr_add_0_l | ].
-      simpl; unfold Coker_eq; simpl.
-...
+    do 3 rewrite Hvid.
+    exists 0; split; [ apply D | now rewrite Hzero, gr_add_inv_r ].
+  }
   set (hv :=
     {| Happ := v;
        Hmem_compat := Hmc;
        Happ_compat := Hac;
-       Hadditive := I |}).
+       Hadditive := Had |}).
 
 ...
   set (w (d' : gr_set D') := false).
