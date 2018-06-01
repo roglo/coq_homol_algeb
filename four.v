@@ -62,6 +62,19 @@ assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
       -assert (H : Happ h' z' ∈ Im h') by (exists z'; easy).
        now apply s' in H; simpl in H.
     }
+    set (v (b : gr_set Gr2) := if b then Happ j t else 0).
+    assert (Hmc : ∀ x : gr_set Gr2, x ∈ Gr2 → v x ∈ E). ...
+    assert (Hac : ∀ x y : gr_set Gr2, x ∈ Gr2 → y ∈ Gr2 → (x = y)%G → (v x = v y)%G). ...
+    assert (Had : ∀ x y : gr_set Gr2, x ∈ Gr2 → y ∈ Gr2 → (v (x + y) = v x + v y)%G). ...
+    set (hv :=
+      {| Happ := v;
+         Hmem_compat := Hmc;
+         Happ_compat := Hac;
+         Hadditive := Had |}).
+    specialize (Hme Gr2 hv) as H1.
+...
+
+set (w (b : bool) := @gr_zero E).
 ...
     specialize (Hme bool (λ b, if b then Happ j t else 0) (λ _, 0)) as H1.
     simpl in H1.
