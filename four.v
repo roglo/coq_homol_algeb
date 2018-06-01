@@ -150,5 +150,5 @@ Lemma four_2 :
   → is_mono c.
 Proof.
 intros * Hcff' Hcgg' Hchh' s s' (Hmb & Hmd & Hea).
-intros T g₁ g₂ H z Hz.
+intros T g₁ g₂ Hcg z Hz.
 ...
