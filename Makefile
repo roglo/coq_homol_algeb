@@ -16,6 +16,9 @@ depend:
 .SUFFIXES: .v .vo
 
 .v.vo:
+	coqc $<
+
+AbGroup.vo: AbGroup.v
 	coqc -w none $<
 
 .PHONY: all
