@@ -6,13 +6,12 @@ Require Import Utf8.
 Require Import AbGroup Setoid.
 
 Theorem epi_is_surj : ∀ A B (f : HomGr A B),
-  Decidable_Equality
-  → is_epi f
+  is_epi f
   → ∀ y, y ∈ B → ∃ t, t ∈ A ∧ (Happ f t = y)%G.
 Proof.
-intros * eq_dec Hed y Hy.
+intros * Hed y Hy.
 (* trick to make identity of type gr_set B → gr_set (Coker f) *)
-set (v y1 := let _ := eq_dec _ y y1 in y1 : gr_set (Coker f)).
+set (v y1 := let _ := gr_mem B y1 in y1 : gr_set (Coker f)).
 assert (Hmc : ∀ y1, y1 ∈ B → v y1 ∈ B) by easy.
 assert (Hac : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (y1 = y2)%G → (v y1 = v y2)%G). {
   intros * Hy1 Hy2 Hyy.
@@ -83,8 +82,7 @@ Lemma four_1 :
      (g' : HomGr B' C') (h' : HomGr C' D') (j' : HomGr D' E')
      (b : HomGr B B') (c : HomGr C C')
      (d : HomGr D D') (e : HomGr E E'),
-  (Decidable_Equality * Excluded_Middle)
-  → diagram_commutes g b c g'
+  diagram_commutes g b c g'
   → diagram_commutes h c d h'
   → diagram_commutes j d e j'
   → exact_sequence [g; h; j]
@@ -92,18 +90,17 @@ Lemma four_1 :
   → is_epi b ∧ is_epi d ∧ is_mono e
   → is_epi c.
 Proof.
-intros * (eq_dec, excl_midd) Hcgg' Hchh' Hcjj' s s' (Heb & Hed & Hme).
+intros * Hcgg' Hchh' Hcjj' s s' (Heb & Hed & Hme).
 unfold is_epi.
-...
 enough
-  (∀ T (g₁ g₂ : gr_set C' → T),
-  (∀ z, z ∈ C → g₁ (Happ c z) = g₂ (Happ c z))
-  → ∀ z', z' ∈ C' → g₁ z' = g₂ z'). {
+  (∀ T (g₁ g₂ : HomGr C' T),
+   (∀ z, z ∈ C → (Happ g₁ (Happ c z) = Happ g₂ (Happ c z))%G)
+   → ∀ z', z' ∈ C' → (Happ g₁ z' = Happ g₂ z')%G). {
   now intros T g₁ g₂ H1; apply H.
 }
 intros * Hgc * Hz'.
 assert (H : ∃ t, t ∈ D ∧ (Happ d t = Happ h' z')%G). {
-apply epi_is_surj; [ easy | easy | now apply h' ].
+  apply epi_is_surj; [ easy | now apply h' ].
 }
 destruct H as (t & Ht & Hdt).
 move t after z'; move Ht after Hz'.
@@ -165,6 +162,4 @@ assert (H : (Happ c (z - Happ g y) = z')%G). {
   apply g'; [ easy | now apply b | ].
   now symmetry.
 }
-(* rats! g₁ and g₂ must be morphisms,
-   I must change the definition of is_epi *)
 ...
