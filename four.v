@@ -1,4 +1,4 @@
-(* WORK IN PROGRESS (2018-05-30) *)
+(* WORK IN PROGRESS (2018-06-01) *)
 
 (* The two Four Lemmas *)
 
@@ -162,4 +162,16 @@ assert (H : (Happ c (z - Happ g y) = z')%G). {
   apply g'; [ easy | now apply b | ].
   now symmetry.
 }
-...
+etransitivity.
+-apply g₁; [ easy | | symmetry; apply H ].
+ apply c, C; [ easy | now apply C, g ].
+-rewrite H1.
+ apply g₂; [ | easy | easy ].
+ apply c, C; [ easy | now apply C, g ].
+Qed.
+
+Check four_1.
+
+(*
+Print Assumptions four_1.
+*)
