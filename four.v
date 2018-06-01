@@ -63,9 +63,18 @@ assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
        now apply s' in H; simpl in H.
     }
     set (v (b : gr_set Gr2) := if b then Happ j t else 0).
-    assert (Hmc : ∀ x : gr_set Gr2, x ∈ Gr2 → v x ∈ E). ...
-    assert (Hac : ∀ x y : gr_set Gr2, x ∈ Gr2 → y ∈ Gr2 → (x = y)%G → (v x = v y)%G). ...
-    assert (Had : ∀ x y : gr_set Gr2, x ∈ Gr2 → y ∈ Gr2 → (v (x + y) = v x + v y)%G). ...
+    assert (Hmc : ∀ x : gr_set Gr2, x ∈ Gr2 → v x ∈ E). {
+      intros x Hx.
+      destruct x; [ now apply j | apply E ].
+    }
+    assert (Hac : ∀ x y, x ∈ Gr2 → y ∈ Gr2 → (x = y)%G → (v x = v y)%G). {
+      intros * Hx Hy Hxy.
+      now rewrite <- Hxy.
+    }
+    assert (Had : ∀ x y, x ∈ Gr2 → y ∈ Gr2 → (v (x + y) = v x + v y)%G). {
+      intros * Hx Hy.
+      destruct x, y; simpl.
+...
     set (hv :=
       {| Happ := v;
          Hmem_compat := Hmc;
