@@ -12,34 +12,42 @@ Theorem epi_is_surj : ∀ D D' (d : HomGr D D'),
 Proof.
 intros * (eq_dec, excl_midd) Hed * Ht'.
 assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ t')%G)). {
-  set (v t'₁ := if eq_dec _ t'₁ t' then (true : gr_set Gr2) else false).
-  specialize (Hed Gr2) as H1.
-  assert (Hmc : ∀ t'₁, t'₁ ∈ D' → v t'₁ ∈ Gr2). {
+  set (v t'₁ := (if eq_dec _ t'₁ t' then t' else 0) : gr_set (Coker d)).
+  specialize (Hed (Coker d)) as H1.
+  assert (Hmc : ∀ t : gr_set D', t ∈ D' → v t ∈ D'). {
     intros * Ht'₁.
-    now destruct (eq_dec _ t'₁ t').
+    unfold v.
+    destruct (eq_dec _ t t'); [ easy | apply D' ].
   }
   assert (Hac : ∀ x y, x ∈ D' → y ∈ D' → (x = y)%G → (v x = v y)%G). {
     intros * Hx Hy Hxy.
-    unfold v.
+    unfold v; simpl.
     destruct (eq_dec _ x t') as [H2| H2].
-    -destruct (eq_dec _ y t') as [H3| H3]; [ easy | ].
-     now rewrite Hxy in H2.
-    -destruct (eq_dec _ y t') as [H3| H3]; [ | easy ].
-     now rewrite Hxy in H2.
+    -destruct (eq_dec _ y t') as [H3| H3].
+     +exists 0; split; [ apply D | now rewrite Hzero, gr_add_inv_r ].
+     +now rewrite Hxy in H2.
+    -destruct (eq_dec _ y t') as [H3| H3].
+     +now rewrite Hxy in H2.
+     +exists 0; split; [ apply D | now rewrite Hzero, gr_add_inv_r ].
   }
   assert (Had : ∀ x y, x ∈ D' → y ∈ D' → (v (x + y) = v x + v y)%G). {
     intros * Hx Hy.
     unfold v.
     destruct (eq_dec D' (x + y) t') as [H2| H2].
     -destruct (eq_dec D' x t') as [H3| H3].
-     +destruct (eq_dec D' y t') as [H4| H4]; [ simpl | easy ].
+     +destruct (eq_dec D' y t') as [H4| H4]; [ | now rewrite gr_add_0_r ].
+      simpl; unfold Coker_eq; simpl.
+      exists 0; split; [ apply D | ].
       rewrite H3, H4 in H2.
+      rewrite H2, gr_add_inv_r; apply Hzero.
+     +destruct (eq_dec D' y t') as [H4| H4]; [ now rewrite gr_add_0_l | ].
+      simpl; unfold Coker_eq; simpl.
 ...
   set (hv :=
     {| Happ := v;
        Hmem_compat := Hmc;
        Happ_compat := Hac;
-       Hadditive := Had |}).
+       Hadditive := I |}).
 
 ...
   set (w (d' : gr_set D') := false).

@@ -413,6 +413,172 @@ Definition Ker {G H : AbGroup} (f : HomGr G H) :=
      gr_add_compat := gr_add_compat G;
      gr_inv_compat := gr_inv_compat G |}.
 
+(* Cokernels
+
+   x ∈ Coker f ↔ x ∈ H/Im f
+   quotient group is H with setoid, i.e. set with its own equality *)
+
+Definition Coker_eq {G H} (f : HomGr G H) x y := (x - y)%G ∈ Im f.
+
+Theorem Coker_add_0_l {G H} : ∀ (f : HomGr G H) x, Coker_eq f (0 + x)%G x.
+Proof.
+intros.
+unfold Coker_eq.
+exists 0%G.
+split; [ apply gr_zero_mem | ].
+rewrite gr_add_0_l, gr_add_inv_r.
+simpl; apply Hzero.
+Qed.
+
+Theorem Coker_add_assoc {G H} : ∀ (f : HomGr G H) x y z,
+  Coker_eq f (x + y + z)%G (x + (y + z))%G.
+Proof.
+intros.
+unfold Coker_eq.
+exists 0%G.
+split; [ apply gr_zero_mem | ].
+rewrite Hzero.
+symmetry; simpl.
+apply gr_sub_move_r.
+rewrite gr_add_0_l.
+apply gr_add_assoc.
+Qed.
+
+Theorem Coker_add_inv_r {G H} : ∀ (f : HomGr G H) x, Coker_eq f (x - x)%G 0%G.
+Proof.
+intros.
+exists 0%G.
+split; [ apply gr_zero_mem | ].
+now rewrite Hzero, gr_add_inv_r, gr_sub_0_r.
+Qed.
+
+Theorem Coker_add_comm {G H} : ∀ (f : HomGr G H) x y,
+  Coker_eq f (x + y)%G (y + x)%G.
+Proof.
+intros.
+exists 0%G.
+split; [ apply gr_zero_mem | ].
+rewrite Hzero.
+symmetry.
+simpl; apply gr_sub_move_l.
+now rewrite gr_add_0_r, gr_add_comm.
+Qed.
+
+Theorem Coker_eq_refl {G H} (f : HomGr G H) : Reflexive (Coker_eq f).
+Proof.
+intros x.
+exists 0%G.
+split; [ apply gr_zero_mem | ].
+rewrite gr_add_inv_r.
+simpl; apply Hzero.
+Qed.
+
+Theorem Coker_eq_symm {G H} (f : HomGr G H) : Symmetric (Coker_eq f).
+Proof.
+intros x y Hxy.
+destruct Hxy as (z & Hz & Hfz).
+exists (- z)%G.
+split; [ now apply gr_inv_mem | ].
+rewrite Hinv; [ | easy ].
+rewrite Hfz.
+simpl; rewrite gr_inv_add_distr, gr_add_comm.
+apply gr_add_compat; [ | easy ].
+apply gr_inv_involutive.
+Qed.
+
+Theorem Coker_eq_trans {G H} (f : HomGr G H) : Transitive (Coker_eq f).
+Proof.
+intros x y z Hxy Hyz.
+simpl in Hxy, Hyz.
+destruct Hxy as (t & Ht & Hft).
+destruct Hyz as (u & Hu & Hfu).
+exists (t + u)%G.
+split; [ now apply gr_add_mem | ].
+rewrite Hadditive; [ | easy | easy ].
+rewrite Hft, Hfu.
+simpl; rewrite gr_add_assoc.
+apply gr_add_compat; [ easy | ].
+now rewrite <- gr_add_assoc, gr_add_inv_l, gr_add_0_l.
+Qed.
+
+Theorem Coker_equiv {G H} : ∀ (f : HomGr G H), Equivalence (Coker_eq f).
+Proof.
+intros.
+unfold Coker_eq; split.
+-apply Coker_eq_refl.
+-apply Coker_eq_symm.
+-apply Coker_eq_trans.
+Qed.
+
+Add Parametric Relation {G H} {f : HomGr G H} : (gr_set (Im f)) (Coker_eq f)
+ reflexivity proved by (Coker_eq_refl f)
+ symmetry proved by (Coker_eq_symm f)
+ transitivity proved by (Coker_eq_trans f)
+ as gr_cokereq_rel.
+
+Theorem Coker_mem_compat {G H} : ∀ (f : HomGr G H) x y,
+  Coker_eq f x y → x ∈ H → y ∈ H.
+Proof.
+intros * Heq Hx.
+destruct Heq as (z & Hz & Hfz).
+apply gr_mem_compat with (x := (x - Happ f z)%G).
+-rewrite Hfz.
+ simpl; apply gr_sub_move_r.
+ now rewrite gr_add_comm, gr_add_assoc, gr_add_inv_l, gr_add_0_r.
+-simpl; apply gr_add_mem; [ easy | ].
+ apply gr_inv_mem.
+ now apply f.
+Qed.
+
+Theorem Coker_add_compat {G H} : ∀ (f : HomGr G H) x y x' y',
+  Coker_eq f x y → Coker_eq f x' y' → Coker_eq f (x + x')%G (y + y')%G.
+Proof.
+intros f x y x' y' (z & Hz & Hfz) (z' & Hz' & Hfz').
+exists (z + z')%G.
+split.
+-now apply gr_add_mem.
+-rewrite Hadditive; [ | easy | easy ].
+ rewrite Hfz, Hfz'; simpl.
+ rewrite gr_add_assoc; symmetry.
+ rewrite gr_add_assoc; symmetry.
+ apply gr_add_compat; [ easy | ].
+ rewrite gr_add_comm, gr_add_assoc.
+ apply gr_add_compat; [ easy | ].
+ rewrite gr_add_comm; symmetry.
+ apply gr_inv_add_distr.
+Qed.
+
+Theorem Coker_inv_compat {G H} :∀ (f : HomGr G H) x y,
+  Coker_eq f x y → Coker_eq f (- x)%G (- y)%G.
+Proof.
+intros * (z & Hz & Hfz).
+unfold Coker_eq; simpl.
+exists (- z)%G.
+split; [ now apply gr_inv_mem | ].
+rewrite Hinv; [ | easy ].
+rewrite Hfz.
+simpl; apply gr_inv_add_distr.
+Qed.
+
+Definition Coker {G H : AbGroup} (f : HomGr G H) :=
+  {| gr_set := gr_set H;
+     gr_zero := gr_zero;
+     gr_eq := Coker_eq f;
+     gr_mem := gr_mem H;
+     gr_add := @gr_add H;
+     gr_inv := @gr_inv H;
+     gr_zero_mem := @gr_zero_mem H;
+     gr_add_mem := @gr_add_mem H;
+     gr_add_0_l := Coker_add_0_l f;
+     gr_add_assoc := Coker_add_assoc f;
+     gr_inv_mem := gr_inv_mem H;
+     gr_add_inv_r := Coker_add_inv_r f;
+     gr_add_comm := Coker_add_comm f;
+     gr_equiv := Coker_equiv f;
+     gr_mem_compat := Coker_mem_compat f;
+     gr_add_compat := Coker_add_compat f;
+     gr_inv_compat := Coker_inv_compat f |}.
+
 (* Exact sequences *)
 
 Inductive sequence {A : AbGroup} :=
