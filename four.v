@@ -138,7 +138,7 @@ Print Assumptions four_1.
      3/ b and d are monomorphisms,
      4/ a is epimorphism,
   Then
-     d is an monomorphism.
+     c is an monomorphism.
 *)
 
 Lemma four_2 :
@@ -153,7 +153,7 @@ Lemma four_2 :
   → exact_sequence [f; g; h]
   → exact_sequence [f'; g'; h']
   → is_mono b ∧ is_mono d ∧ is_epi a
-  → is_epi d.
+  → is_mono c.
 Proof.
 intros * Hcff' Hcgg' Hchh' s s' (Hmb & Hmd & Hea).
 ...
