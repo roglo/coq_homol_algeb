@@ -5,59 +5,6 @@
 Require Import Utf8.
 Require Import AbGroup Setoid.
 
-Theorem epi_is_surj : ∀ A B (f : HomGr A B),
-  is_epi f
-  → ∀ y, y ∈ B → ∃ t, t ∈ A ∧ (Happ f t = y)%G.
-Proof.
-intros * Hed y Hy.
-(* trick to make identity of type gr_set B → gr_set (Coker f) *)
-set (v y1 := let _ := gr_mem B y1 in y1 : gr_set (Coker f)).
-assert (Hmc : ∀ y1, y1 ∈ B → v y1 ∈ B) by easy.
-assert (Hac : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (y1 = y2)%G → (v y1 = v y2)%G). {
-  intros * Hy1 Hy2 Hyy.
-  exists 0; split; [ apply A | ].
-  now unfold v; simpl; rewrite Hzero, Hyy, gr_add_inv_r.
-}
-assert (Had : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (v (y1 + y2) = v y1 + v y2)%G). {
-  intros * Hy1 Hy2.
-  exists 0; split; [ apply A | now unfold v; rewrite Hzero, gr_add_inv_r ].
-}
-set (hv :=
-  {| Happ := v;
-     Hmem_compat := Hmc;
-     Happ_compat := Hac;
-     Hadditive := Had |}).
-assert (Hmc₀ : ∀ y1, y1 ∈ B → 0 ∈ Coker f) by (intros; apply B).
-assert
-  (Hac₀ :
-   ∀ y1 y2, y1 ∈ B → y2 ∈ B→ (y1 = y2)%G → (@gr_zero (Coker f) = 0)%G). {
-  intros * Hy1 Hy2 Hyy.
-  simpl; unfold Coker_eq; simpl.
-  exists 0; split; [ apply A | now rewrite Hzero, gr_add_inv_r ].
-}
-assert (Had₀ : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (@gr_zero (Coker f) = 0 + 0)%G). {
-  intros * Hy1 Hy2.
-  simpl; unfold Coker_eq; simpl.
-  exists 0; split; [ apply A | now rewrite Hzero, gr_add_0_r, gr_sub_0_r ].
-}
-set (hw :=
-  {| Happ _ := 0;
-     Hmem_compat := Hmc₀;
-     Happ_compat := Hac₀;
-     Hadditive := Had₀ |}).
-specialize (Hed (Coker f) hv hw) as H1.
-assert (H : ∀ x, x ∈ A → (Happ hv (Happ f x) = Happ hw (Happ f x))%G). {
-  intros x Hx.
-  simpl; unfold v; unfold Coker_eq; simpl.
-  exists x; split; [ easy | now rewrite gr_sub_0_r ].
-}
-specialize (H1 H y Hy); clear H.
-simpl in H1; unfold Coker_eq in H1; simpl in H1.
-destruct H1 as (x & Hx).
-rewrite gr_sub_0_r in Hx.
-now exists x.
-Qed.
-
 (* Four lemma #1
            g       h        j
         B------>C------>D------>E
