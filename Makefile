@@ -21,6 +21,6 @@ depend:
 AbGroup.vo: AbGroup.v
 	coqc -w none $<
 
-.PHONY: all
+.PHONY: all allok clean depend
 
 include .depend
