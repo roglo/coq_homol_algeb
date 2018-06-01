@@ -685,9 +685,9 @@ Definition Gr2 :=
 (* *)
 
 Definition is_mono {A B} (f : HomGr A B) :=
-  ∀ C (g₁ g₂ : C → gr_set A),
-  (∀ z, (Happ f (g₁ z) = Happ f (g₂ z))%G)
-  → (∀ z, (g₁ z = g₂ z)%G).
+  ∀ C (g₁ g₂ : HomGr C A),
+  (∀ z, (Happ f (Happ g₁ z) = Happ f (Happ g₂ z))%G)
+  → (∀ z, (Happ g₁ z = Happ g₂ z)%G).
 
 Definition is_epi {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : HomGr B C),

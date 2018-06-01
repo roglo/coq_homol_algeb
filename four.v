@@ -62,6 +62,7 @@ assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
       -assert (H : Happ h' z' ∈ Im h') by (exists z'; easy).
        now apply s' in H; simpl in H.
     }
+...
     specialize (Hme bool (λ b, if b then Happ j t else 0) (λ _, 0)) as H1.
     simpl in H1.
     assert
@@ -156,4 +157,6 @@ Lemma four_2 :
   → is_mono c.
 Proof.
 intros * Hcff' Hcgg' Hchh' s s' (Hmb & Hmd & Hea).
+unfold is_mono.
+intros T g₁ g₂ H z.
 ...
