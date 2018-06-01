@@ -686,8 +686,8 @@ Definition Gr2 :=
 
 Definition is_mono {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : HomGr C A),
-  (∀ z, (Happ f (Happ g₁ z) = Happ f (Happ g₂ z))%G)
-  → (∀ z, (Happ g₁ z = Happ g₂ z)%G).
+  (∀ z, z ∈ C → (Happ f (Happ g₁ z) = Happ f (Happ g₂ z))%G)
+  → (∀ z, z ∈ C → (Happ g₁ z = Happ g₂ z)%G).
 
 Definition is_epi {A B} (f : HomGr A B) :=
   ∀ C (g₁ g₂ : HomGr B C),
@@ -699,9 +699,9 @@ Definition is_iso {A B} (f : HomGr A B) :=
   (∀ x, (Happ g (Happ f x) = x)%G) ∧
   (∀ y, (Happ f (Happ g y) = y)%G).
 
-(* Proof that an epimorphism is a surjection *)
+(* Proofs that epimorphism is surjective and monomorphism is injective *)
 
-Theorem epi_is_surj : ∀ A B (f : HomGr A B),
+Theorem epi_is_surj : ∀ {A B} {f : HomGr A B},
   is_epi f
   → ∀ y, y ∈ B → ∃ t, t ∈ A ∧ (Happ f t = y)%G.
 Proof.
@@ -726,7 +726,7 @@ set (hv :=
 assert (Hmc₀ : ∀ y1, y1 ∈ B → 0 ∈ Coker f) by (intros; apply B).
 assert
   (Hac₀ :
-   ∀ y1 y2, y1 ∈ B → y2 ∈ B→ (y1 = y2)%G → (@gr_zero (Coker f) = 0)%G). {
+   ∀ y1 y2, y1 ∈ B → y2 ∈ B → (y1 = y2)%G → (@gr_zero (Coker f) = 0)%G). {
   intros * Hy1 Hy2 Hyy.
   simpl; unfold Coker_eq; simpl.
   exists 0; split; [ apply A | now rewrite Hzero, gr_add_inv_r ].
@@ -752,6 +752,45 @@ simpl in H1; unfold Coker_eq in H1; simpl in H1.
 destruct H1 as (x & Hx).
 rewrite gr_sub_0_r in Hx.
 now exists x.
+Qed.
+
+Theorem mono_is_inj : ∀ {A B} {f : HomGr A B},
+  is_mono f
+  → ∀ x1 x2, x1 ∈ A → x2 ∈ A → (Happ f x1 = Happ f x2)%G → (x1 = x2)%G.
+Proof.
+intros * Hf * Hx1 Hx2 Hxx.
+(* morphism identity from Ker f to A *)
+set (v x := let _ : gr_set (Ker f) := x in x : gr_set A).
+assert (Hmc : ∀ x, x ∈ Ker f → v x ∈ A) by (intros x Hx; apply Hx).
+set (hv :=
+  {| Happ := v;
+     Hmem_compat := Hmc;
+     Happ_compat _ _ _ _ H := H;
+     Hadditive _ _ _ _ := gr_eq_rel_Reflexive _ |}).
+(* morphism null from Ker f to A *)
+set (hw :=
+  {| Happ x := let _ : gr_set (Ker f) := x in 0 : gr_set A;
+     Hmem_compat _ _ := gr_zero_mem A;
+     Happ_compat _ _ _ _ _ := gr_eq_rel_Reflexive _;
+     Hadditive _ _ _ _ := gr_eq_rel_Symmetric _ _ (gr_add_0_r _ _) |}).
+specialize (Hf (Ker f) hv hw) as H1.
+assert (H : ∀ z, z ∈ Ker f → (Happ f (Happ hv z) = Happ f (Happ hw z))%G). {
+  intros z (Hz, Hfz).
+  unfold hv, hw, v; simpl.
+  now rewrite Hfz, Hzero.
+}
+specialize (H1 H (x1 - x2)); clear H.
+assert (H : x1 - x2 ∈ Ker f). {
+  split.
+  -apply A; [ easy | now apply A ].
+  -rewrite Hadditive; [ | easy | now apply A ].
+   rewrite Hinv; [ | easy ].
+   now rewrite Hxx, gr_add_inv_r.
+}
+specialize (H1 H); clear H.
+unfold hv, hw, v in H1; simpl in H1.
+apply gr_sub_move_r in H1.
+now rewrite gr_add_0_l in H1.
 Qed.
 
 (* We sometimes need these axioms *)
