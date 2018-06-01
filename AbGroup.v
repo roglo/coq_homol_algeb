@@ -707,7 +707,7 @@ Theorem epi_is_surj : ∀ A B (f : HomGr A B),
 Proof.
 intros * Hed y Hy.
 (* trick to make identity of type gr_set B → gr_set (Coker f) *)
-set (v y1 := let _ := gr_mem B y1 in y1 : gr_set (Coker f)).
+set (v y1 := let _ : gr_set B := y1 in y1 : gr_set (Coker f)).
 assert (Hmc : ∀ y1, y1 ∈ B → v y1 ∈ B) by easy.
 assert (Hac : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (y1 = y2)%G → (v y1 = v y2)%G). {
   intros * Hy1 Hy2 Hyy.

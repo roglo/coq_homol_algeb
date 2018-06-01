@@ -62,6 +62,8 @@ assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
       -assert (H : Happ h' z' ∈ Im h') by (exists z'; easy).
        now apply s' in H; simpl in H.
     }
+    set (v x := let _ : gr_set (Ker e) := x in x : gr_set E).
+...
     set (v (b : gr_set Gr2) := if b then Happ j t else 0).
     assert (Hmc : ∀ x : gr_set Gr2, x ∈ Gr2 → v x ∈ E). {
       intros x Hx.
