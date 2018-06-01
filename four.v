@@ -5,65 +5,58 @@
 Require Import Utf8.
 Require Import AbGroup Setoid.
 
-Theorem epi_is_surj : ∀ D D' (d : HomGr D D'),
-  Decidable_Equality * Excluded_Middle
-  → is_epi d
-  → ∀ t', t' ∈ D' → ∃ t, t ∈ D ∧ (Happ d t = t')%G.
+Theorem epi_is_surj : ∀ A B (f : HomGr A B),
+  Decidable_Equality
+  → is_epi f
+  → ∀ y, y ∈ B → ∃ t, t ∈ A ∧ (Happ f t = y)%G.
 Proof.
-intros * (eq_dec, excl_midd) Hed * Ht'.
-assert (Hn : ¬ (∀ t, t ∈ D → (Happ d t ≠ t')%G)). {
-(*
-  set (v t'₁ := (t'₁ : gr_set (Coker d))).
-*)
-  (* trick to make identity of type gr_set D' → gr_set (Coker d) *)
-  set (v t'₁ := (if eq_dec _ t'₁ t' then t'₁ else t'₁) : gr_set (Coker d)).
-(**)
-  assert (Hvid : ∀ x, v x = x). {
-    intros; unfold v.
-    now destruct (eq_dec _ x t').
-  }
-  assert (Hmc : ∀ t, t ∈ D' → v t ∈ D'). {
-    intros t Ht; now rewrite Hvid.
-  }
-  assert (Hac : ∀ x y, x ∈ D' → y ∈ D' → (x = y)%G → (v x = v y)%G). {
-    intros * Hx Hy Hxy.
-    do 2 rewrite Hvid.
-    simpl; unfold Coker_eq; simpl.
-    exists 0; split; [ apply D | now rewrite Hzero, Hxy, gr_add_inv_r ].
-  }
-  assert (Had : ∀ x y, x ∈ D' → y ∈ D' → (v (x + y) = v x + v y)%G). {
-    intros * Hx Hy.
-    do 3 rewrite Hvid.
-    exists 0; split; [ apply D | now rewrite Hzero, gr_add_inv_r ].
-  }
-  set (hv :=
-    {| Happ := v;
-       Hmem_compat := Hmc;
-       Happ_compat := Hac;
-       Hadditive := Had |}).
-
-...
-  set (w (d' : gr_set D') := false).
-  specialize (Hed (Coker d)) as H1.
-...
-  specialize (Hed _ v w) as H1.
-  intros H2.
-  assert (H : ∀ t, t ∈ D → v (Happ d t) = w (Happ d t)). {
-    intros t Ht.
-    unfold v, w.
-    destruct (eq_dec _ (Happ d t) t') as [H| H]; [ | easy ].
-    now specialize (H2 t Ht).
-  }
-  specialize (H1 H t' Ht'); clear H.
-  unfold v, w in H1.
-  destruct (eq_dec _ t' t') as [H3| H3]; [ easy | ].
-  now apply H3.
+intros * eq_dec Hed y Hy.
+(* trick to make identity of type gr_set B → gr_set (Coker f) *)
+set (v y1 := let _ := eq_dec _ y y1 in y1 : gr_set (Coker f)).
+assert (Hmc : ∀ y1, y1 ∈ B → v y1 ∈ B) by easy.
+assert (Hac : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (y1 = y2)%G → (v y1 = v y2)%G). {
+  intros * Hy1 Hy2 Hyy.
+  exists 0; split; [ apply A | ].
+  now unfold v; simpl; rewrite Hzero, Hyy, gr_add_inv_r.
 }
-specialize (excl_midd (∃ t, t ∈ D ∧ (Happ d t = t')%G)) as H2.
-destruct H2 as [H2| H2]; [ easy | ].
-exfalso; apply Hn; intros t Ht H3.
-apply H2.
-now exists t.
+assert (Had : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (v (y1 + y2) = v y1 + v y2)%G). {
+  intros * Hy1 Hy2.
+  exists 0; split; [ apply A | now unfold v; rewrite Hzero, gr_add_inv_r ].
+}
+set (hv :=
+  {| Happ := v;
+     Hmem_compat := Hmc;
+     Happ_compat := Hac;
+     Hadditive := Had |}).
+assert (Hmc₀ : ∀ y1, y1 ∈ B → 0 ∈ Coker f) by (intros; apply B).
+assert
+  (Hac₀ :
+   ∀ y1 y2, y1 ∈ B → y2 ∈ B→ (y1 = y2)%G → (@gr_zero (Coker f) = 0)%G). {
+  intros * Hy1 Hy2 Hyy.
+  simpl; unfold Coker_eq; simpl.
+  exists 0; split; [ apply A | now rewrite Hzero, gr_add_inv_r ].
+}
+assert (Had₀ : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (@gr_zero (Coker f) = 0 + 0)%G). {
+  intros * Hy1 Hy2.
+  simpl; unfold Coker_eq; simpl.
+  exists 0; split; [ apply A | now rewrite Hzero, gr_add_0_r, gr_sub_0_r ].
+}
+set (hw :=
+  {| Happ _ := 0;
+     Hmem_compat := Hmc₀;
+     Happ_compat := Hac₀;
+     Hadditive := Had₀ |}).
+specialize (Hed (Coker f) hv hw) as H1.
+assert (H : ∀ x, x ∈ A → (Happ hv (Happ f x) = Happ hw (Happ f x))%G). {
+  intros x Hx.
+  simpl; unfold v; unfold Coker_eq; simpl.
+  exists x; split; [ easy | now rewrite gr_sub_0_r ].
+}
+specialize (H1 H y Hy); clear H.
+simpl in H1; unfold Coker_eq in H1; simpl in H1.
+destruct H1 as (x & Hx).
+rewrite gr_sub_0_r in Hx.
+now exists x.
 Qed.
 
 (* Four lemma #1
@@ -101,6 +94,7 @@ Lemma four_1 :
 Proof.
 intros * (eq_dec, excl_midd) Hcgg' Hchh' Hcjj' s s' (Heb & Hed & Hme).
 unfold is_epi.
+...
 enough
   (∀ T (g₁ g₂ : gr_set C' → T),
   (∀ z, z ∈ C → g₁ (Happ c z) = g₂ (Happ c z))
