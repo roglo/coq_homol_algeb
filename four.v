@@ -150,5 +150,22 @@ Lemma four_2 :
   → is_mono c.
 Proof.
 intros * Hcff' Hcgg' Hchh' s s' (Hmb & Hmd & Hea).
-intros T g₁ g₂ Hcg z Hz.
+intros T g₁ g₂ Hcg u Hu.
+specialize (Hcg u Hu) as H.
+assert (H1 :( Happ c (Happ g₁ u - Happ g₂ u) = 0)%G). {
+  rewrite Hadditive; [ | now apply g₁ | now apply C, g₂ ].
+  rewrite Hinv; [ | now apply g₂ ].
+  now rewrite H, gr_add_inv_r.
+}
+clear H.
+symmetry; rewrite <- gr_add_0_r; symmetry.
+apply gr_sub_move_l.
+set (z := Happ g₁ u - Happ g₂ u) in H1 |-*.
+assert (Hz : z ∈ C) by (apply C; [ now apply g₁ | now apply C, g₂ ]).
+move Hz before z.
+apply (Happ_compat _ _ h') in H1; [ | now apply c | now apply C' ].
+rewrite <- Hchh', Hzero in H1.
+assert (H2 : (Happ h z = 0)%G). {
+  apply (mono_is_inj Hmd); [ now apply h | apply D | now rewrite Hzero ].
+}
 ...
