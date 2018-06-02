@@ -9,7 +9,13 @@ Require Import four.
 Theorem iso_is_epi : ∀ A B (f : HomGr A B), is_iso f → is_epi f.
 Proof.
 intros * (g & Hgf & Hfg) C * Hgg * Hy.
-...
+specialize (Hfg y) as H1.
+etransitivity.
+-apply g₁; [ easy | | symmetry; apply H1 ].
+ now apply f, g.
+-rewrite Hgg; [ | now apply g ].
+ apply g₂; [ now apply f, g | easy | easy ].
+Qed.
 
 (* The five lemma
          f      g       h        j
@@ -48,6 +54,7 @@ Lemma five :
 Proof.
 intros *.
 intros Hcff' Hcgg' Hchh' Hcjj' s s' (Hea & Hib & Hid & Hme).
+(* using lemma four #1 *)
 specialize (four_1 B C D E B' C' D' E') as H1.
 specialize (H1 g h j g' h' j' b c d e).
 specialize (H1 Hcgg' Hchh' Hcjj').
@@ -56,5 +63,12 @@ specialize (H1 H); clear H.
 assert (H : exact_sequence [g'; h'; j']) by apply s'.
 specialize (H1 H); clear H.
 assert (H : is_epi b ∧ is_epi d ∧ is_mono e). {
-  split; [ | split ]; [ | | easy ].
+  split; [ | split ]; [ now apply iso_is_epi | now apply iso_is_epi | easy ].
+}
+specialize (H1 H); clear H.
+(* using lemma four #2 *)
+specialize (four_2 A B C D A' B' C' D') as H2.
+specialize (H2 f g h f' g' h' a b c d).
+specialize (H2 Hcff' Hcgg' Hchh').
+assert (H : exact_sequence [f; g; h]). {
 ...
