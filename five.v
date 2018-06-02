@@ -6,6 +6,11 @@ Require Import Utf8.
 Require Import AbGroup Setoid.
 Require Import four.
 
+Theorem iso_is_epi : ∀ A B (f : HomGr A B), is_iso f → is_epi f.
+Proof.
+intros * (g & Hgf & Hfg) C * Hgg * Hy.
+...
+
 (* The five lemma
          f      g       h        j
      A------>B------>C------>D------>E
