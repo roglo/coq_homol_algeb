@@ -696,8 +696,8 @@ Definition is_epi {A B} (f : HomGr A B) :=
 
 Definition is_iso {A B} (f : HomGr A B) :=
   ∃ g : HomGr B A,
-  (∀ x, (Happ g (Happ f x) = x)%G) ∧
-  (∀ y, (Happ f (Happ g y) = y)%G).
+  (∀ x, x ∈ A → (Happ g (Happ f x) = x)%G) ∧
+  (∀ y, y ∈ B → (Happ f (Happ g y) = y)%G).
 
 (* Proofs that epimorphism is surjective and monomorphism is injective *)
 
