@@ -1,5 +1,3 @@
-(* WORK IN PROGRESS (2018-06-01) *)
-
 (* The two Four Lemmas *)
 
 Require Import Utf8.
@@ -113,10 +111,6 @@ Qed.
 
 Check four_1.
 
-(*
-Print Assumptions four_1.
-*)
-
 (* Four lemma #2
             f      g       h
         A------>B------>C------>D
@@ -191,4 +185,9 @@ assert (H5 : (Happ g (Happ f x) = z)%G). {
   apply g; [ now apply f | easy | easy ].
 }
 rewrite <- H5.
-...
+assert (H : Happ f x ∈ Im f) by now exists x.
+apply s in H.
+now destruct H.
+Qed.
+
+Check four_2.
