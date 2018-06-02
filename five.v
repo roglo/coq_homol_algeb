@@ -17,6 +17,12 @@ etransitivity.
  apply g₂; [ now apply f, g | easy | easy ].
 Qed.
 
+Theorem iso_is_mono : ∀ A B (f : HomGr A B), is_iso f → is_mono f.
+Proof.
+intros * (g & Hgf & Hfg) C * Hgg * Hz.
+specialize (Hgg z Hz) as H1.
+...
+
 (* The five lemma
          f      g       h        j
      A------>B------>C------>D------>E
@@ -63,12 +69,18 @@ specialize (H1 H); clear H.
 assert (H : exact_sequence [g'; h'; j']) by apply s'.
 specialize (H1 H); clear H.
 assert (H : is_epi b ∧ is_epi d ∧ is_mono e). {
-  split; [ | split ]; [ now apply iso_is_epi | now apply iso_is_epi | easy ].
+  split; [ | split ]; [ | | easy ]; now apply iso_is_epi.
 }
 specialize (H1 H); clear H.
 (* using lemma four #2 *)
 specialize (four_2 A B C D A' B' C' D') as H2.
 specialize (H2 f g h f' g' h' a b c d).
 specialize (H2 Hcff' Hcgg' Hchh').
-assert (H : exact_sequence [f; g; h]). {
+assert (H : exact_sequence [f; g; h]) by now destruct s as (t & u & v).
+specialize (H2 H); clear H.
+assert (H : exact_sequence [f'; g'; h']) by now destruct s' as (t & u & v).
+specialize (H2 H); clear H.
+assert (H : is_mono b ∧ is_mono d ∧ is_epi a). {
+  split; [ | split ]; [ | | easy ].
+
 ...
