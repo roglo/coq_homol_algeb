@@ -172,10 +172,23 @@ assert (H3 : z ∈ Ker h). {
 }
 apply s in H3.
 destruct H3 as (y & Hy & Hgy).
-apply (Happ_compat _ _ c) in Hgy; [ | now apply g | easy ].
-rewrite Hcgg', H1 in Hgy.
-assert (H3 : Happ b y ∈ Ker g') by (split; [ now apply b | easy ]).
-apply s' in H3.
-destruct H3 as (x' & Hx' & Hfx').
-unfold is_epi in Hea.
+generalize Hgy; intros H3.
+apply (Happ_compat _ _ c) in H3; [ | now apply g | easy ].
+rewrite Hcgg', H1 in H3.
+assert (H4 : Happ b y ∈ Ker g') by (split; [ now apply b | easy ]).
+apply s' in H4.
+destruct H4 as (x' & Hx' & Hfx').
+assert (H : ∃ x, x ∈ A ∧ (Happ a x = x')%G) by now apply epi_is_surj.
+destruct H as (x & Hx & Hax).
+assert (H4 : (Happ f' (Happ a x) = Happ b y)%G). {
+  etransitivity; [ | apply Hfx' ].
+  apply f'; [ now apply a | easy | easy ].
+}
+rewrite <- Hcff' in H4.
+apply mono_is_inj in H4; [ | easy | now apply f | easy ].
+assert (H5 : (Happ g (Happ f x) = z)%G). {
+  etransitivity; [ | apply Hgy ].
+  apply g; [ now apply f | easy | easy ].
+}
+rewrite <- H5.
 ...
