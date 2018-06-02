@@ -36,10 +36,9 @@ specialize (mono_is_inj Hm) as H2.
 assert (H3 : ∀ y, ∃ t, y ∈ B → t ∈ A ∧ (Happ f t = y)%G). {
   intros y.
   specialize (H1 y).
-  specialize (mem_dec B y) as [H3| H3].
-  -specialize (H1 H3) as (x & Hx & Hfx).
-   exists x; intros H; easy.
-  -exists 0; easy.
+  specialize (mem_dec B y) as [H3| H3]; [ | now exists 0 ].
+  specialize (H1 H3) as (x & Hx & Hfx).
+  exists x; intros H; easy.
 }
 specialize (choice _ _ _ H3) as (g & Hg).
 assert (Hmc : ∀ x : gr_set B, x ∈ B → g x ∈ A). {

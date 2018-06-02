@@ -130,49 +130,6 @@ split; intros H.
 -eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
 Qed.
 
-(*
-Definition gr_elem A := { a : gr_set A | a ∈ A }.
-Definition gr_mem_eq A (x y : gr_elem A) := (proj1_sig x = proj1_sig y)%G.
-
-Theorem gr_mem_refl {A} : Reflexive (gr_mem_eq A).
-Proof.
-intros (x & Hx).
-now unfold gr_mem_eq.
-Qed.
-
-Theorem gr_mem_symm {A} : Symmetric (gr_mem_eq A).
-Proof.
-intros (x & Hx) (y & Hy).
-unfold gr_mem_eq; simpl; intros Hxy.
-now symmetry.
-Qed.
-
-Theorem gr_mem_trans {A} : Transitive (gr_mem_eq A).
-Proof.
-intros (x & Hx) (y & Hy) (z & Hz).
-unfold gr_mem_eq; simpl; intros Hxy Hyz.
-now transitivity y.
-Qed.
-
-Add Parametric Relation {G} : _ (@gr_mem_eq G)
- reflexivity proved by gr_mem_refl
- symmetry proved by gr_mem_symm
- transitivity proved by gr_mem_trans
- as gr_mem_rel.
-
-Definition M_app A B (f : HomGr A B) (x : gr_elem A) := Happ f (proj1_sig x).
-
-Add Parametric Morphism {G H} : (M_app G H)
-  with signature eq ==> gr_mem_eq G ==> @gr_eq H
-  as M_app_morph.
-Proof.
-intros f (x, Hx) (y, Hy) Hxy.
-unfold gr_mem_eq in Hxy; simpl in Hxy.
-unfold M_app; simpl.
-now apply Happ_compat.
-Qed.
-*)
-
 (* Miscellaneous theorems in groups *)
 
 Theorem gr_add_0_r : ∀ G (x : gr_set G), (x + 0 = x)%G.
@@ -643,43 +600,6 @@ Definition Gr1 :=
       gr_equiv := eq_equivalence;
       gr_mem_compat _ _ _ _ := I;
       gr_add_compat _ _ _ _ _ _ := eq_refl;
-      gr_inv_compat _ _ H := H |}.
-
-(* The 2 group *)
-
-Theorem Gr2_add_assoc : ∀ x y z : bool,
-  (if if x then negb y else y then negb z else z) =
-  (if x then negb (if y then negb z else z) else if y then negb z else z).
-Proof. intros; now destruct x, y, z. Qed.
-
-Theorem Gr2_add_inv_r : ∀ x : bool, (if x then negb x else x) = false.
-Proof. intros; now destruct x. Qed.
-
-Theorem Gr2_add_comm : ∀ x y : bool,
-  (if x then negb y else y) = (if y then negb x else x).
-Proof. intros; now destruct x, y. Qed.
-
-Theorem Gr2_add_compat : ∀ x y x' y' : bool,
-  x = y → x' = y' → (if x then negb x' else x') = (if y then negb y' else y').
-Proof. intros; now destruct x, y, x', y'. Qed.
-
-Definition Gr2 :=
-   {| gr_set := bool;
-      gr_mem _ := True;
-      gr_eq := eq;
-      gr_zero := false;
-      gr_add x y := if x then negb y else y;
-      gr_inv x := x;
-      gr_zero_mem := I;
-      gr_add_mem _ _ _ _ := I;
-      gr_add_0_l _ := eq_refl;
-      gr_add_assoc := Gr2_add_assoc;
-      gr_inv_mem _ H := H;
-      gr_add_inv_r := Gr2_add_inv_r;
-      gr_add_comm := Gr2_add_comm;
-      gr_equiv := eq_equivalence;
-      gr_mem_compat _ _ _ _ := I;
-      gr_add_compat := Gr2_add_compat;
       gr_inv_compat _ _ H := H |}.
 
 (* *)
