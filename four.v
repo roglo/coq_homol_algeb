@@ -163,9 +163,19 @@ apply gr_sub_move_l.
 set (z := Happ g₁ u - Happ g₂ u) in H1 |-*.
 assert (Hz : z ∈ C) by (apply C; [ now apply g₁ | now apply C, g₂ ]).
 move Hz before z.
-apply (Happ_compat _ _ h') in H1; [ | now apply c | now apply C' ].
-rewrite <- Hchh', Hzero in H1.
-assert (H2 : (Happ h z = 0)%G). {
+generalize H1; intros H2.
+apply (Happ_compat _ _ h') in H2; [ | now apply c | now apply C' ].
+rewrite <- Hchh', Hzero in H2.
+assert (H3 : z ∈ Ker h). {
+  split; [ easy | ].
   apply (mono_is_inj Hmd); [ now apply h | apply D | now rewrite Hzero ].
 }
+apply s in H3.
+destruct H3 as (y & Hy & Hgy).
+apply (Happ_compat _ _ c) in Hgy; [ | now apply g | easy ].
+rewrite Hcgg', H1 in Hgy.
+assert (H3 : Happ b y ∈ Ker g') by (split; [ now apply b | easy ]).
+apply s' in H3.
+destruct H3 as (x' & Hx' & Hfx').
+unfold is_epi in Hea.
 ...
