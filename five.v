@@ -9,7 +9,7 @@ Require Import four.
 Theorem is_iso_is_epi : ∀ A B (f : HomGr A B), is_iso f → is_epi f.
 Proof.
 intros * (g & Hgf & Hfg) C * Hgg * Hy.
-specialize (Hfg y) as H1.
+specialize (Hfg y Hy) as H1.
 etransitivity.
 -apply g₁; [ easy | | symmetry; apply H1 ].
  now apply f, g.
@@ -22,7 +22,9 @@ Proof.
 intros * (g & Hgf & Hfg) C * Hgg * Hz.
 specialize (Hgg z Hz) as H1.
 apply (Happ_compat _ _ g) in H1; [ | now apply f, g₁ | now apply f, g₂ ].
-now do 2 rewrite Hgf in H1.
+rewrite Hgf in H1; [ | now apply g₁ ].
+rewrite Hgf in H1; [ | now apply g₂ ].
+easy.
 Qed.
 
 Theorem epi_mono_is_iso : ∀ A B (f : HomGr A B),
@@ -72,17 +74,12 @@ set (hv :=
      Hadditive := Had |}).
 exists hv; simpl.
 split.
--intros x.
- destruct (mem_dec _ x) as [H4| H4].
- +apply H2; [ now apply Hmc, f | easy | ].
-  now apply Hg, f.
- +idtac.
-...
--intros y.
- destruct (mem_dec _ y) as [H4| H4].
- +now apply Hg.
- +idtac.
-...
+-intros x Hx.
+ apply H2; [ now apply Hmc, f | easy | ].
+ now apply Hg, f.
+-intros y Hy.
+ now apply Hg.
+Qed.
 
 (* The five lemma
          f      g       h        j
@@ -110,7 +107,8 @@ Lemma five :
      (h' : HomGr C' D') (j' : HomGr D' E')
      (a : HomGr A A') (b : HomGr B B') (c : HomGr C C')
      (d : HomGr D D') (e : HomGr E E'),
-  diagram_commutes f a b f'
+  Decidable_Membership * Choice
+  → diagram_commutes f a b f'
   → diagram_commutes g b c g'
   → diagram_commutes h c d h'
   → diagram_commutes j d e j'
@@ -119,7 +117,7 @@ Lemma five :
   → is_epi a ∧ is_iso b ∧ is_iso d ∧ is_mono e
   → is_iso c.
 Proof.
-intros *.
+intros * dc.
 intros Hcff' Hcgg' Hchh' Hcjj' s s' (Hea & Hib & Hid & Hme).
 (* using lemma four #1 *)
 specialize (four_1 B C D E B' C' D' E') as H1.
@@ -145,4 +143,7 @@ assert (H : is_mono b ∧ is_mono d ∧ is_epi a). {
   split; [ | split ]; [ | | easy ]; now apply is_iso_is_mono.
 }
 specialize (H2 H); clear H.
-...
+now apply epi_mono_is_iso.
+Qed.
+
+Check five.
