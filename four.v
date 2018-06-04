@@ -54,6 +54,9 @@ assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
     split; [ easy | ].
     assert (H : (Happ e (Happ j t) = 0)%G). {
       rewrite Hcjj'.
+(* works not: a coq morphism is required
+rewrite Hdt.
+*)
       etransitivity.
       -apply Happ_compat; [ now apply d | | apply Hdt ].
        now apply h'.
