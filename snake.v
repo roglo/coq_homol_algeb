@@ -13,8 +13,7 @@ Theorem KK_mem_compat {A B A' B'} : ∀ (a : HomGr A A') (b : HomGr B B') f f',
   → ∀ x : gr_set (Ker a), x ∈ Ker a → Happ f x ∈ Ker b.
 intros * Hc * (Hx & Hax).
 split; [ now apply f | ].
-rewrite Hc.
-transitivity (Happ f' 0%G); [ | apply Hzero ].
+rewrite Hc, <- (Hzero _ _ f').
 apply f'; [ apply a, Hx | apply A' | apply Hax ].
 Qed.
 
