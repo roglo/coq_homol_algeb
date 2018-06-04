@@ -215,10 +215,10 @@ destruct (mem_dec (Im b) y') as [Hy'| Hy'].
   *destruct Hy' as (y & Hy & Hby).
    eapply B'; [ apply Hby | now apply b ].
   *transitivity (Happ g' (Happ b (g₁ x'))).
-  --apply g'; [ | | easy ].
-    ++destruct Hy' as (y & Hy & Hby).
-      eapply B'; [ apply Hby | now apply b ].
-    ++apply b, (g₁_in_B Hg₁), Hx'.
+  --apply Happ_compat; [ | | easy ].
+   ++destruct Hy' as (y & Hy & Hby).
+     eapply B'; [ apply Hby | now apply b ].
+   ++apply b, (g₁_in_B Hg₁), Hx'.
   --rewrite <- Hcgg'.
     destruct Hx' as (Hx', Hcx').
     specialize (Hg₁ x' Hx') as H2.
