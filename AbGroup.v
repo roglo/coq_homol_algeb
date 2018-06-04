@@ -130,6 +130,46 @@ split; intros H.
 -eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
 Qed.
 
+(*
+Definition gr_elem A := { a : gr_set A | a ∈ A }.
+Definition gr_mem_eq A (x y : gr_elem A) := (proj1_sig x = proj1_sig y)%G.
+
+Theorem gr_mem_refl {A} : Reflexive (gr_mem_eq A).
+Proof.
+intros (x & Hx).
+now unfold gr_mem_eq.
+Qed.
+
+Theorem gr_mem_symm {A} : Symmetric (gr_mem_eq A).
+Proof.
+intros (x & Hx) (y & Hy).
+unfold gr_mem_eq; simpl; intros Hxy.
+now symmetry.
+Qed.
+
+Theorem gr_mem_trans {A} : Transitive (gr_mem_eq A).
+Proof.
+intros (x & Hx) (y & Hy) (z & Hz).
+unfold gr_mem_eq; simpl; intros Hxy Hyz.
+now transitivity y.
+Qed.
+
+Add Parametric Relation {G} : _ (@gr_mem_eq G)
+ reflexivity proved by gr_mem_refl
+ symmetry proved by gr_mem_symm
+ transitivity proved by gr_mem_trans
+ as gr_mem_rel.
+
+Add Parametric Morphism {G H} : (λ f x, Happ f (proj1_sig x))
+  with signature eq ==> gr_mem_eq G ==> @gr_eq H
+  as M_app_morph.
+Proof.
+intros f (x, Hx) (y, Hy) Hxy.
+unfold gr_mem_eq in Hxy; simpl in Hxy.
+now apply Happ_compat.
+Qed.
+*)
+
 (* Miscellaneous theorems in groups *)
 
 Theorem gr_add_0_r : ∀ G (x : gr_set G), (x + 0 = x)%G.
