@@ -76,7 +76,7 @@ assert (H : Happ c z - z' ∈ Ker h'). {
   split.
   -apply C'; [ now apply c | now apply C' ].
   -rewrite Hadditive; [ | now apply c | now apply C' ].
-   rewrite Hinv; [ | easy ].
+   rewrite Hopp; [ | easy ].
    rewrite <- Hchh'.
    apply gr_sub_move_r.
    rewrite gr_add_0_l.
@@ -96,7 +96,7 @@ assert (H : z - Happ g y ∈ C). {
 specialize (H1 H); clear H.
 assert (H : (Happ c (z - Happ g y) = z')%G). {
   rewrite Hadditive; [ | easy | now apply C, g ].
-  rewrite Hinv; [ | now apply g ].
+  rewrite Hopp; [ | now apply g ].
   apply gr_sub_move_r.
   apply gr_sub_move_l.
   rewrite <- Hgy'.
@@ -151,8 +151,8 @@ intros T g₁ g₂ Hcg u Hu.
 specialize (Hcg u Hu) as H.
 assert (H1 :( Happ c (Happ g₁ u - Happ g₂ u) = 0)%G). {
   rewrite Hadditive; [ | now apply g₁ | now apply C, g₂ ].
-  rewrite Hinv; [ | now apply g₂ ].
-  now rewrite H, gr_add_inv_r.
+  rewrite Hopp; [ | now apply g₂ ].
+  now rewrite H, gr_add_opp_r.
 }
 clear H.
 symmetry; rewrite <- gr_add_0_r; symmetry.

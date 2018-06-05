@@ -17,7 +17,7 @@ Reserved Notation "x '≡' y" (at level 70).
 
    -group sets are setoids: there is a specific equality (gr_eq) which is
     compatible with membership (gr_mem_compat), addition (gr_add_compat),
-    and inverse (gr_inv_compat). This allows to define quotient groups,
+    and opposite (gr_opp_compat). This allows to define quotient groups,
     for example in cokernets, by changing this equality.
 *)
 
@@ -28,37 +28,37 @@ Record AbGroup :=
     gr_eq : gr_set → gr_set → Prop where "x ≡ y" := (gr_eq x y);
     gr_zero : gr_set where "0" := (gr_zero);
     gr_add : gr_set → gr_set → gr_set where "x + y" := (gr_add x y);
-    gr_inv : gr_set → gr_set where "- x" := (gr_inv x);
+    gr_opp : gr_set → gr_set where "- x" := (gr_opp x);
     (* properties *)
     gr_zero_mem : 0 ∈ G;
     gr_add_mem : ∀ x y, x ∈ G → y ∈ G → x + y ∈ G;
     gr_add_0_l : ∀ x, 0 + x ≡ x;
     gr_add_assoc : ∀ x y z, (x + y) + z ≡ x + (y + z);
-    gr_inv_mem : ∀ x, x ∈ G → - x ∈ G;
-    gr_add_inv_r : ∀ x, x + (- x) ≡ 0;
+    gr_opp_mem : ∀ x, x ∈ G → - x ∈ G;
+    gr_add_opp_r : ∀ x, x + (- x) ≡ 0;
     gr_add_comm : ∀ x y, x + y ≡ y + x;
     gr_equiv : Equivalence gr_eq;
     gr_mem_compat : ∀ x y, x ≡ y → x ∈ G → y ∈ G;
     gr_add_compat : ∀ x y x' y', x ≡ y → x' ≡ y' → x + x' ≡ y + y';
-    gr_inv_compat : ∀ x y, x ≡ y → - x ≡ - y }.
+    gr_opp_compat : ∀ x y, x ≡ y → - x ≡ - y }.
 
 (* coq stuff: implicit and renamed arguments *)
 
 Arguments gr_eq [_].
 Arguments gr_zero [_].
 Arguments gr_add [_].
-Arguments gr_inv [_].
+Arguments gr_opp [_].
 Arguments gr_zero_mem G : rename.
 Arguments gr_add_mem G : rename.
 Arguments gr_add_0_l G : rename.
 Arguments gr_add_assoc G : rename.
-Arguments gr_inv_mem G : rename.
-Arguments gr_add_inv_r G : rename.
+Arguments gr_opp_mem G : rename.
+Arguments gr_add_opp_r G : rename.
 Arguments gr_add_comm G : rename.
 Arguments gr_equiv G : rename.
 Arguments gr_mem_compat G : rename.
 Arguments gr_add_compat G : rename.
-Arguments gr_inv_compat G : rename.
+Arguments gr_opp_compat G : rename.
 
 (* syntaxes for expressions for groups elements and sets *)
 
@@ -68,8 +68,8 @@ Notation "0" := (gr_zero) : group_scope.
 Notation "a = b" := (gr_eq a b) : group_scope.
 Notation "a ≠ b" := (¬ gr_eq a b) : group_scope.
 Notation "a + b" := (gr_add a b) : group_scope.
-Notation "a - b" := (gr_add a (gr_inv b)) : group_scope.
-Notation "- a" := (gr_inv a) : group_scope.
+Notation "a - b" := (gr_add a (gr_opp b)) : group_scope.
+Notation "- a" := (gr_opp a) : group_scope.
 
 Notation "x '∈' S" := (gr_mem S x) (at level 60).
 Notation "x '∉' S" := (¬ gr_mem S x) (at level 60).
@@ -102,14 +102,14 @@ Add Parametric Relation {G} : (gr_set G) (@gr_eq G)
  as gr_eq_rel.
 
 (* Coq "Morphisms": they allow to use "rewrite" in expressions containing
-   inversions (-), additions (+) and memberships (∈) *)
+   opposites (-), additions (+) and memberships (∈) *)
 
-Add Parametric Morphism {G} : (@gr_inv G)
+Add Parametric Morphism {G} : (@gr_opp G)
   with signature @gr_eq G ==> @gr_eq G
-  as gr_inv_morph.
+  as gr_opp_morph.
 Proof.
 intros * Hxy.
-now apply gr_inv_compat.
+now apply gr_opp_compat.
 Qed.
 
 Add Parametric Morphism {G} : (@gr_add G)
@@ -179,25 +179,25 @@ rewrite gr_add_comm.
 apply gr_add_0_l.
 Qed.
 
-Theorem gr_add_inv_l : ∀ G (x : gr_set G), (- x + x = 0)%G.
+Theorem gr_add_opp_l : ∀ G (x : gr_set G), (- x + x = 0)%G.
 Proof.
 intros.
 rewrite gr_add_comm.
-apply gr_add_inv_r.
+apply gr_add_opp_r.
 Qed.
 
-Theorem gr_inv_zero : ∀ G, (- 0 = @gr_zero G)%G.
+Theorem gr_opp_zero : ∀ G, (- 0 = @gr_zero G)%G.
 Proof.
 intros.
 rewrite <- gr_add_0_l.
-apply gr_add_inv_r.
+apply gr_add_opp_r.
 Qed.
 
 Theorem gr_sub_0_r : ∀ G (x : gr_set G), (x - 0 = x)%G.
 Proof.
 intros.
 symmetry; rewrite <- gr_add_0_r at 1.
-apply gr_add_compat; [ easy | now rewrite gr_inv_zero ].
+apply gr_add_compat; [ easy | now rewrite gr_opp_zero ].
 Qed.
 
 Theorem gr_sub_move_r : ∀ G (x y z : gr_set G),
@@ -205,8 +205,8 @@ Theorem gr_sub_move_r : ∀ G (x y z : gr_set G),
 Proof.
 intros.
 split; intros Hxyz.
--now rewrite <- Hxyz, gr_add_assoc, gr_add_inv_l, gr_add_0_r.
--now rewrite Hxyz, gr_add_assoc, gr_add_inv_r, gr_add_0_r.
+-now rewrite <- Hxyz, gr_add_assoc, gr_add_opp_l, gr_add_0_r.
+-now rewrite Hxyz, gr_add_assoc, gr_add_opp_r, gr_add_0_r.
 Qed.
 
 Theorem gr_sub_move_l : ∀ G (x y z : gr_set G),
@@ -214,11 +214,11 @@ Theorem gr_sub_move_l : ∀ G (x y z : gr_set G),
 Proof.
 intros.
 split; intros Hxyz.
--now rewrite <- Hxyz, gr_add_comm, gr_add_assoc, gr_add_inv_l, gr_add_0_r.
--now rewrite Hxyz, gr_add_comm, <- gr_add_assoc, gr_add_inv_l, gr_add_0_l.
+-now rewrite <- Hxyz, gr_add_comm, gr_add_assoc, gr_add_opp_l, gr_add_0_r.
+-now rewrite Hxyz, gr_add_comm, <- gr_add_assoc, gr_add_opp_l, gr_add_0_l.
 Qed.
 
-Theorem gr_inv_add_distr : ∀ G (x y : gr_set G), (- (x + y) = - x - y)%G.
+Theorem gr_opp_add_distr : ∀ G (x y : gr_set G), (- (x + y) = - x - y)%G.
 Proof.
 intros *.
 symmetry.
@@ -229,25 +229,25 @@ symmetry; rewrite gr_add_assoc.
 symmetry.
 apply gr_sub_move_r.
 rewrite gr_add_0_l.
-apply gr_inv_compat, gr_add_comm.
+apply gr_opp_compat, gr_add_comm.
 Qed.
 
-Theorem gr_inv_involutive : ∀ G (x : gr_set G), (- - x = x)%G.
+Theorem gr_opp_involutive : ∀ G (x : gr_set G), (- - x = x)%G.
 Proof.
 intros.
 transitivity (- - x + (- x + x))%G.
 -rewrite <- gr_add_0_r at 1.
  apply gr_add_compat; [ easy | ].
- now rewrite gr_add_inv_l.
--now rewrite <- gr_add_assoc, gr_add_inv_l, gr_add_0_l.
+ now rewrite gr_add_opp_l.
+-now rewrite <- gr_add_assoc, gr_add_opp_l, gr_add_0_l.
 Qed.
 
-Theorem gr_eq_inv_l : ∀ G (x y : gr_set G), (- x = y)%G ↔ (x = - y)%G.
+Theorem gr_eq_opp_l : ∀ G (x y : gr_set G), (- x = y)%G ↔ (x = - y)%G.
 Proof.
 intros.
 split; intros Hxy.
--rewrite <- Hxy; symmetry; apply gr_inv_involutive.
--rewrite Hxy; apply gr_inv_involutive.
+-rewrite <- Hxy; symmetry; apply gr_opp_involutive.
+-rewrite Hxy; apply gr_opp_involutive.
 Qed.
 
 (* Theorems on homomorphisms *)
@@ -264,13 +264,13 @@ assert (H3 : (Happ f 0 + Happ f 0 - Happ f 0 = Happ f 0 - Happ f 0)%G). {
   apply gr_add_compat; [ apply H2 | easy ].
 }
 assert (H4 : (Happ f 0 + Happ f 0 - Happ f 0 = 0)%G). {
-  rewrite H3; apply gr_add_inv_r.
+  rewrite H3; apply gr_add_opp_r.
 }
 rewrite <- H4.
-now rewrite gr_add_assoc, gr_add_inv_r, gr_add_0_r.
+now rewrite gr_add_assoc, gr_add_opp_r, gr_add_0_r.
 Qed.
 
-Theorem Hinv : ∀ A B (f : HomGr A B) x,
+Theorem Hopp : ∀ A B (f : HomGr A B) x,
   x ∈ A → (Happ f (- x) = - Happ f x)%G.
 Proof.
 intros * Hx.
@@ -312,15 +312,15 @@ rewrite Hadditive; [ | easy | easy ].
 now apply gr_add_compat.
 Qed.
 
-Theorem Im_inv_mem {G H} : ∀ (f : HomGr G H) (x : gr_set H),
+Theorem Im_opp_mem {G H} : ∀ (f : HomGr G H) (x : gr_set H),
   (∃ a : gr_set G, a ∈ G ∧ (Happ f a = x)%G)
   → ∃ a : gr_set G, a ∈ G ∧ (Happ f a = - x)%G.
 Proof.
 intros f x (y & Hy & Hyx).
-exists (gr_inv y).
-split; [ now apply gr_inv_mem | ].
+exists (gr_opp y).
+split; [ now apply gr_opp_mem | ].
 rewrite <- Hyx.
-now apply Hinv.
+now apply Hopp.
 Qed.
 
 Theorem Im_mem_compat {G H} : ∀ f (x y : gr_set H),
@@ -338,18 +338,18 @@ Definition Im {G H : AbGroup} (f : HomGr G H) :=
      gr_eq := @gr_eq H;
      gr_mem := λ b, ∃ a, a ∈ G ∧ (Happ f a = b)%G;
      gr_add := @gr_add H;
-     gr_inv := @gr_inv H;
+     gr_opp := @gr_opp H;
      gr_zero_mem := Im_zero_mem f;
      gr_add_mem := Im_add_mem f;
      gr_add_0_l := gr_add_0_l H;
      gr_add_assoc := gr_add_assoc H;
-     gr_inv_mem := Im_inv_mem f;
-     gr_add_inv_r := gr_add_inv_r H;
+     gr_opp_mem := Im_opp_mem f;
+     gr_add_opp_r := gr_add_opp_r H;
      gr_add_comm := gr_add_comm H;
      gr_equiv := gr_equiv H;
      gr_mem_compat := Im_mem_compat f;
      gr_add_compat := gr_add_compat H;
-     gr_inv_compat := gr_inv_compat H |}.
+     gr_opp_compat := gr_opp_compat H |}.
 
 (* Kernels *)
 
@@ -370,14 +370,14 @@ rewrite Hfx, Hfx'.
 apply gr_add_0_r.
 Qed.
 
-Theorem Ker_inv_mem {G H} : ∀ (f : HomGr G H) (x : gr_set G),
+Theorem Ker_opp_mem {G H} : ∀ (f : HomGr G H) (x : gr_set G),
   x ∈ G ∧ (Happ f x = 0)%G → (- x)%G ∈ G ∧ (Happ f (- x) = 0)%G.
 Proof.
 intros f x (Hx & Hfx).
-split; [ now apply gr_inv_mem | ].
-rewrite Hinv; [ | easy ].
+split; [ now apply gr_opp_mem | ].
+rewrite Hopp; [ | easy ].
 rewrite Hfx.
-apply gr_inv_zero.
+apply gr_opp_zero.
 Qed.
 
 Theorem Ker_mem_compat {G H} : ∀ (f : HomGr G H) x y,
@@ -397,18 +397,18 @@ Definition Ker {G H : AbGroup} (f : HomGr G H) :=
      gr_eq := @gr_eq G;
      gr_mem := λ a, a ∈ G ∧ (Happ f a = gr_zero)%G;
      gr_add := @gr_add G;
-     gr_inv := @gr_inv G;
+     gr_opp := @gr_opp G;
      gr_zero_mem := Ker_zero_mem f;
      gr_add_mem := Ker_add_mem f;
      gr_add_0_l := gr_add_0_l G;
      gr_add_assoc := gr_add_assoc G;
-     gr_inv_mem := Ker_inv_mem f;
-     gr_add_inv_r := gr_add_inv_r G;
+     gr_opp_mem := Ker_opp_mem f;
+     gr_add_opp_r := gr_add_opp_r G;
      gr_add_comm := gr_add_comm G;
      gr_equiv := gr_equiv G;
      gr_mem_compat := Ker_mem_compat f;
      gr_add_compat := gr_add_compat G;
-     gr_inv_compat := gr_inv_compat G |}.
+     gr_opp_compat := gr_opp_compat G |}.
 
 (* Cokernels
 
@@ -423,7 +423,7 @@ intros.
 unfold Coker_eq.
 exists 0%G.
 split; [ apply gr_zero_mem | ].
-rewrite gr_add_0_l, gr_add_inv_r.
+rewrite gr_add_0_l, gr_add_opp_r.
 simpl; apply Hzero.
 Qed.
 
@@ -441,12 +441,12 @@ rewrite gr_add_0_l.
 apply gr_add_assoc.
 Qed.
 
-Theorem Coker_add_inv_r {G H} : ∀ (f : HomGr G H) x, Coker_eq f (x - x)%G 0%G.
+Theorem Coker_add_opp_r {G H} : ∀ (f : HomGr G H) x, Coker_eq f (x - x)%G 0%G.
 Proof.
 intros.
 exists 0%G.
 split; [ apply gr_zero_mem | ].
-now rewrite Hzero, gr_add_inv_r, gr_sub_0_r.
+now rewrite Hzero, gr_add_opp_r, gr_sub_0_r.
 Qed.
 
 Theorem Coker_add_comm {G H} : ∀ (f : HomGr G H) x y,
@@ -466,7 +466,7 @@ Proof.
 intros x.
 exists 0%G.
 split; [ apply gr_zero_mem | ].
-rewrite gr_add_inv_r.
+rewrite gr_add_opp_r.
 simpl; apply Hzero.
 Qed.
 
@@ -475,12 +475,12 @@ Proof.
 intros x y Hxy.
 destruct Hxy as (z & Hz & Hfz).
 exists (- z)%G.
-split; [ now apply gr_inv_mem | ].
-rewrite Hinv; [ | easy ].
+split; [ now apply gr_opp_mem | ].
+rewrite Hopp; [ | easy ].
 rewrite Hfz.
-simpl; rewrite gr_inv_add_distr, gr_add_comm.
+simpl; rewrite gr_opp_add_distr, gr_add_comm.
 apply gr_add_compat; [ | easy ].
-apply gr_inv_involutive.
+apply gr_opp_involutive.
 Qed.
 
 Theorem Coker_eq_trans {G H} (f : HomGr G H) : Transitive (Coker_eq f).
@@ -495,7 +495,7 @@ rewrite Hadditive; [ | easy | easy ].
 rewrite Hft, Hfu.
 simpl; rewrite gr_add_assoc.
 apply gr_add_compat; [ easy | ].
-now rewrite <- gr_add_assoc, gr_add_inv_l, gr_add_0_l.
+now rewrite <- gr_add_assoc, gr_add_opp_l, gr_add_0_l.
 Qed.
 
 Theorem Coker_equiv {G H} : ∀ (f : HomGr G H), Equivalence (Coker_eq f).
@@ -521,9 +521,9 @@ destruct Heq as (z & Hz & Hfz).
 apply gr_mem_compat with (x := (x - Happ f z)%G).
 -rewrite Hfz.
  simpl; apply gr_sub_move_r.
- now rewrite gr_add_comm, gr_add_assoc, gr_add_inv_l, gr_add_0_r.
+ now rewrite gr_add_comm, gr_add_assoc, gr_add_opp_l, gr_add_0_r.
 -simpl; apply gr_add_mem; [ easy | ].
- apply gr_inv_mem.
+ apply gr_opp_mem.
  now apply f.
 Qed.
 
@@ -542,19 +542,19 @@ split.
  rewrite gr_add_comm, gr_add_assoc.
  apply gr_add_compat; [ easy | ].
  rewrite gr_add_comm; symmetry.
- apply gr_inv_add_distr.
+ apply gr_opp_add_distr.
 Qed.
 
-Theorem Coker_inv_compat {G H} :∀ (f : HomGr G H) x y,
+Theorem Coker_opp_compat {G H} :∀ (f : HomGr G H) x y,
   Coker_eq f x y → Coker_eq f (- x)%G (- y)%G.
 Proof.
 intros * (z & Hz & Hfz).
 unfold Coker_eq; simpl.
 exists (- z)%G.
-split; [ now apply gr_inv_mem | ].
-rewrite Hinv; [ | easy ].
+split; [ now apply gr_opp_mem | ].
+rewrite Hopp; [ | easy ].
 rewrite Hfz.
-simpl; apply gr_inv_add_distr.
+simpl; apply gr_opp_add_distr.
 Qed.
 
 Definition Coker {G H : AbGroup} (f : HomGr G H) :=
@@ -563,18 +563,18 @@ Definition Coker {G H : AbGroup} (f : HomGr G H) :=
      gr_eq := Coker_eq f;
      gr_mem := gr_mem H;
      gr_add := @gr_add H;
-     gr_inv := @gr_inv H;
+     gr_opp := @gr_opp H;
      gr_zero_mem := @gr_zero_mem H;
      gr_add_mem := @gr_add_mem H;
      gr_add_0_l := Coker_add_0_l f;
      gr_add_assoc := Coker_add_assoc f;
-     gr_inv_mem := gr_inv_mem H;
-     gr_add_inv_r := Coker_add_inv_r f;
+     gr_opp_mem := gr_opp_mem H;
+     gr_add_opp_r := Coker_add_opp_r f;
      gr_add_comm := Coker_add_comm f;
      gr_equiv := Coker_equiv f;
      gr_mem_compat := Coker_mem_compat f;
      gr_add_compat := Coker_add_compat f;
-     gr_inv_compat := Coker_inv_compat f |}.
+     gr_opp_compat := Coker_opp_compat f |}.
 
 (* Exact sequences *)
 
@@ -629,18 +629,18 @@ Definition Gr1 :=
       gr_eq := eq;
       gr_zero := I;
       gr_add _ _ := I;
-      gr_inv x := x;
+      gr_opp x := x;
       gr_zero_mem := I;
       gr_add_mem _ _ _ _ := I;
       gr_add_0_l := Gr1_add_0_l;
       gr_add_assoc _ _ _ := eq_refl;
-      gr_inv_mem _ H := H;
-      gr_add_inv_r _ := eq_refl;
+      gr_opp_mem _ H := H;
+      gr_add_opp_r _ := eq_refl;
       gr_add_comm _ _ := eq_refl;
       gr_equiv := eq_equivalence;
       gr_mem_compat _ _ _ _ := I;
       gr_add_compat _ _ _ _ _ _ := eq_refl;
-      gr_inv_compat _ _ H := H |}.
+      gr_opp_compat _ _ H := H |}.
 
 (* *)
 
@@ -672,11 +672,11 @@ assert (Hmc : ∀ y1, y1 ∈ B → v y1 ∈ B) by easy.
 assert (Hac : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (y1 = y2)%G → (v y1 = v y2)%G). {
   intros * Hy1 Hy2 Hyy.
   exists 0; split; [ apply A | ].
-  now unfold v; simpl; rewrite Hzero, Hyy, gr_add_inv_r.
+  now unfold v; simpl; rewrite Hzero, Hyy, gr_add_opp_r.
 }
 assert (Had : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (v (y1 + y2) = v y1 + v y2)%G). {
   intros * Hy1 Hy2.
-  exists 0; split; [ apply A | now unfold v; rewrite Hzero, gr_add_inv_r ].
+  exists 0; split; [ apply A | now unfold v; rewrite Hzero, gr_add_opp_r ].
 }
 set (hv :=
   {| Happ := v;
@@ -689,7 +689,7 @@ assert
    ∀ y1 y2, y1 ∈ B → y2 ∈ B → (y1 = y2)%G → (@gr_zero (Coker f) = 0)%G). {
   intros * Hy1 Hy2 Hyy.
   simpl; unfold Coker_eq; simpl.
-  exists 0; split; [ apply A | now rewrite Hzero, gr_add_inv_r ].
+  exists 0; split; [ apply A | now rewrite Hzero, gr_add_opp_r ].
 }
 assert (Had₀ : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (@gr_zero (Coker f) = 0 + 0)%G). {
   intros * Hy1 Hy2.
@@ -744,8 +744,8 @@ assert (H : x1 - x2 ∈ Ker f). {
   split.
   -apply A; [ easy | now apply A ].
   -rewrite Hadditive; [ | easy | now apply A ].
-   rewrite Hinv; [ | easy ].
-   now rewrite Hxx, gr_add_inv_r.
+   rewrite Hopp; [ | easy ].
+   now rewrite Hxx, gr_add_opp_r.
 }
 specialize (H1 H); clear H.
 unfold hv, hw, v in H1; simpl in H1.
