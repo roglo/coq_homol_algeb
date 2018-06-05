@@ -57,11 +57,11 @@ assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
 (* works not: a coq morphism is required
 rewrite Hdt.
 *)
-      etransitivity.
-      -apply Happ_compat; [ now apply d | | apply Hdt ].
-       now apply h'.
+      etransitivity; [ apply Happ_compat | ]; [ | | apply Hdt | ]; cycle 2.
       -assert (H : Happ h' z' ∈ Im h') by (exists z'; easy).
        now apply s' in H; simpl in H.
+      -now apply d.
+      -now apply h'.
     }
     specialize (mono_is_inj Hme) as H1.
     apply H1; [ now apply j | apply E | now rewrite Hzero ].
@@ -80,8 +80,8 @@ assert (H : Happ c z - z' ∈ Ker h'). {
    rewrite <- Hchh'.
    apply gr_sub_move_r.
    rewrite gr_add_0_l.
-   etransitivity; [ | apply Hdt ].
-   apply d; [ now apply h | easy | apply Hhz ].
+   etransitivity; [ apply Happ_compat | ]; [ | | apply Hhz | ]; try easy.
+   now apply h.
 }
 apply s' in H.
 destruct H as (y' & Hy' & Hgy').
@@ -104,12 +104,13 @@ assert (H : (Happ c (z - Happ g y) = z')%G). {
   apply g'; [ easy | now apply b | ].
   now symmetry.
 }
-etransitivity.
--apply g₁; [ easy | | symmetry; apply H ].
- apply c, C; [ easy | now apply C, g ].
+symmetry in H.
+etransitivity; [ apply Happ_compat | ]; [ | | apply H | ]; cycle 2.
 -rewrite H1.
  apply g₂; [ | easy | easy ].
  apply c, C; [ easy | now apply C, g ].
+-easy.
+-apply c, C; [ easy | now apply C, g ].
 Qed.
 
 Check four_1.
@@ -178,14 +179,14 @@ destruct H4 as (x' & Hx' & Hfx').
 assert (H : ∃ x, x ∈ A ∧ (Happ a x = x')%G) by now apply epi_is_surj.
 destruct H as (x & Hx & Hax).
 assert (H4 : (Happ f' (Happ a x) = Happ b y)%G). {
-  etransitivity; [ | apply Hfx' ].
-  apply f'; [ now apply a | easy | easy ].
+  etransitivity; [ apply Happ_compat | ]; [ | | apply Hax | ]; try easy.
+  now apply a.
 }
 rewrite <- Hcff' in H4.
 apply mono_is_inj in H4; [ | easy | now apply f | easy ].
 assert (H5 : (Happ g (Happ f x) = z)%G). {
-  etransitivity; [ | apply Hgy ].
-  apply g; [ now apply f | easy | easy ].
+  etransitivity; [ apply Happ_compat | ]; [ | | apply H4 | ]; try easy.
+  now apply f.
 }
 rewrite <- H5.
 assert (H : Happ f x ∈ Im f) by now exists x.
