@@ -160,7 +160,7 @@ Add Parametric Relation {G} : _ (@gr_mem_eq G)
  transitivity proved by gr_mem_trans
  as gr_mem_rel.
 
-Add Parametric Morphism {G H} : (λ f x, Happ f (proj1_sig x))
+Add Parametric Morphism {G H} : (λ f e, Happ f (proj1_sig e))
   with signature eq ==> gr_mem_eq G ==> @gr_eq H
   as M_app_morph.
 Proof.
