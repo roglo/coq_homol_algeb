@@ -130,11 +130,12 @@ split; intros H.
 -eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
 Qed.
 
+Check Happ_compat.
+
 (*
 Trying to make a (coq) morphism when there are hypotheses.
   E.g. Happ_compat : x ∈ A → y ∈ A → (x = y)%G → (Happ f x = Happ f y)%G
-
-But it dow not work.
+But it does not work. The rewrite does not apply.
 
 Definition gr_elem A := { a : gr_set A | a ∈ A }.
 Definition gr_mem_eq A (x y : gr_elem A) := (proj1_sig x = proj1_sig y)%G.
