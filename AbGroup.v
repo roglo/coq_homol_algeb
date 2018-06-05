@@ -130,8 +130,6 @@ split; intros H.
 -eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
 Qed.
 
-Check Happ_compat.
-
 (*
 Trying to make a (coq) morphism when there are hypotheses.
   E.g. Happ_compat : x ∈ A → y ∈ A → (x = y)%G → (Happ f x = Happ f y)%G
