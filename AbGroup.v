@@ -110,19 +110,16 @@ intros x y Hxy.
 now apply gr_opp_compat.
 Qed.
 
-Add Parametric Morphism {G} : (@gr_add G)
-  with signature @gr_eq G ==> @gr_eq G ==> @gr_eq G
-  as gr_add_morph.
+Instance gr_add_morph {G} :
+  Proper (@gr_eq G ==> @gr_eq G ==> @gr_eq G) (@gr_add G).
 Proof.
-intros * Hxy x' y' Hxy'.
+intros x y Hxy x' y' Hxy'.
 now apply gr_add_compat.
 Qed.
 
-Add Parametric Morphism {G} : (@gr_mem G)
-  with signature @gr_eq G ==> iff
-  as gr_mem_morph.
+Instance gr_mem_morph {G} : Proper (@gr_eq G ==> iff) (@gr_mem G).
 Proof.
-intros * Hxy.
+intros x y Hxy.
 split; intros H.
 -eapply gr_mem_compat; [ apply Hxy | easy ].
 -eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
