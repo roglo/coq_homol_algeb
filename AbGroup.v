@@ -13,7 +13,7 @@ Reserved Notation "x '≡' y" (at level 70).
    -sets in groups are predicates (naive theory of sets); a value of type
     gr_set is not necessarily in the group set. To be in the group set, it
     must satisfy the predicate gr_mem, which is later syntaxified by the
-    usual symbol ∈.
+    usual symbol ∈. This allows to create subgroups by changing gr_mem.
 
    -group sets are setoids: there is a specific equality (gr_eq) which is
     compatible with membership (gr_mem_compat), addition (gr_add_compat),
@@ -93,7 +93,7 @@ Arguments Hmem_compat _ _ f : rename.
 Arguments Happ_compat _ _ f : rename.
 Arguments Hadditive _ _ f : rename.
 
-(* Equality (gr_eq) in groups is an equivalence relation *)
+(* Equality (gr_eq) of groups elements is an equivalence relation *)
 
 Add Parametric Relation {G} : (gr_set G) (@gr_eq G)
  reflexivity proved by (@Equivalence_Reflexive _ (@gr_eq G) (@gr_equiv G))
@@ -130,6 +130,7 @@ Trying to make a (coq) morphism when there are hypotheses.
   E.g. Happ_compat : x ∈ A → y ∈ A → (x = y)%G → (Happ f x = Happ f y)%G
 But it does not work. The rewrite does not apply.
 See https://github.com/coq/coq/issues/7708
+Seems that this kind of morphism is not implemented in Coq.
 
 Definition gr_elem A := { a : gr_set A | a ∈ A }.
 Definition gr_mem_eq A (x y : gr_elem A) := (proj1_sig x = proj1_sig y)%G.
