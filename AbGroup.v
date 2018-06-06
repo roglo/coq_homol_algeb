@@ -1,7 +1,7 @@
 (* Abelian groups and Homomorphisms *)
 
 Require Import Utf8.
-Require Import Setoid.
+Require Import Setoid Morphisms.
 
 Reserved Notation "x '∈' S" (at level 60).
 Reserved Notation "x '≡' y" (at level 70).
@@ -104,11 +104,9 @@ Add Parametric Relation {G} : (gr_set G) (@gr_eq G)
 (* Coq "Morphisms": they allow to use "rewrite" in expressions containing
    opposites (-), additions (+) and memberships (∈) *)
 
-Add Parametric Morphism {G} : (@gr_opp G)
-  with signature @gr_eq G ==> @gr_eq G
-  as gr_opp_morph.
+Instance gr_opp_morph {G} : Proper (@gr_eq G ==> @gr_eq G) (@gr_opp G).
 Proof.
-intros * Hxy.
+intros x y Hxy.
 now apply gr_opp_compat.
 Qed.
 
