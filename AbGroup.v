@@ -135,9 +135,9 @@ unfold gr_mem_equiv.
 Qed.
 
 Add Parametric Relation {G} : (gr_set G) (@gr_mem_equiv G)
- reflexivity proved by True
- symmetry proved by (@Equivalence_Symmetric _ (@gr_eq G) (@gr_equiv G))
- transitivity proved by (@Equivalence_Transitive _ (@gr_eq G) (@gr_equiv G))
+ reflexivity proved by gr_mem_equiv_refl
+ symmetry proved by gr_mem_equiv_symm
+ transitivity proved by gr_mem_equiv_trans
  as gr_mem_equiv_rel.
 ...
 
