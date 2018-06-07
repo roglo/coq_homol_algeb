@@ -94,11 +94,8 @@ Arguments Hadditive _ _ f : rename.
 
 (* Equality (gr_eq) of groups elements is an equivalence relation *)
 
-Add Parametric Relation {G} : (gr_set G) (@gr_eq G)
- reflexivity proved by (@Equivalence_Reflexive _ (@gr_eq G) (@gr_equiv G))
- symmetry proved by (@Equivalence_Symmetric _ (@gr_eq G) (@gr_equiv G))
- transitivity proved by (@Equivalence_Transitive _ (@gr_eq G) (@gr_equiv G))
- as gr_eq_rel.
+Instance gr_eq_rel {G} : Equivalence (@gr_eq G).
+Proof. apply gr_equiv. Qed.
 
 (* Coq "Morphisms": they allow to use "rewrite" in expressions containing
    opposites (-), additions (+) and memberships (∈) *)
@@ -703,13 +700,13 @@ set (hv :=
   {| Happ := v;
      Hmem_compat := Hmc;
      Happ_compat _ _ _ H := H;
-     Hadditive _ _ _ _ := gr_eq_rel_Reflexive _ |}).
+     Hadditive _ _ _ _ := reflexivity _ |}).
 (* morphism null from Ker f to A *)
 set (hw :=
   {| Happ x := let _ : gr_set (Ker f) := x in 0 : gr_set A;
      Hmem_compat _ _ := gr_zero_mem A;
-     Happ_compat _ _ _ _ := gr_eq_rel_Reflexive _;
-     Hadditive _ _ _ _ := gr_eq_rel_Symmetric _ _ (gr_add_0_r _ _) |}).
+     Happ_compat _ _ _ _ := reflexivity _;
+     Hadditive _ _ _ _ := symmetry (gr_add_0_r _ _) |}).
 specialize (Hf (Ker f) hv hw) as H1.
 assert (H : ∀ z, z ∈ Ker f → (Happ f (Happ hv z) = Happ f (Happ hw z))%G). {
   intros z (Hz, Hfz).
