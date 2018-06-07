@@ -14,15 +14,14 @@ Theorem KK_mem_compat {A B A' B'} : ∀ (a : HomGr A A') (b : HomGr B B') f f',
 intros * Hc * (Hx & Hax).
 split; [ now apply f | ].
 rewrite Hc, <- (Hzero _ _ f').
-apply f'; [ apply a, Hx | apply A' | apply Hax ].
+apply f'; [ apply a, Hx | easy ].
 Qed.
 
 Theorem KK_app_compat {A B A'} : ∀ (f : HomGr A B) (a : HomGr A A'),
-  ∀ x y : gr_set (Ker a),
-  x ∈ Ker a → y ∈ Ker a → (x = y)%G → (Happ f x = Happ f y)%G.
+  ∀ x y : gr_set (Ker a), x ∈ Ker a → (x = y)%G → (Happ f x = Happ f y)%G.
 Proof.
-intros * Hx Hy Hxy.
-simpl in Hx, Hy.
+intros * Hx Hxy.
+simpl in Hx.
 now apply f.
 Qed.
 
@@ -57,22 +56,22 @@ Theorem CC_app_compat {A B A' B'} :
   diagram_commutes f a b f'
   → ∀ x y : gr_set (Coker a),
      x ∈ Coker a
-     → y ∈ Coker a
      → (x = y)%G
      → @gr_eq (Coker b) (Happ f' x) (Happ f' y)%G.
 Proof.
-intros * Hc * Hx Hy Hxy.
-simpl in Hx, Hy, x, y, Hxy; simpl.
+intros * Hc * Hx Hxy.
+assert (Hy : y ∈ Coker a) by now apply (gr_mem_compat _ x).
+simpl in Hx, x, y, Hxy; simpl.
 destruct Hxy as (z & Hz & Haz).
 simpl; unfold Coker_eq; simpl.
 exists (Happ f z).
 split; [ now apply f | ].
 rewrite Hc.
 transitivity (Happ f' (x - y)%G).
--apply Happ_compat; [ now apply a | | easy ].
- apply A'; [ easy | now apply A' ].
--rewrite Hadditive; [ | easy | now apply A' ].
- apply gr_add_compat; [ easy | now apply Hopp ].
+-apply Happ_compat; [ now apply a | easy ].
+-rewrite Hadditive; [ | easy | ].
+ +apply gr_add_compat; [ easy | now apply Hopp ].
+ +now apply A'.
 Qed.
 
 Theorem CC_additive {A B A' B'} :
@@ -165,7 +164,7 @@ exists 0; split; [ apply A | ].
 eapply (f'_is_inj sf'); [ apply a, A | | ].
 -apply A'; [ easy | now apply A' ].
 -transitivity (Happ f' 0).
- +apply f'; [ apply a, A | apply A' | apply Hzero ].
+ +apply f'; [ apply a, A | apply Hzero ].
  +rewrite Hzero; symmetry.
   rewrite Hadditive; [ | easy | now apply A' ].
   rewrite Hxy, Hopp; [ | easy ].
@@ -215,16 +214,15 @@ destruct (mem_dec (Im b) y') as [Hy'| Hy'].
   *destruct Hy' as (y & Hy & Hby).
    eapply B'; [ apply Hby | now apply b ].
   *transitivity (Happ g' (Happ b (g₁ x'))).
-  --apply Happ_compat; [ | | easy ].
-   ++destruct Hy' as (y & Hy & Hby).
-     eapply B'; [ apply Hby | now apply b ].
-   ++apply b, (g₁_in_B Hg₁), Hx'.
+  --apply Happ_compat; [ | easy ].
+    destruct Hy' as (y & Hy & Hby).
+    eapply B'; [ apply Hby | now apply b ].
   --rewrite <- Hcgg'.
     destruct Hx' as (Hx', Hcx').
     specialize (Hg₁ x' Hx') as H2.
     destruct H2 as (Hgx', Hggx').
     transitivity (Happ c x'); [ | easy ].
-    apply c; [ now apply g, (g₁_in_B Hg₁) | easy | easy ].
+    apply c; [ now apply g, (g₁_in_B Hg₁) | easy ].
 -exists 0%G; intros (x' & Hx' & Hyx').
  exfalso; apply Hy'.
  exists (g₁ x').
@@ -258,20 +256,21 @@ Theorem d_app_compat
   → g₁_prop g c g₁
   → f'₁_prop a b f' g₁ f'₁
   → let d := λ x, f'₁ (Happ b (g₁ x)) in
-     ∀ x1 x2, x1 ∈ Ker c → x2 ∈ Ker c → (x1 = x2)%G → (d x1 = d x2)%G.
+     ∀ x1 x2, x1 ∈ Ker c → (x1 = x2)%G → (d x1 = d x2)%G.
 Proof.
-intros * Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁ * Hx1 Hx2 Hxx.
+intros * Hcff' Hcgg' sf sf' sg' Hg₁ Hf'₁ * Hx1 Hxx.
+assert (Hx2 : x2 ∈ Ker c) by now apply (gr_mem_compat _ x1).
 assert (Hgy1 : (Happ g (g₁ x1) = x1)%G) by apply Hg₁, Hx1.
 assert (Hgy2 : (Happ g (g₁ x2) = x2)%G) by apply Hg₁, Hx2.
 assert (Hgb1 : (Happ g' (Happ b (g₁ x1)) = 0)%G). {
   rewrite <- Hcgg'.
   etransitivity; [ | apply Hx1 ].
-  apply c; [ apply g, Hg₁, Hx1 | apply Hx1 | apply Hgy1 ].
+  apply c; [ apply g, Hg₁, Hx1 | apply Hgy1 ].
 }
 assert (Hgb2 : (Happ g' (Happ b (g₁ x2)) = 0)%G). {
   rewrite <- Hcgg'.
   etransitivity; [ | apply Hx2 ].
-  apply c; [ apply g, Hg₁, Hx2 | apply Hx2 | apply Hgy2 ].
+  apply c; [ apply g, Hg₁, Hx2 | apply Hgy2 ].
 }
 assert (H1 : Happ b (g₁ x1) ∈ Im f'). {
   apply sg'; split; [ apply b, (g₁_in_B Hg₁), Hx1 | easy ].
@@ -306,7 +305,7 @@ assert (H4 : (z'1 - z'2 = Happ a z)%G). {
   apply (f'_is_inj sf'); [ | now apply a | ].
   -apply A'; [ easy | now apply A' ].
   -rewrite <- Hcff', H3.
-   apply b; [ | now apply f | now symmetry ].
+   apply b; [ | now symmetry ].
    apply B; [ apply (g₁_in_B Hg₁), Hx1 | apply B, (g₁_in_B Hg₁), Hx2 ].
 }
 assert (H6 : z'1 - z'2 ∈ Im a). {
@@ -420,7 +419,7 @@ assert (Hfz : (Happ f' (z1 + z2 - z3) = Happ f' (Happ a z))%G). {
   -apply gr_add_compat; [ now symmetry; apply b | now symmetry; apply Hopp ].
   -rewrite <- Hadditive; [ | now apply B | now apply B ].
    rewrite <- Hcff'.
-   apply b; [ | now apply f | now apply B; apply B ].
+   apply b; [ | now apply B; apply B ].
    rewrite <- Hzf.
    now apply f.
 }
@@ -460,11 +459,11 @@ split.
  split; [ split | ].
  *eapply B; [ apply Hxy | now apply f ].
  *transitivity (Happ b (Happ f x)).
- --apply b; [ | now apply f | now symmetry ].
+ --apply b; [ | now symmetry ].
    eapply gr_mem_compat; [ apply Hxy | now apply f ].
  --rewrite Hcff'.
    transitivity (Happ f' (@gr_zero A')); [ | apply Hzero ].
-   apply f'; [ now apply a | apply A' | easy ].
+   apply f'; [ now apply a | easy ].
  *now apply sf; exists x.
 +intros y ((Hy & Hby) & Hgy).
  assert (H : y ∈ Im f) by now apply sf; split.
@@ -476,7 +475,7 @@ split.
    split; [ now apply a | ].
    rewrite <- Hcff'.
    transitivity (Happ b y); [ | easy ].
-   apply b; [ now apply f | easy | easy ].
+   apply b; [ now apply f | easy ].
  }
  specialize (H1 H3).
  destruct H1 as (z & _ & Hzz).
@@ -508,17 +507,17 @@ split.
  +eapply C; [ apply Hyx | now apply g ].
  +specialize (Hcgg' y) as H1.
   transitivity (Happ c (Happ g y)).
-  *eapply c; [ | now apply g | now apply C ].
+  *eapply c; [ | now apply C ].
    eapply C; [ apply Hyx | now apply g ].
   *rewrite H1.
    transitivity (Happ g' (@gr_zero B')); [ | apply Hzero ].
-   apply g'; [ now apply b | apply B' | easy ].
+   apply g'; [ now apply b | easy ].
  +simpl in Hyx.
   assert (Hgy : Happ g y ∈ Ker c). {
     split; [ now apply g | ].
     rewrite Hcgg'.
     etransitivity; [ | apply Hzero ].
-    apply g'; [ now apply b | apply B' | easy ].
+    apply g'; [ now apply b | easy ].
   }
   assert (Hxk : x ∈ Ker c). {
     assert (Hx : x ∈ C). {
@@ -526,7 +525,7 @@ split.
     }
     split; [ easy | ].
     etransitivity; [ | apply Hgy ].
-    apply c; [ easy | now apply g | now symmetry ].
+    apply c; [ easy | now symmetry ].
   }
   assert (Hyk : g₁ x - y ∈ Ker g). {
     split.
@@ -546,17 +545,14 @@ split.
     -etransitivity; [ apply Hf'₁; now exists x | ].
      rewrite <- Hcff'; symmetry.
      etransitivity.
-     +apply Happ_compat; [ | | apply Haz ].
-      *apply Hmem_compat, Hz.
-      *apply B; [ apply (g₁_in_B Hg₁), Hxk | now apply B ].
+     +apply Happ_compat; [ apply Hmem_compat, Hz | apply Haz ].
      +rewrite Hadditive; [ | apply (g₁_in_B Hg₁), Hxk | now apply B ].
       etransitivity.
       *apply gr_add_compat; [ easy | now simpl; apply Hopp ].
       *etransitivity.
       --apply gr_add_compat; [ easy | apply gr_opp_compat, Hay ].
       --rewrite gr_sub_0_r.
-        apply b; [ apply (g₁_in_B Hg₁), Hxk | apply (g₁_in_B Hg₁), Hxk | ].
-        easy.
+        apply b; [ apply (g₁_in_B Hg₁), Hxk | easy ].
   }
   rewrite Hd.
   simpl; rewrite Hdx.
@@ -568,26 +564,25 @@ split.
  move z before x; move Hz before Hx.
  rewrite gr_sub_0_r in Haz.
  enough (∃ y, (y ∈ B ∧ (Happ b y = 0)%G) ∧ (Happ g y = x)%G) by easy.
- apply (Happ_compat _ _ f') in Haz; [ | now apply a | ].
- +rewrite <- Hcff' in Haz.
-  exists (g₁ x - Happ f z).
-  split; [ split | ].
-  *apply B; [ apply Hg₁, Hx | now apply B, f ].
-  *rewrite Hadditive; [ | apply Hg₁, Hx | now apply B, f ].
-   etransitivity.
+ apply (Happ_compat _ _ f') in Haz; [ | now apply a ].
+ rewrite <- Hcff' in Haz.
+ exists (g₁ x - Happ f z).
+ split; [ split | ].
+ +apply B; [ apply Hg₁, Hx | now apply B, f ].
+ +rewrite Hadditive; [ | apply Hg₁, Hx | now apply B, f ].
+  etransitivity.
+  *apply gr_add_compat; [ easy | now apply Hopp, f ].
+  *apply gr_sub_move_r; rewrite gr_add_0_l; symmetry.
+   now rewrite Haz; apply Hf'₁; exists x.
+ +rewrite Hadditive; [ | apply Hg₁, Hx | now apply B, f ].
+  *etransitivity.
   --apply gr_add_compat; [ easy | now apply Hopp, f ].
-  --apply gr_sub_move_r; rewrite gr_add_0_l; symmetry.
-    now rewrite Haz; apply Hf'₁; exists x.
-  *rewrite Hadditive; [ | apply Hg₁, Hx | now apply B, f ].
-  --etransitivity.
-   ++apply gr_add_compat; [ easy | now apply Hopp, f ].
-   ++apply gr_sub_move_l.
-     etransitivity; [ apply Hg₁, Hx | ].
-     rewrite <- gr_add_0_l at 1.
-     apply gr_add_compat; [ | easy ].
-     enough (H1 : Happ f z ∈ Ker g) by now simpl in H1.
-     now apply sf; exists z.
- +eapply gr_mem_compat; [ apply Haz | now apply a ].
+  --apply gr_sub_move_l.
+    etransitivity; [ apply Hg₁, Hx | ].
+    rewrite <- gr_add_0_l at 1.
+    apply gr_add_compat; [ | easy ].
+    enough (H1 : Happ f z ∈ Ker g) by now simpl in H1.
+    now apply sf; exists z.
 Qed.
 
 (* 3/ proof exact sequence: Ker c → CoKer a → Coker b *)
@@ -636,22 +631,21 @@ split.
  exists (g₁ x - Happ f z).
  split.
  +apply B; [ apply Hg₁, Hx | now apply B, f ].
- +apply (Happ_compat _ _ f') in Haz; [ | now apply a | ].
-  *rewrite Hadditive; [ | apply Hg₁, Hx | now apply B, f ].
-  --etransitivity.
-   ++apply gr_add_compat; [ easy | now apply Hopp, f ].
-   ++etransitivity.
-    **apply gr_add_compat; [ easy | ].
-      apply gr_opp_compat, Hcff'.
-    **apply gr_sub_move_r.
-      etransitivity; [ now symmetry; apply Hf'₁; exists x | ].
-      fold (d x).
-      apply gr_sub_move_l.
-      etransitivity.
-    ---apply gr_add_compat; [ easy | now symmetry; apply Hopp ].
-    ---rewrite <- Hadditive; [ now symmetry | | now apply A' ].
-       now apply Hf'₁; exists x.
-  *apply A'; [ now apply Hf'₁; exists x | now apply A' ].
+ +apply (Happ_compat _ _ f') in Haz; [ | now apply a ].
+  rewrite Hadditive; [ | apply Hg₁, Hx | now apply B, f ].
+  etransitivity.
+  *apply gr_add_compat; [ easy | now apply Hopp, f ].
+  *etransitivity.
+  --apply gr_add_compat; [ easy | ].
+    apply gr_opp_compat, Hcff'.
+  --apply gr_sub_move_r.
+    etransitivity; [ now symmetry; apply Hf'₁; exists x | ].
+    fold (d x).
+    apply gr_sub_move_l.
+    etransitivity.
+   ++apply gr_add_compat; [ easy | now symmetry; apply Hopp ].
+   ++rewrite <- Hadditive; [ now symmetry | | now apply A' ].
+     now apply Hf'₁; exists x.
 -intros z' (Hz' & y & Hy & Hby).
  simpl in z', Hz', Hby.
  rewrite gr_sub_0_r in Hby.
@@ -668,8 +662,7 @@ split.
  split.
  +rewrite Hcgg'.
   etransitivity.
-  *apply Happ_compat; [ now apply b | | apply Hby ].
-   now apply f'.
+  *apply Happ_compat; [ now apply b | apply Hby ].
   *assert (H : Happ f' z' ∈ Im f') by now exists z'.
    now apply sg' in H; simpl in H.
  +assert (H : g₁ (Happ g y) - y ∈ Ker g). {
@@ -682,45 +675,41 @@ split.
   apply sf in H.
   destruct H as (z & Hz & Hfz).
   exists z; split; [ easy | ].
-  apply (Happ_compat _ _ b) in Hfz; [ | now apply f | ].
-  *rewrite Hadditive in Hfz; [ | now apply Hg₁, g | now apply B ].
-   rewrite Hcff' in Hfz.
-  --apply (f'_is_inj sf'); [ now apply a | | ].
-   ++apply A'; [ | now apply A' ].
-     apply Hf'₁.
-     exists (Happ g y); split; [ | easy ].
-     split; [ now apply g | ].
-     rewrite Hcgg'.
-     etransitivity.
-    **apply Happ_compat; [ now apply b | | apply Hby ].
-      now apply f'.
-    **assert (H : Happ f' z' ∈ Im f') by (exists z'; easy).
-      now apply sg' in H; simpl in H.
-   ++rewrite Hfz.
-     symmetry; simpl; rewrite Hadditive; [ | | now apply A' ].
-    **apply gr_add_compat.
-    ---apply Hf'₁.
-       exists (Happ g y); split; [ | easy ].
-       split; [ now apply g | ].
-       rewrite Hcgg'.
-       etransitivity.
-     +++apply Happ_compat; [ now apply b | | apply Hby ].
-        now apply f'.
-     +++assert (H : Happ f' z' ∈ Im f') by (exists z'; easy).
-        now apply sg' in H; simpl in H.
-    ---rewrite Hopp; [ | easy ].
-       rewrite Hopp; [ | easy ].
-       apply gr_opp_compat.
-       now symmetry.
-    **apply Hf'₁; exists (Happ g y); split; [ | easy ].
+  apply (Happ_compat _ _ b) in Hfz; [ | now apply f ].
+  rewrite Hadditive in Hfz; [ | now apply Hg₁, g | now apply B ].
+  rewrite Hcff' in Hfz.
+  *apply (f'_is_inj sf'); [ now apply a | | ].
+  --apply A'; [ | now apply A' ].
+    apply Hf'₁.
+    exists (Happ g y); split; [ | easy ].
+    split; [ now apply g | ].
+    rewrite Hcgg'.
+    etransitivity.
+   ++apply Happ_compat; [ now apply b | apply Hby ].
+   ++assert (H : Happ f' z' ∈ Im f') by (exists z'; easy).
+     now apply sg' in H; simpl in H.
+  --rewrite Hfz.
+    symmetry; simpl; rewrite Hadditive; [ | | now apply A' ].
+   ++apply gr_add_compat.
+    **apply Hf'₁.
+      exists (Happ g y); split; [ | easy ].
       split; [ now apply g | ].
       rewrite Hcgg'.
       etransitivity.
-    ---apply Happ_compat; [ now apply b | | apply Hby ].
-       now apply f'.
+    ---apply Happ_compat; [ now apply b | apply Hby ].
     ---assert (H : Happ f' z' ∈ Im f') by (exists z'; easy).
        now apply sg' in H; simpl in H.
-  *apply B; [ now apply Hg₁, g | now apply B ].
+    **rewrite Hopp; [ | easy ].
+      rewrite Hopp; [ | easy ].
+      apply gr_opp_compat.
+      now symmetry.
+   ++apply Hf'₁; exists (Happ g y); split; [ | easy ].
+     split; [ now apply g | ].
+     rewrite Hcgg'.
+     etransitivity.
+    **apply Happ_compat; [ now apply b | apply Hby ].
+    **assert (H : Happ f' z' ∈ Im f') by (exists z'; easy).
+      now apply sg' in H; simpl in H.
 Qed.
 
 (* 4/ proof exact sequence: CoKer a → CoKer b → Coker c *)
@@ -769,7 +758,7 @@ split.
   symmetry.
   assert (H : Happ f' z' ∈ Im f') by (exists z'; easy).
   now apply sg' in H; simpl in H.
- +apply g'; [ | now apply b | now symmetry ].
+ +apply g'; [ | now symmetry ].
   apply B'; [ now apply f' | now apply B' ].
 -simpl; intros y' (Hy' & x & Hx & Hcx).
  simpl in Hcx; rewrite gr_sub_0_r in Hcx.
@@ -788,7 +777,7 @@ split.
     etransitivity; [ | apply gr_add_opp_r ].
     apply gr_add_compat; [ easy | ].
     apply gr_opp_compat.
-    apply Happ_compat; [ now apply g, Hg₁ | apply Hx | now apply Hg₁ ].
+    apply Happ_compat; [ now apply g, Hg₁ | now apply Hg₁ ].
  }
  apply sg' in Hby.
  destruct Hby as (z' & Hz' & Hfz').

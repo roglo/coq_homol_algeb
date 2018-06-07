@@ -9,17 +9,16 @@ Proof.
 intros * (g & Hgf & Hfg) C * Hgg * Hy.
 specialize (Hfg y Hy) as H1.
 etransitivity.
--apply g₁; [ easy | | symmetry; apply H1 ].
- now apply f, g.
+-apply g₁; [ easy | symmetry; apply H1 ].
 -rewrite Hgg; [ | now apply g ].
- apply g₂; [ now apply f, g | easy | easy ].
+ apply g₂; [ now apply f, g | easy ].
 Qed.
 
 Theorem is_iso_is_mono : ∀ A B (f : HomGr A B), is_iso f → is_mono f.
 Proof.
 intros * (g & Hgf & Hfg) C * Hgg * Hz.
 specialize (Hgg z Hz) as H1.
-apply (Happ_compat _ _ g) in H1; [ | now apply f, g₁ | now apply f, g₂ ].
+apply (Happ_compat _ _ g) in H1; [ | now apply f, g₁ ].
 rewrite Hgf in H1; [ | now apply g₁ ].
 rewrite Hgf in H1; [ | now apply g₂ ].
 easy.
@@ -45,8 +44,9 @@ assert (Hmc : ∀ x : gr_set B, x ∈ B → g x ∈ A). {
   intros y Hy.
   now specialize (Hg _ Hy).
 }
-assert (Hac : ∀ x y, x ∈ B → y ∈ B → (x = y)%G → (g x = g y)%G). {
-  intros y1 y2 Hy1 Hy2 Hyy.
+assert (Hac : ∀ x y, x ∈ B → (x = y)%G → (g x = g y)%G). {
+  intros y1 y2 Hy1 Hyy.
+  assert (Hy2 : y2 ∈ B) by now apply (gr_mem_compat _ y1).
   specialize (Hg _ Hy1) as H; destruct H as (Hgy1, Hfgy1).
   specialize (Hg _ Hy2) as H; destruct H as (Hgy2, Hfgy2).
   move Hgy2 before Hgy1.

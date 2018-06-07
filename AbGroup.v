@@ -81,8 +81,7 @@ Open Scope group_scope.
 Record HomGr (A B : AbGroup) :=
   { Happ : gr_set A → gr_set B;
     Hmem_compat : ∀ x, x ∈ A → Happ x ∈ B;
-    Happ_compat : ∀ x y,
-      x ∈ A → y ∈ A → (x = y)%G → (Happ x = Happ y)%G;
+    Happ_compat : ∀ x y, x ∈ A → (x = y)%G → (Happ x = Happ y)%G;
     Hadditive : ∀ x y,
       x ∈ A → y ∈ A → (Happ (x + y) = Happ x + Happ y)%G }.
 
@@ -259,7 +258,7 @@ intros.
 assert (H1 : (@gr_zero A + 0 = 0)%G) by apply A.
 assert (H2 : (Happ f 0 + Happ f 0 = Happ f 0)%G). {
   rewrite <- Hadditive; [ | apply A | apply A ].
-  apply f; [ apply A; apply A | apply A | easy ].
+  apply f; [ apply A; apply A | apply A ].
 }
 assert (H3 : (Happ f 0 + Happ f 0 - Happ f 0 = Happ f 0 - Happ f 0)%G). {
   apply gr_add_compat; [ apply H2 | easy ].
@@ -275,9 +274,8 @@ Theorem Hopp : ∀ A B (f : HomGr A B) x,
   x ∈ A → (Happ f (- x) = - Happ f x)%G.
 Proof.
 intros * Hx.
-assert (H1 : (x - x = 0)%G) by apply A.
 assert (H2 : (Happ f (x - x) = Happ f 0)%G). {
-  apply Happ_compat; [ now apply A, A | apply A | apply H1 ].
+  apply Happ_compat; [ now apply A, A | apply A ].
 }
 assert (H3 : (Happ f x + Happ f (- x) = Happ f 0)%G). {
   rewrite <- H2.
@@ -388,7 +386,7 @@ intros * Hxy (ax, Hx).
 split.
 -eapply gr_mem_compat; [ apply Hxy | easy ].
 -rewrite <- Hx.
- apply f; [ | easy | easy ].
+ apply f; [ | easy ].
  now rewrite <- Hxy.
 Qed.
 
@@ -670,8 +668,8 @@ intros * Hed y Hy.
 (* trick to make identity of type gr_set B → gr_set (Coker f) *)
 set (v y1 := let _ : gr_set B := y1 in y1 : gr_set (Coker f)).
 assert (Hmc : ∀ y1, y1 ∈ B → v y1 ∈ B) by easy.
-assert (Hac : ∀ y1 y2, y1 ∈ B → y2 ∈ B → (y1 = y2)%G → (v y1 = v y2)%G). {
-  intros * Hy1 Hy2 Hyy.
+assert (Hac : ∀ y1 y2, y1 ∈ B → (y1 = y2)%G → (v y1 = v y2)%G). {
+  intros * Hy1 Hyy.
   exists 0; split; [ apply A | ].
   now unfold v; simpl; rewrite Hzero, Hyy, gr_add_opp_r.
 }
@@ -685,10 +683,8 @@ set (hv :=
      Happ_compat := Hac;
      Hadditive := Had |}).
 assert (Hmc₀ : ∀ y1, y1 ∈ B → 0 ∈ Coker f) by (intros; apply B).
-assert
-  (Hac₀ :
-   ∀ y1 y2, y1 ∈ B → y2 ∈ B → (y1 = y2)%G → (@gr_zero (Coker f) = 0)%G). {
-  intros * Hy1 Hy2 Hyy.
+assert (Hac₀ : ∀ y1 y2, y1 ∈ B → (y1 = y2)%G → (@gr_zero (Coker f) = 0)%G). {
+  intros * Hy1 Hyy.
   simpl; unfold Coker_eq; simpl.
   exists 0; split; [ apply A | now rewrite Hzero, gr_add_opp_r ].
 }
@@ -726,13 +722,13 @@ assert (Hmc : ∀ x, x ∈ Ker f → v x ∈ A) by (intros x Hx; apply Hx).
 set (hv :=
   {| Happ := v;
      Hmem_compat := Hmc;
-     Happ_compat _ _ _ _ H := H;
+     Happ_compat _ _ _ H := H;
      Hadditive _ _ _ _ := gr_eq_rel_Reflexive _ |}).
 (* morphism null from Ker f to A *)
 set (hw :=
   {| Happ x := let _ : gr_set (Ker f) := x in 0 : gr_set A;
      Hmem_compat _ _ := gr_zero_mem A;
-     Happ_compat _ _ _ _ _ := gr_eq_rel_Reflexive _;
+     Happ_compat _ _ _ _ := gr_eq_rel_Reflexive _;
      Hadditive _ _ _ _ := gr_eq_rel_Symmetric _ _ (gr_add_0_r _ _) |}).
 specialize (Hf (Ker f) hv hw) as H1.
 assert (H : ∀ z, z ∈ Ker f → (Happ f (Happ hv z) = Happ f (Happ hw z))%G). {

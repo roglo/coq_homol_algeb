@@ -57,11 +57,10 @@ assert (H : ∃ z, z ∈ C ∧ (Happ h z = t)%G). {
 (* works not: a coq morphism is required
 rewrite Hdt.
 *)
-      etransitivity; [ apply Happ_compat | ]; [ | | apply Hdt | ]; cycle 2.
+      etransitivity; [ apply Happ_compat | ]; [ | apply Hdt | ]; cycle 1.
       -assert (H : Happ h' z' ∈ Im h') by (exists z'; easy).
        now apply s' in H; simpl in H.
       -now apply d.
-      -now apply h'.
     }
     specialize (mono_is_inj Hme) as H1.
     apply H1; [ now apply j | apply E | now rewrite Hzero ].
@@ -80,7 +79,7 @@ assert (H : Happ c z - z' ∈ Ker h'). {
    rewrite <- Hchh'.
    apply gr_sub_move_r.
    rewrite gr_add_0_l.
-   etransitivity; [ apply Happ_compat | ]; [ | | apply Hhz | ]; try easy.
+   etransitivity; [ apply Happ_compat | ]; [ | apply Hhz | ]; try easy.
    now apply h.
 }
 apply s' in H.
@@ -101,16 +100,14 @@ assert (H : (Happ c (z - Happ g y) = z')%G). {
   apply gr_sub_move_l.
   rewrite <- Hgy'.
   rewrite Hcgg'.
-  apply g'; [ easy | now apply b | ].
-  now symmetry.
+  apply g'; [ easy | now symmetry ].
 }
 symmetry in H.
-etransitivity; [ apply Happ_compat | ]; [ | | apply H | ]; cycle 2.
+etransitivity; [ apply Happ_compat | ]; [ | apply H | ]; cycle 1.
 -rewrite H1.
- apply g₂; [ | easy | easy ].
+ apply g₂; [ | easy ].
  apply c, C; [ easy | now apply C, g ].
 -easy.
--apply c, C; [ easy | now apply C, g ].
 Qed.
 
 Check four_1.
@@ -162,7 +159,7 @@ set (z := Happ g₁ u - Happ g₂ u) in H1 |-*.
 assert (Hz : z ∈ C) by (apply C; [ now apply g₁ | now apply C, g₂ ]).
 move Hz before z.
 generalize H1; intros H2.
-apply (Happ_compat _ _ h') in H2; [ | now apply c | now apply C' ].
+apply (Happ_compat _ _ h') in H2; [ | now apply c ].
 rewrite <- Hchh', Hzero in H2.
 assert (H3 : z ∈ Ker h). {
   split; [ easy | ].
@@ -171,7 +168,7 @@ assert (H3 : z ∈ Ker h). {
 apply s in H3.
 destruct H3 as (y & Hy & Hgy).
 generalize Hgy; intros H3.
-apply (Happ_compat _ _ c) in H3; [ | now apply g | easy ].
+apply (Happ_compat _ _ c) in H3; [ | now apply g ].
 rewrite Hcgg', H1 in H3.
 assert (H4 : Happ b y ∈ Ker g') by (split; [ now apply b | easy ]).
 apply s' in H4.
@@ -179,13 +176,13 @@ destruct H4 as (x' & Hx' & Hfx').
 assert (H : ∃ x, x ∈ A ∧ (Happ a x = x')%G) by now apply epi_is_surj.
 destruct H as (x & Hx & Hax).
 assert (H4 : (Happ f' (Happ a x) = Happ b y)%G). {
-  etransitivity; [ apply Happ_compat | ]; [ | | apply Hax | ]; try easy.
+  etransitivity; [ apply Happ_compat | ]; [ | apply Hax | ]; try easy.
   now apply a.
 }
 rewrite <- Hcff' in H4.
 apply mono_is_inj in H4; [ | easy | now apply f | easy ].
 assert (H5 : (Happ g (Happ f x) = z)%G). {
-  etransitivity; [ apply Happ_compat | ]; [ | | apply H4 | ]; try easy.
+  etransitivity; [ apply Happ_compat | ]; [ | apply H4 | ]; try easy.
   now apply f.
 }
 rewrite <- H5.
