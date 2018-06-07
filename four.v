@@ -110,8 +110,6 @@ etransitivity; [ apply Happ_compat | ]; [ | apply H | ]; cycle 1.
 -easy.
 Qed.
 
-Check four_1.
-
 (* Four lemma #2
             f      g       h
         A------>B------>C------>D
@@ -191,4 +189,3 @@ apply s in H.
 now destruct H.
 Qed.
 
-Check four_2.
