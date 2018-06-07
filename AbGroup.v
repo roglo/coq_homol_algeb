@@ -125,49 +125,29 @@ split; intros H.
 Qed.
 
 (*
-Trying to make a (coq) morphism when there are hypotheses.
-  E.g. Happ_compat : x ∈ A → (x = y)%G → (Happ f x = Happ f y)%G
-But it does not work. The rewrite does not apply.
-See https://github.com/coq/coq/issues/7708
-Seems that this kind of morphism is not implemented in Coq.
+Definition gr_mem_equiv {G} x y := (x = y)%G ∧ x ∈ G.
 
-Definition gr_elem A := { a : gr_set A | a ∈ A }.
-Definition gr_mem_eq A (x y : gr_elem A) := (proj1_sig x = proj1_sig y)%G.
-
-Theorem gr_mem_refl {A} : Reflexive (gr_mem_eq A).
+Theorem gr_mem_equiv_refl  {G} : ∀ x : gr_set G, gr_mem_equiv x x.
 Proof.
-intros (x & Hx).
-now unfold gr_mem_eq.
+intros.
+unfold gr_mem_equiv.
+...
 Qed.
 
-Theorem gr_mem_symm {A} : Symmetric (gr_mem_eq A).
-Proof.
-intros (x & Hx) (y & Hy).
-unfold gr_mem_eq; simpl; intros Hxy.
-now symmetry.
-Qed.
+Add Parametric Relation {G} : (gr_set G) (@gr_mem_equiv G)
+ reflexivity proved by True
+ symmetry proved by (@Equivalence_Symmetric _ (@gr_eq G) (@gr_equiv G))
+ transitivity proved by (@Equivalence_Transitive _ (@gr_eq G) (@gr_equiv G))
+ as gr_mem_equiv_rel.
+...
 
-Theorem gr_mem_trans {A} : Transitive (gr_mem_eq A).
+Instance gr_app_morph {G H f} : Proper (@gr_mem_equiv G ==> @gr_eq H) (Happ f).
 Proof.
-intros (x & Hx) (y & Hy) (z & Hz).
-unfold gr_mem_eq; simpl; intros Hxy Hyz.
-now transitivity y.
-Qed.
-
-Add Parametric Relation {G} : _ (@gr_mem_eq G)
- reflexivity proved by gr_mem_refl
- symmetry proved by gr_mem_symm
- transitivity proved by gr_mem_trans
- as gr_mem_rel.
-
-Add Parametric Morphism {G H} : (λ f e, Happ f (proj1_sig e))
-  with signature eq ==> gr_mem_eq G ==> @gr_eq H
-  as M_app_morph.
-Proof.
-intros f (x, Hx) (y, Hy) Hxy.
-unfold gr_mem_eq in Hxy; simpl in Hxy.
+intros x y (Hxy & Hx).
 now apply Happ_compat.
 Qed.
+
+... sauf que gr_mem_equiv n'est pas réflexive !
 *)
 
 (* Miscellaneous theorems in groups *)
