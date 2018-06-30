@@ -122,29 +122,13 @@ split; intros H.
 Qed.
 
 (*
-Definition gr_mem_equiv {G} x y := (x = y)%G ∧ x ∈ G.
-
-Theorem gr_mem_equiv_refl  {G} : ∀ x : gr_set G, gr_mem_equiv x x.
+Instance gr_app_morph {G H f} : Proper (@gr_eq G ==> @gr_eq H) (Happ f).
 Proof.
-intros.
-unfold gr_mem_equiv.
+intros x y Hxy.
+apply Happ_compat; [ | easy ].
 ...
-Qed.
-
-Add Parametric Relation {G} : (gr_set G) (@gr_mem_equiv G)
- reflexivity proved by gr_mem_equiv_refl
- symmetry proved by gr_mem_equiv_symm
- transitivity proved by gr_mem_equiv_trans
- as gr_mem_equiv_rel.
-...
-
-Instance gr_app_morph {G H f} : Proper (@gr_mem_equiv G ==> @gr_eq H) (Happ f).
-Proof.
-intros x y (Hxy & Hx).
-now apply Happ_compat.
-Qed.
-
-... sauf que gr_mem_equiv n'est pas réflexive !
+blocked: we have to prove x ∈ G but it is not possible to
+have this hypothesis in Proper
 *)
 
 (* Miscellaneous theorems in groups *)
