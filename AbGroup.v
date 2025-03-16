@@ -45,7 +45,7 @@ Record AbGroup :=
 (* coq stuff: implicit and renamed arguments *)
 
 Arguments gr_eq [_].
-Arguments gr_zero [_].
+Arguments gr_zero {_}.
 Arguments gr_add [_].
 Arguments gr_opp [_].
 Arguments gr_zero_mem G : rename.
@@ -62,6 +62,7 @@ Arguments gr_opp_compat G : rename.
 
 (* syntaxes for expressions for groups elements and sets *)
 
+Declare Scope group_scope.
 Delimit Scope group_scope with G.
 
 Notation "0" := (gr_zero) : group_scope.

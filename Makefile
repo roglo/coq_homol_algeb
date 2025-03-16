@@ -6,7 +6,7 @@ allok: $(TARGET)
 all: $(TARGET)
 
 clean:
-	rm -f *.glob *.vo *.cm[iox] *.out *.o
+	rm -f *.glob *.vo *.cm[iox] *.out *.o *.vok *.vos
 	rm -f .*.bak .*.aux .*.cache
 
 depend:
