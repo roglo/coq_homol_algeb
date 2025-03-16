@@ -11,6 +11,7 @@ Require Import AbGroup.
 Theorem KK_mem_compat {A B A' B'} : ∀ (a : HomGr A A') (b : HomGr B B') f f',
   diagram_commutes f a b f'
   → ∀ x : gr_set (Ker a), x ∈ Ker a → Happ f x ∈ Ker b.
+Proof.
 intros * Hc * (Hx & Hax).
 split; [ now apply f | ].
 rewrite Hc, <- (Hzero _ _ f').
@@ -205,29 +206,34 @@ Theorem exists_B'_to_Coker_a : ∀ {A A' B B' C C' g f'}
     → z' ∈ Coker a ∧ (Happ f' z' = y')%G.
 Proof.
 intros * mem_dec sg' Hg₁ Hcgg' *.
-destruct (mem_dec (Im b) y') as [Hy'| Hy'].
--destruct (mem_dec (Im f') y') as [(z' & Hz' & Hfz')| Hfy'].
- +exists z'; now intros (x' & Hx' & Hyx').
- +exists 0%G; intros (x' & Hx' & Hyx').
+destruct (mem_dec (Im b) y') as [Hy'| Hy']. {
+  destruct (mem_dec (Im f') y') as [(z' & Hz' & Hfz')| Hfy']. {
+    exists z'; now intros (x' & Hx' & Hyx').
+  }
+  exists 0%G; intros (x' & Hx' & Hyx').
   exfalso; apply Hfy', sg'; simpl.
-  split.
-  *destruct Hy' as (y & Hy & Hby).
-   eapply B'; [ apply Hby | now apply b ].
-  *transitivity (Happ g' (Happ b (g₁ x'))).
-  --apply Happ_compat; [ | easy ].
+  split. {
     destruct Hy' as (y & Hy & Hby).
     eapply B'; [ apply Hby | now apply b ].
-  --rewrite <- Hcgg'.
+  }
+  transitivity (Happ g' (Happ b (g₁ x'))). {
+    apply Happ_compat; [ | easy ].
+    destruct Hy' as (y & Hy & Hby).
+    eapply B'; [ apply Hby | now apply b ].
+  } {
+    rewrite <- Hcgg'.
     destruct Hx' as (Hx', Hcx').
     specialize (Hg₁ x' Hx') as H2.
     destruct H2 as (Hgx', Hggx').
     transitivity (Happ c x'); [ | easy ].
     apply c; [ now apply g, (g₁_in_B Hg₁) | easy ].
--exists 0%G; intros (x' & Hx' & Hyx').
- exfalso; apply Hy'.
- exists (g₁ x').
- split; [ apply (g₁_in_B Hg₁); now simpl in Hx' | ].
- now symmetry.
+  }
+}
+exists 0%G; intros (x' & Hx' & Hyx').
+exfalso; apply Hy'.
+exists (g₁ x').
+split; [ apply (g₁_in_B Hg₁); now simpl in Hx' | ].
+now symmetry.
 Qed.
 
 (* Connecting homomorphism: d *)
