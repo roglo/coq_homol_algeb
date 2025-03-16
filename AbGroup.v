@@ -117,9 +117,11 @@ Qed.
 Instance gr_mem_morph {G} : Proper (@gr_eq G ==> iff) (@gr_mem G).
 Proof.
 intros x y Hxy.
-split; intros H.
--eapply gr_mem_compat; [ apply Hxy | easy ].
--eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
+split; intros H. {
+  eapply gr_mem_compat; [ apply Hxy | easy ].
+} {
+  eapply gr_mem_compat; [ symmetry; apply Hxy | easy ].
+}
 Qed.
 
 (*
@@ -166,18 +168,22 @@ Theorem gr_sub_move_r : ∀ G (x y z : gr_set G),
   (x - y = z)%G ↔ (x = z + y)%G.
 Proof.
 intros.
-split; intros Hxyz.
--now rewrite <- Hxyz, gr_add_assoc, gr_add_opp_l, gr_add_0_r.
--now rewrite Hxyz, gr_add_assoc, gr_add_opp_r, gr_add_0_r.
+split; intros Hxyz. {
+  now rewrite <- Hxyz, gr_add_assoc, gr_add_opp_l, gr_add_0_r.
+} {
+  now rewrite Hxyz, gr_add_assoc, gr_add_opp_r, gr_add_0_r.
+}
 Qed.
 
 Theorem gr_sub_move_l : ∀ G (x y z : gr_set G),
   (x - y = z)%G ↔ (x = y + z)%G.
 Proof.
 intros.
-split; intros Hxyz.
--now rewrite <- Hxyz, gr_add_comm, gr_add_assoc, gr_add_opp_l, gr_add_0_r.
--now rewrite Hxyz, gr_add_comm, <- gr_add_assoc, gr_add_opp_l, gr_add_0_l.
+split; intros Hxyz. {
+  now rewrite <- Hxyz, gr_add_comm, gr_add_assoc, gr_add_opp_l, gr_add_0_r.
+} {
+  now rewrite Hxyz, gr_add_comm, <- gr_add_assoc, gr_add_opp_l, gr_add_0_l.
+}
 Qed.
 
 Theorem gr_opp_add_distr : ∀ G (x y : gr_set G), (- (x + y) = - x - y)%G.
@@ -197,19 +203,22 @@ Qed.
 Theorem gr_opp_involutive : ∀ G (x : gr_set G), (- - x = x)%G.
 Proof.
 intros.
-transitivity (- - x + (- x + x))%G.
--rewrite <- gr_add_0_r at 1.
- apply gr_add_compat; [ easy | ].
- now rewrite gr_add_opp_l.
--now rewrite <- gr_add_assoc, gr_add_opp_l, gr_add_0_l.
+transitivity (- - x + (- x + x))%G. {
+  rewrite <- gr_add_0_r at 1.
+  apply gr_add_compat; [ easy | ].
+  now rewrite gr_add_opp_l.
+}
+now rewrite <- gr_add_assoc, gr_add_opp_l, gr_add_0_l.
 Qed.
 
 Theorem gr_eq_opp_l : ∀ G (x y : gr_set G), (- x = y)%G ↔ (x = - y)%G.
 Proof.
 intros.
-split; intros Hxy.
--rewrite <- Hxy; symmetry; apply gr_opp_involutive.
--rewrite Hxy; apply gr_opp_involutive.
+split; intros Hxy. {
+  rewrite <- Hxy; symmetry; apply gr_opp_involutive.
+} {
+  rewrite Hxy; apply gr_opp_involutive.
+}
 Qed.
 
 (* Theorems on homomorphisms *)
